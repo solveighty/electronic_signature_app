@@ -40,3 +40,80 @@
 .read-the-docs {
   color: #888;
 }
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #272c44;
+}
+
+.login-box {
+  width: 50%;
+  max-width: auto;
+  background: #275f40;
+  padding: 2rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  min-width: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.login-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.input {
+  width: 90%;
+  padding: 0.8rem;
+  background-color: #000000b4;
+  border: 1px solid #050505;
+  border-radius: 6px;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+  margin-bottom: 0.5rem;
+}
+
+.input:focus {
+  border: 1.5px solid #e7c056;
+}
+
+.btn-primary {
+  align-items: center;
+  width: 40%;
+  padding: 0.8rem;
+  background: #8a783f;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #c09c38;
+}
+
+.text-link {
+  color: #ffffff;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+  transition: color 0.2s;
+}
+
+.text-link:hover {
+  color: #c0a425;
+}

@@ -28,94 +28,63 @@ const Register = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Crear una cuenta
-          </h2>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm space-y-4">
-            <div>
-              <label htmlFor="name" className="sr-only">
-                Nombre completo
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                className="input"
-                placeholder="Nombre completo"
-                value={formData.name}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Correo electrónico
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className="input"
-                placeholder="Correo electrónico"
-                value={formData.email}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Contraseña
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="input"
-                placeholder="Contraseña"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">
-                Confirmar contraseña
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                className="input"
-                placeholder="Confirmar contraseña"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-            </div>
-          </div>
-
-          <div>
-            <button type="submit" className="btn btn-primary w-full">
-              Registrarse
-            </button>
-          </div>
-        </form>
-        <div className="text-center">
-          <button
-            onClick={() => navigate('/login')}
-            className="text-primary hover:text-secondary font-medium"
-          >
-            ¿Ya tienes cuenta? Inicia sesión
-          </button>
-        </div>
-      </div>
+  <div className="login-container">
+    <div className="login-box">
+      <h2 className="login-title">Crear una cuenta</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          required
+          className="input"
+          placeholder="Nombre completo"
+          value={formData.name}
+          onChange={handleChange}
+        />
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          className="input"
+          placeholder="Correo electrónico"
+          value={formData.email}
+          onChange={handleChange}
+        />
+        <input
+          id="password"
+          name="password"
+          type="password"
+          required
+          className="input"
+          placeholder="Contraseña"
+          value={formData.password}
+          onChange={handleChange}
+        />
+        <input
+          id="confirmPassword"
+          name="confirmPassword"
+          type="password"
+          required
+          className="input"
+          placeholder="Confirmar contraseña"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+        />
+        <button type="submit" className="btn-primary" style={{ width: '100%' }}>
+          Registrarse
+        </button>
+      </form>
+      <button
+        onClick={() => navigate('/login')}
+        className="text-link"
+      >
+        ¿Ya tienes cuenta? Inicia sesión
+      </button>
     </div>
-  )
+  </div>
+)
 }
 
 export default Register 
