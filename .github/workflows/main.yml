@@ -1,23 +1,57 @@
+name: Build and Package Electron App
+
 on:
   push:
     branches:
-    - main
-    - release/*
+      - main
+      - release/*
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build_desktop:
-    name: Build artifacts
+    name: Build Electron Application
     runs-on: windows-latest
 
-    steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node_version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node_version }}
+    strategy:
+      matrix:
+        node-version: [18.x] # Using a more recent Node version
 
-    - name: npm install, build and test
-      run: |
-        npm install
-        npm run build --if-present
-        npm test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the application
+        run: pnpm run build
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Package for Windows
+        run: pnpm run electron:build -- --win
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: electron-app-windows
+          path: |
+            dist/*.exe
+            dist/win-unpacked/**/*
+          if-no-files-found: error
+          retention-days: 7
