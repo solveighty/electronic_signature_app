@@ -9,18 +9,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <AuthLayout
-              children={
-                <>
-                  <Login />
-                </>
-              }
-            />
-          }
-        ></Route>
+        <Route element={<AuthLayout />}>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
         <Route path="/main" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>

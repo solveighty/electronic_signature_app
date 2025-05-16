@@ -32,7 +32,7 @@ function createWindow() {
   win = new BrowserWindow({
     maximizable: true,
     frame: false,
-    resizable: false,
+    resizable: true,
     titleBarStyle: "hidden",
     trafficLightPosition: { x: 10, y: 10 },
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
@@ -44,6 +44,8 @@ function createWindow() {
   });
 
   win.setMenu(null);
+  // for debbugging purposes
+  win.webContents.openDevTools();
 
   // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {

@@ -11,6 +11,7 @@ import {
   Center,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useSpring, animated } from "@react-spring/web";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -26,6 +27,12 @@ const Login = () => {
         value.length < 1 ? "Contraseña es requerida" : null,
     },
   });
+  // Animations
+  const [loginProps, loginApi] = useSpring(() => ({
+    scale: 1,
+    config: { tension: 300, friction: 10 },
+  }));
+
   const handleSubmit = () => {
     localStorage.setItem("isAuthenticated", "true");
     navigate("/main");
@@ -57,9 +64,18 @@ const Login = () => {
             {...form.getInputProps("password")}
           />
 
-          <Button fullWidth mt="xl" type="submit">
-            Iniciar Sesión
-          </Button>
+          <animated.div style={loginProps}>
+            <Button
+              fullWidth
+              mt="xl"
+              type="submit"
+              onMouseDown={() => loginApi.start({ scale: 0.95 })}
+              onMouseUp={() => loginApi.start({ scale: 1 })}
+              onMouseLeave={() => loginApi.start({ scale: 1 })}
+            >
+              Iniciar Sesión
+            </Button>
+          </animated.div>
         </form>
 
         <Text ta="center" mt="md">

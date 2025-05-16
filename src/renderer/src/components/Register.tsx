@@ -1,90 +1,118 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import {
+  Anchor,
+  Button,
+  Center,
+  Container,
+  Paper,
+  PasswordInput,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { useNavigate } from "react-router-dom";
+import { useSpring, animated } from "@react-spring/web";
 
 const Register = () => {
-  const navigate = useNavigate()
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  })
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Simulación de registro exitoso
-    if (formData.password === formData.confirmPassword) {
-      // Aquí iría la lógica real de registro
-      localStorage.setItem('isAuthenticated', 'true')
-      window.location.reload()
-    }
-  }
+  // From from Mantine library
+  const form = useForm({
+    initialValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+    validate: {
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Email inválido"),
+      password: (value) =>
+        value.length < 1 ? "Contraseña es requerida" : null,
+      confirmPassword: (value, values) =>
+        value !== values.password ? "Las contraseñas no coinciden" : null,
+    },
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    })
-  }
+  // Animations
+
+  const [registerProps, registerApi] = useSpring(() => ({
+    scale: 1,
+    config: { tension: 300, friction: 10 },
+  }));
+
+  const handleSubmit = () => {
+    localStorage.setItem("isAuthenticated", "true");
+    navigate("/login");
+  };
 
   return (
-  <div className="login-container">
-    <div className="login-box">
-      <h2 className="login-title">Crear una cuenta</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          required
-          className="input"
-          placeholder="Nombre completo"
-          value={formData.name}
-          onChange={handleChange}
-        />
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          className="input"
-          placeholder="Correo electrónico"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          className="input"
-          placeholder="Contraseña"
-          value={formData.password}
-          onChange={handleChange}
-        />
-        <input
-          id="confirmPassword"
-          name="confirmPassword"
-          type="password"
-          required
-          className="input"
-          placeholder="Confirmar contraseña"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-        />
-        <button type="submit" className="btn-primary" style={{ width: '100%' }}>
+    <Container size={420} my={40}>
+      <Center>
+        <Title ta="center" order={2} mb="lg">
           Registrarse
-        </button>
-      </form>
-      <button
-        onClick={() => navigate('/login')}
-        className="text-link"
-      >
-        ¿Ya tienes cuenta? Inicia sesión
-      </button>
-    </div>
-  </div>
-)
-}
+        </Title>
+      </Center>
 
-export default Register 
+      <Paper radius="md" p="xl" withBorder>
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <TextInput
+            label="Tu nombre"
+            style={{ textAlign: "left" }}
+            placeholder="ej. Juan Pérez"
+            required
+            mb="md"
+            {...form.getInputProps("name")}
+          />
+
+          <TextInput
+            label="Correo electrónico"
+            style={{ textAlign: "left" }}
+            placeholder="ejemplo@correo.com"
+            required
+            mb="md"
+            {...form.getInputProps("email")}
+          />
+
+          <PasswordInput
+            label="Contraseña"
+            style={{ textAlign: "left" }}
+            placeholder="Tu contraseña"
+            required
+            mb="md"
+            {...form.getInputProps("password")}
+          />
+
+          <PasswordInput
+            label="Confirmar Contraseña"
+            style={{ textAlign: "left" }}
+            placeholder="Confirma tu contraseña"
+            required
+            mb="md"
+            {...form.getInputProps("confirmPassword")}
+          />
+
+          <animated.div style={registerProps}>
+            <Button
+              fullWidth
+              mt="xl"
+              type="submit"
+              onMouseDown={() => registerApi.start({ scale: 0.95 })}
+              onMouseUp={() => registerApi.start({ scale: 1 })}
+              onMouseLeave={() => registerApi.start({ scale: 1 })}
+            >
+              Registrarse
+            </Button>
+          </animated.div>
+        </form>
+
+        <Text ta="center" mt="md">
+          Ya eres miembro?{" "}
+          <Anchor fw={700} onClick={() => navigate("/login")}>
+            Inicia sesión
+          </Anchor>
+        </Text>
+      </Paper>
+    </Container>
+  );
+};
+
+export default Register;
