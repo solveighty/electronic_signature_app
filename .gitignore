@@ -28,3 +28,4 @@ dist-ssr
 bun.lock
 package-lock.json
 pnpm-lock.yaml
+dist*/
