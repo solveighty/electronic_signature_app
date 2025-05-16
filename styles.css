@@ -1,0 +1,89 @@
+:root {
+  --titlebar-bg: #1e1e1e;
+  --titlebar-text: #e0e0e0;
+  --titlebar-icon: #a0a0a0;
+  --titlebar-hover: #333333;
+  --titlebar-close-hover: #ff5252;
+  --titlebar-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.titlebar {
+  height: 39px;
+  background-color: var(--titlebar-bg);
+  color: var(--titlebar-text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: var(--titlebar-shadow);
+  user-select: none;
+  -webkit-app-region: drag;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.titlebar-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 16px;
+}
+
+.titlebar-title svg {
+  color: #3b82f6;
+  stroke-width: 1.5;
+}
+
+.titlebar-controls {
+  display: flex;
+  padding-right: 10px;
+  -webkit-app-region: no-drag;
+}
+
+.titlebar-button {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: all 0.15s ease;
+  border-radius: 4px;
+  color: var(--titlebar-icon);
+}
+.titlebar-button.close {
+  width: 34px;
+}
+
+.titlebar-button:hover {
+  background-color: var(--titlebar-hover);
+}
+
+.titlebar-button.close:hover {
+  background-color: var(--titlebar-close-hover);
+  color: white;
+}
+
+.titlebar-button svg {
+  width: 12px;
+  height: 12px;
+}
+
+.theme-toggle:hover {
+  background-color: var(--titlebar-hover);
+}
+
+/* Animation for smooth transitions */
+.titlebar,
+.titlebar-button,
+.theme-toggle,
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
