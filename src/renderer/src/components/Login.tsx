@@ -1,57 +1,76 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
+import {
+  TextInput,
+  PasswordInput,
+  Button,
+  Paper,
+  Title,
+  Text,
+  Container,
+  Anchor,
+  Center,
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
 
 const Login = () => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (email && password) {
-      localStorage.setItem('isAuthenticated', 'true')
-      navigate('/main')
-    }
-  }
+  const form = useForm({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validate: {
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Email inválido"),
+      password: (value) =>
+        value.length < 1 ? "Contraseña es requerida" : null,
+    },
+  });
+  const handleSubmit = () => {
+    localStorage.setItem("isAuthenticated", "true");
+    navigate("/main");
+  };
 
   return (
-  <div className="login-container">
-    <div className="login-box">
-      <h2 className="login-title">Iniciar Sesión</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          className="input"
-          placeholder="Correo electrónico"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          id="password"
-          name="password"
-          type="password"
-          required
-          className="input"
-          placeholder="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button type="submit" className="btn-primary">
+    <Container size={420} my={40}>
+      <Center>
+        <Title ta="center" order={2} mb="lg">
           Iniciar Sesión
-        </button>
-      </form>
-      <button
-        onClick={() => navigate('/register')}
-        className="text-link"
-      >
-        ¿No tienes cuenta? Regístrate
-      </button>
-    </div>
-  </div>
-)
-}
+        </Title>
+      </Center>
 
-export default Login 
+      <Paper radius="md" p="xl" withBorder>
+        <form onSubmit={form.onSubmit(handleSubmit)}>
+          <TextInput
+            label="Correo electrónico"
+            placeholder="ejemplo@correo.com"
+            required
+            mb="md"
+            {...form.getInputProps("email")}
+          />
+
+          <PasswordInput
+            label="Contraseña"
+            placeholder="Tu contraseña"
+            required
+            mb="md"
+            {...form.getInputProps("password")}
+          />
+
+          <Button fullWidth mt="xl" type="submit">
+            Iniciar Sesión
+          </Button>
+        </form>
+
+        <Text ta="center" mt="md">
+          ¿No tienes cuenta?{" "}
+          <Anchor fw={700} onClick={() => navigate("/register")}>
+            Regístrate
+          </Anchor>
+        </Text>
+      </Paper>
+    </Container>
+  );
+};
+
+export default Login;
