@@ -38,6 +38,7 @@ function createWindow() {
       preload: path.join(__dirname, "preload.mjs"),
       contextIsolation: true,
       nodeIntegration: false,
+      webSecurity: false,
     },
   });
 
@@ -55,6 +56,7 @@ function createWindow() {
   } else {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(RENDERER_DIST, "index.html"));
+    //win.loadURL(`file://${process.cwd()}/dist/index.html`);
   }
 }
 

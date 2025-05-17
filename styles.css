@@ -13,6 +13,20 @@ body {
     Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
+.content-container {
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.content-container::-webkit-scrollbar {
+  display: none;
+}
+
+.content-container {
+  height: calc(100vh - 39px); /* Subtract titlebar height */
+}
+
 .titlebar {
   height: 39px;
   background-color: var(--titlebar-bg);
