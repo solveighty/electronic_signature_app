@@ -32,12 +32,6 @@ jobs:
       - name: Build the application
         run: npm run build
 
-      - name: Package for Windows
-        run: npm run build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -45,5 +39,7 @@ jobs:
           path: |
             dist/*.exe
             dist/win-unpacked/**/*
+            release/**/*.exe
+            release/**/win-unpacked/**/*
           if-no-files-found: error
           retention-days: 7
