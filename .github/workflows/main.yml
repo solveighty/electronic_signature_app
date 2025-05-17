@@ -27,13 +27,13 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-        run: node install --frozen-lockfile
+        run: npm install 
 
       - name: Build the application
-        run: node run build
-        
+        run: npm run build
+
       - name: Package for Windows
-        run: node run electron:build -- --win
+        run: npm run electron:build -- --win
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
