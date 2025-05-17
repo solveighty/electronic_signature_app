@@ -33,7 +33,7 @@ jobs:
         run: npm run build
 
       - name: Package for Windows
-        run: npm run electron:build -- --win
+        run: npm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
