@@ -12,6 +12,7 @@ import {
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
 import { useSpring, animated } from "@react-spring/web";
+import { register as RegisterApi } from "../utils/api";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -19,11 +20,14 @@ const Register = () => {
   // From from Mantine library
   const form = useForm({
     initialValues: {
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
     },
     validate: {
+      name: (value) =>
+        value.length < 1 ? "Nombre es requerido" : null,
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Email inválido"),
       password: (value) =>
         value.length < 1 ? "Contraseña es requerida" : null,
@@ -39,9 +43,14 @@ const Register = () => {
     config: { tension: 300, friction: 10 },
   }));
 
-  const handleSubmit = () => {
-    localStorage.setItem("isAuthenticated", "true");
-    navigate("/login");
+  const handleSubmit = async () => {
+    try {
+      await RegisterApi(form.values.name, form.values.email, form.values.password);
+      navigate("/login");
+    } catch (error: any) {
+      console.error("Error al registrarse:", error);
+      alert("Error al registrarse. Por favor, intenta de nuevo.");
+    }
   };
 
   return (

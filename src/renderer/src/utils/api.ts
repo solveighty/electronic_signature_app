@@ -5,12 +5,12 @@ const api = axios.create({
   timeout: 10000,
 });
 
-export function login(username: string, password: string) {
-  return api.post("/api/login", { username, password });
+export function login(email: string, password: string) {
+  return api.post("/api/login", { email, password });
 }
 
-export function register(username: string, password: string) {
-  return api.post("/api/register", { username, password });
+export function register(name: string, email: string,password: string,) {
+  return api.post("/api/register", { name, email, password });
 }
 
 export default api;

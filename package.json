@@ -37,8 +37,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.6.0",
-    "recharts": "^2.15.3",
-    "tsx": "^4.19.4"
+    "recharts": "^2.15.3"
   },
   "devDependencies": {
     "@heroicons/react": "^2.2.0",
@@ -63,8 +62,9 @@
     "postcss-preset-mantine": "^1.17.0",
     "postcss-simple-vars": "^7.0.1",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.4",
     "typescript": "^5.2.2",
-    "vite": "^5.1.6",
+    "vite": "^5.4.19",
     "vite-plugin-electron": "^0.28.6",
     "vite-plugin-electron-renderer": "^0.14.5"
   },
