@@ -6,11 +6,11 @@ const api = axios.create({
 });
 
 export function login(email: string, password: string) {
-  return api.post("/api/login", { email, password });
+  return api.post("/api/auth/login", { email, password });
 }
 
 export function register(name: string, email: string,password: string,) {
-  return api.post("/api/register", { name, email, password });
+  return api.post("/api/auth/register", { name, email, password });
 }
 
 export default api;

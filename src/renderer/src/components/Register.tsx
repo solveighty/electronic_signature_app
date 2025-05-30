@@ -26,8 +26,7 @@ const Register = () => {
       confirmPassword: "",
     },
     validate: {
-      name: (value) =>
-        value.length < 1 ? "Nombre es requerido" : null,
+      name: (value) => (value.length < 1 ? "Nombre es requerido" : null),
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Email inválido"),
       password: (value) =>
         value.length < 1 ? "Contraseña es requerida" : null,
@@ -45,7 +44,11 @@ const Register = () => {
 
   const handleSubmit = async () => {
     try {
-      await RegisterApi(form.values.name, form.values.email, form.values.password);
+      await RegisterApi(
+        form.values.name,
+        form.values.email,
+        form.values.password
+      );
       navigate("/login");
     } catch (error: any) {
       console.error("Error al registrarse:", error);

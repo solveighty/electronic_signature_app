@@ -1,17 +1,27 @@
 import type User from "../models/User";
-
+import {v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import supabase from "../utils/supabase";
+import { Request, Response } from "express";
+import 'dotenv/config';
 
 const users: User[] = [];
-const JWT_SECRET = "your-secret-key"; // In production, use environment variables
+const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 
-export const register = async (req: any, res: any) => {
+export const register = async (req: Request, res: Response) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { name, email, password } = req.body;
 
     // Check if user already exists
-    if (users.find((user) => user.email === email)) {
+    const { data: existingUser } = await supabase
+    .schema("public")
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .single();
+
+    if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
@@ -20,16 +30,26 @@ export const register = async (req: any, res: any) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create new user
-    const newUser = {
-      id: users.length + 1,
-      firstName,
-      lastName,
+    const newUser: User = {
+      id: uuidv4(), // Generate unique ID
+      name,
       email,
       password: hashedPassword,
     };
 
     // Add user to array (in real app, save to database)
     users.push(newUser);
+
+    await supabase.schema("public").from("users").insert({
+      id: newUser.id.toString(),
+      name: newUser.name,
+      email: newUser.email,
+      password: hashedPassword, // In production, do not store plain passwords
+    }).then(({ error }) => {
+      if (error) {
+        console.error("Error inserting user:", error);
+        return res.status(500).json({ message: "Error inserting user" });
+      }});  
 
     // Create and return JWT token
     const token = jwt.sign({ id: newUser.id }, JWT_SECRET, { expiresIn: "1h" });
@@ -38,31 +58,34 @@ export const register = async (req: any, res: any) => {
       token,
       user: {
         id: newUser.id,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
+        name: newUser.name,
         email: newUser.email,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: (error as Error).message || "Server error" });
   }
 };
 
-export const login = async (req: any, res: any) => {
+export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
     // Find user
-    const user = users.find((user) => user.email === email);
+    const { data: user, error: fetchError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .single();
 
     // Check if user exists
-    if (!user) {
+    if (fetchError || !user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
     // Check password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password!);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -74,8 +97,7 @@ export const login = async (req: any, res: any) => {
       token,
       user: {
         id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        name: user.name,
         email: user.email,
       },
     });

@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useSpring, animated } from "@react-spring/web";
-import {login as LoginApi} from "../utils/api"; 
+import { login as LoginApi } from "../utils/api";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -35,12 +35,12 @@ const Login = () => {
   }));
 
   const handleSubmit = async () => {
-    try{
+    try {
       const response = await LoginApi(form.values.email, form.values.password);
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("isAuthenticated", "true");
       navigate("/main");
-    } catch (error:any) {
+    } catch (error: any) {
       console.error("Error al iniciar sesión:", error);
       alert("Error al iniciar sesión. Por favor, verifica tus credenciales.");
     }
