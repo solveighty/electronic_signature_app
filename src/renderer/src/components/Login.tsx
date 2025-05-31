@@ -25,7 +25,7 @@ const Login = () => {
       password: "",
     },
     validate: {
-      email: (value) => /^\S+@\S+$/.test(value) ? null : "Email inválido",
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Email inválido"),
       password: (value) =>
         value.length < 1 ? "Contraseña es requerida" : null,
     },
@@ -40,7 +40,6 @@ const Login = () => {
     try {
       const response = await LoginApi(form.values.email, form.values.password);
       setToken(response.data.token);
-      console.log("Token recibido:", response.data.token);
       navigate("/main");
     } catch (error: any) {
       console.error("Error al iniciar sesión:", error);

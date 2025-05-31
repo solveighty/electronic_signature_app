@@ -50,8 +50,6 @@ export const register = async (req: Request, res: Response) => {
         password: hashedPassword, // In production, do not store plain passwords
       });
 
-    console.log("Supabase response:", supabaseResponse);
-
     if (supabaseResponse.error) {
       console.error("Error inserting user:", supabaseResponse.error);
       return res.status(500).json({ message: "Error inserting user" });
