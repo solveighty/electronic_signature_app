@@ -1,10 +1,10 @@
 import type User from "../models/User";
-import {v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import supabase from "../utils/supabase";
 import { Request, Response } from "express";
-import 'dotenv/config';
+import "dotenv/config";
 
 const users: User[] = [];
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
@@ -15,7 +15,7 @@ export const register = async (req: Request, res: Response) => {
 
     // Check if user already exists
     const { data: existingUser } = await supabase
-    .schema("public")
+      .schema("public")
       .from("users")
       .select("*")
       .eq("email", email)
@@ -40,16 +40,22 @@ export const register = async (req: Request, res: Response) => {
     // Add user to array (in real app, save to database)
     users.push(newUser);
 
-    await supabase.schema("public").from("users").insert({
-      id: newUser.id.toString(),
-      name: newUser.name,
-      email: newUser.email,
-      password: hashedPassword, // In production, do not store plain passwords
-    }).then(({ error }) => {
-      if (error) {
-        console.error("Error inserting user:", error);
-        return res.status(500).json({ message: "Error inserting user" });
-      }});  
+    const supabaseResponse = await supabase
+      .schema("public")
+      .from("users")
+      .insert({
+        id: newUser.id.toString(),
+        name: newUser.name,
+        email: newUser.email,
+        password: hashedPassword, // In production, do not store plain passwords
+      });
+
+    console.log("Supabase response:", supabaseResponse);
+
+    if (supabaseResponse.error) {
+      console.error("Error inserting user:", supabaseResponse.error);
+      return res.status(500).json({ message: "Error inserting user" });
+    }
 
     // Create and return JWT token
     const token = jwt.sign({ id: newUser.id }, JWT_SECRET, { expiresIn: "1h" });
@@ -64,7 +70,9 @@ export const register = async (req: Request, res: Response) => {
     });
   } catch (error: unknown) {
     console.error(error);
-    res.status(500).json({ message: (error as Error).message || "Server error" });
+    res
+      .status(500)
+      .json({ message: (error as Error).message || "Server error" });
   }
 };
 
