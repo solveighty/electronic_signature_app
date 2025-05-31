@@ -4,12 +4,15 @@ import App from "./App.tsx";
 import "./index.css";
 import "@mantine/core/styles.css";
 import { MantineProvider } from "@mantine/core";
+import { AuthProvider } from "./renderer/src/context/AuthContext.tsx";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <MantineProvider>
-      <App />
-    </MantineProvider>
+    <AuthProvider>
+      <MantineProvider>
+        <App />
+      </MantineProvider>
+    </AuthProvider>
   </React.StrictMode>
 );
 

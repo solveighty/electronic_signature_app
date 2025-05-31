@@ -1,7 +1,12 @@
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from "react-router-dom";
+
 
 const Dashboard = () => {
   const [documents, setDocuments] = useState<Array<{ id: number; name: string; status: string }>>([])
+  const {setToken} = useAuth(); 
+  const navigate = useNavigate();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -15,7 +20,10 @@ const Dashboard = () => {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated')
+    setToken(null); // Clear the token in context
+    if(setToken === null){
+      navigate('/login'); // Redirect to login page
+    }
     window.location.reload()
   }
 

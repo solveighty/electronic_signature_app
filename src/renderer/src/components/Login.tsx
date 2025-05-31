@@ -13,9 +13,11 @@ import {
 import { useForm } from "@mantine/form";
 import { useSpring, animated } from "@react-spring/web";
 import { login as LoginApi } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { setToken } = useAuth();
 
   const form = useForm({
     initialValues: {
@@ -23,7 +25,7 @@ const Login = () => {
       password: "",
     },
     validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Email inválido"),
+      email: (value) => /^\S+@\S+$/.test(value) ? null : "Email inválido",
       password: (value) =>
         value.length < 1 ? "Contraseña es requerida" : null,
     },
@@ -37,8 +39,8 @@ const Login = () => {
   const handleSubmit = async () => {
     try {
       const response = await LoginApi(form.values.email, form.values.password);
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("isAuthenticated", "true");
+      setToken(response.data.token);
+      console.log("Token recibido:", response.data.token);
       navigate("/main");
     } catch (error: any) {
       console.error("Error al iniciar sesión:", error);
