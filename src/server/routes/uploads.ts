@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { upload } from "../controllers/uploadsController";
 
+
 const router = Router();
 
 router.post("/uploads", upload.single("file"), (req, res) => {

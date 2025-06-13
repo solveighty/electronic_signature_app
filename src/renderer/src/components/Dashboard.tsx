@@ -8,16 +8,42 @@ const Dashboard = () => {
   const {setToken} = useAuth(); 
   const navigate = useNavigate();
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newDocs = Array.from(e.target.files).map((file, index) => ({
-        id: Date.now() + index,
-        name: file.name,
-        status: 'Pendiente de firma'
-      }))
-      setDocuments([...documents, ...newDocs])
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files && e.target.files.length > 0) {
+    const file = e.target.files[0]; 
+
+    // Validación en frontend: solo PDF
+    if (file.type !== "application/pdf") {
+      alert("Solo se permiten archivos PDF");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("http://localhost:3000/api/uploads", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) throw new Error(result.error || "Error al subir archivo");
+
+      setDocuments((prevDocs) => [
+        ...prevDocs,
+        {
+          id: Date.now(),
+          name: result.file.originalname,
+          status: "Pendiente de firma",
+        },
+      ]);
+    } catch (error: any) {
+      alert(error.message);
     }
   }
+};
 
   const handleLogout = () => {
     setToken(null); // Clear the token in context
