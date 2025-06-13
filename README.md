@@ -1,30 +1,84 @@
-# React + TypeScript + Vite
+# Aplicación de Firma Electrónica
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Una aplicación de escritorio para gestión y firma electrónica de documentos, desarrollada con Electron, React, TypeScript y Express.
 
-Currently, two official plugins are available:
+## Características
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Autenticación de usuarios (registro e inicio de sesión)
+- Subida de documentos PDF
+- Gestión de documentos para firma electrónica
+- Interfaz moderna con Mantine UI y Tailwind CSS
 
-## Expanding the ESLint configuration
+## Requisitos previos
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- Node.js (versión 16 o superior)
+- npm o yarn
+- Cuenta de Supabase para la base de datos
 
-- Configure the top-level `parserOptions` property like this:
+## Instalación
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+1. Clona este repositorio:
+```bash
+git clone <url-del-repositorio>
+cd electronic_signature_app
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+2. Instala las dependencias:
+```bash
+npm install
+```
+
+3. Configura las variables de entorno:
+   Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+```
+VITE_SUPABASE_URL=tu_url_de_supabase
+VITE_SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
+JWT_SECRET=tu_clave_secreta_para_jwt
+```
+
+## Desarrollo
+
+Para ejecutar la aplicación en modo desarrollo:
+
+```bash
+npm run dev
+```
+
+Esto iniciará tanto el servidor de desarrollo de Vite (frontend) como el servidor Express (backend).
+
+Para ejecutar solo el servidor backend:
+
+```bash
+npm run dev:server
+```
+
+## Estructura del proyecto
+
+- `/electron`: Código principal de Electron
+- `/src`: Código fuente de la aplicación React
+  - `/renderer/src`: Componentes React
+  - `/server`: Servidor Express con controladores y rutas
+    - `/controllers`: Lógica de negocio
+    - `/models`: Modelos de datos
+    - `/routes`: Rutas de la API
+    - `/utils`: Utilidades y configuración
+
+## Construcción para producción
+
+Para construir la aplicación para producción:
+
+```bash
+npm run build
+```
+
+Esto generará los archivos de distribución en las carpetas `dist` y `release`.
+
+## Tecnologías utilizadas
+
+- Electron: Framework para aplicaciones de escritorio
+- React: Biblioteca para interfaces de usuario
+- TypeScript: Superset tipado de JavaScript
+- Express: Framework para el servidor backend
+- Mantine UI: Biblioteca de componentes para React
+- Tailwind CSS: Framework de CSS utilitario
+- Supabase: Plataforma de backend como servicio
