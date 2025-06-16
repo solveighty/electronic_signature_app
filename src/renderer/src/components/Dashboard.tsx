@@ -1,7 +1,19 @@
 import { useState } from 'react'
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from "react-router-dom";
-
+import { useAuth } from '../context/AuthContext'
+import { useNavigate } from "react-router-dom"
+import {
+  Container,
+  Title,
+  Paper,
+  Text,
+  Button,
+  Center,
+  Group,
+  Badge,
+  Card,
+  Divider
+} from '@mantine/core'
+import { IconUpload, IconLogout, IconFileUpload, IconFile } from '@tabler/icons-react'
 
 const Dashboard = () => {
   const [documents, setDocuments] = useState<Array<{ id: number; name: string; status: string }>>([])
@@ -46,100 +58,72 @@ const Dashboard = () => {
 };
 
   const handleLogout = () => {
-    setToken(null); // Clear the token in context
-    if(setToken === null){
-      navigate('/login'); // Redirect to login page
-    }
-    window.location.reload()
+    setToken(null) // Clear the token in context
+    navigate('/login') // Redirect to login page
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Firma Electrónica</h1>
-            <button 
-              onClick={handleLogout}
-              className="text-gray-500 hover:text-gray-700"
+    <Container size="lg" py={40}>
+      <Group justify="space-between" mb="lg">
+        <Title order={2}>Firma Electrónica</Title>
+        <Button 
+          variant="subtle" 
+          color="gray" 
+          onClick={handleLogout}
+          leftSection={<IconLogout size={18} />}
+        >
+          Cerrar sesión
+        </Button>
+      </Group>
+
+      <Paper radius="md" p="xl" withBorder mb="xl">
+        <Center style={{ flexDirection: 'column' }} py="lg">
+          <IconUpload size={48} color="gray" />
+          <Title order={3} mt="md">Sube tus documentos</Title>
+          <Text c="dimmed" mt="xs" mb="lg">
+            Archivos PDF hasta 10MB
+          </Text>
+          
+          <label htmlFor="file-upload">
+            <Button 
+              component="span" 
+              leftSection={<IconFileUpload size={18} />}
+              style={{ cursor: 'pointer' }}
             >
-              Cerrar sesión
-            </button>
-          </div>
-        </div>
-      </nav>
+              Seleccionar archivos
+              <input
+                id="file-upload"
+                name="file-upload"
+                type="file"
+                style={{ display: 'none' }}
+                onChange={handleFileUpload}
+                accept=".pdf"
+              />
+            </Button>
+          </label>
+        </Center>
+      </Paper>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
-            <div className="text-center">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              <h3 className="mt-2 text-sm font-medium text-gray-900">
-                Sube tus documentos
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                PDF, DOC, DOCX hasta 10MB
-              </p>
-              <div className="mt-6">
-                <label htmlFor="file-upload" className="btn btn-primary cursor-pointer">
-                  Seleccionar archivos
-                  <input
-                    id="file-upload"
-                    name="file-upload"
-                    type="file"
-                    className="sr-only"
-                    multiple
-                    onChange={handleFileUpload}
-                    accept=".pdf,.doc,.docx"
-                  />
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {documents.length > 0 && (
-            <div className="mt-8">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">
-                Documentos subidos
-              </h2>
-              <div className="bg-white shadow overflow-hidden sm:rounded-md">
-                <ul className="divide-y divide-gray-200">
-                  {documents.map((doc) => (
-                    <li key={doc.id}>
-                      <div className="px-4 py-4 sm:px-6">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-primary truncate">
-                            {doc.name}
-                          </p>
-                          <div className="ml-2 flex-shrink-0 flex">
-                            <p className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                              {doc.status}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
+      {documents.length > 0 && (
+        <Paper radius="md" p="xl" withBorder>
+          <Title order={3} mb="md">Documentos subidos</Title>
+          <Divider mb="md" />
+          
+          {documents.map((doc) => (
+            <Card key={doc.id} withBorder radius="md" mb="sm" padding="md">
+              <Group justify="space-between" align="center">
+                <Group>
+                  <IconFile size={20} />
+                  <Text fw={500}>{doc.name}</Text>
+                </Group>
+                <Badge color="yellow">{doc.status}</Badge>
+              </Group>
+            </Card>
+          ))}
+        </Paper>
+      )}
+    </Container>
   )
 }
 
-export default Dashboard 
+export default Dashboard
