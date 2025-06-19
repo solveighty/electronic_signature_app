@@ -1,5 +1,4 @@
 import axios from "axios";
-import Certificate from "../../../server/models/Certificate";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -27,9 +26,9 @@ export function uploadPdfDocument(file: File) {
   });
 }
 
-export function uploadCertificate(certificate: Certificate) {
+export function uploadCertificate(file: File) {
   const formData = new FormData();
-  formData.append("certificate", certificate);
+  formData.append("certificate", file);
 
   return api.post("/api/uploads/certificates", formData, {
     headers: {
@@ -38,6 +37,20 @@ export function uploadCertificate(certificate: Certificate) {
   });
 }
 
+export function getUserDocuments() {
+  return api.get("/api/documents");
+}
+
+// Configurar interceptor para añadir token de autenticación a las peticiones
+export const setAuthToken = (token: string | null) => {
+  if (token) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common["Authorization"];
+  }
+};
+
+// Interceptor para manejar errores
 api.interceptors.response.use(
   (response) => response,
   (error) => {

@@ -2,9 +2,13 @@ import express from "express";
 import cors from "cors";
 import router from "./routes/auth";
 import uploads from "./routes/uploads";
+import { connectToMongoDB } from "./utils/mongoConnect";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Conectar a MongoDB
+connectToMongoDB().catch(console.error);
 
 app.use(cors());
 app.use(express.json());

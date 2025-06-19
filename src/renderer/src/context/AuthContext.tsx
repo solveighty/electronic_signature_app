@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import { setAuthToken } from "../utils/api";
 
 // Tipado del contexto
 type AuthContextType = {
@@ -13,8 +14,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Componente proveedor
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setTokenState] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+
+  const setToken = (newToken: string | null) => {
+    setTokenState(newToken);
+    setAuthToken(newToken); // Configurar el token en el interceptor de axios
+  };
 
   return (
     <AuthContext.Provider value={{ token, userName, setToken, setUserName }}>

@@ -13,7 +13,8 @@ import {
   Divider,
   Box,
   Grid,
-  Tabs
+  Tabs,
+  Loader
 } from '@mantine/core';
 import { 
   IconUpload, 
@@ -23,21 +24,34 @@ import {
   IconUser,
   IconCertificate,
   IconFileText,
-  IconKey
+  IconKey,
+  IconRefresh
 } from '@tabler/icons-react';
 import { toast } from 'react-toastify';
 import { useDocumentManager } from '../hooks/useDocumentManager';
 
 const Dashboard = () => {
-  const { documents, pdfDocuments, certificateFile, isLoading, handleFileChange } = useDocumentManager();
+  const { documents, pdfDocuments, certificateFile, isLoading, isLoadingDocuments, handleFileChange, refreshDocuments } = useDocumentManager();
   const { setToken, userName } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    setToken(null)
-    toast.info('Sesión cerrada correctamente')
-    navigate('/login')
-  }
+    setToken(null);
+    toast.info('Sesión cerrada correctamente');
+    navigate('/login');
+  };
+
+  // Formato de fecha
+  const formatDate = (date: Date | undefined) => {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   return (
     <Container size="lg" py={40}>
@@ -155,11 +169,27 @@ const Dashboard = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="documents" pt="md">
-          {documents.length > 0 ? (
+          <Group justify="space-between" mb="md">
+            <Title order={4}>Mis Documentos</Title>
+            <Button 
+              variant="subtle" 
+              leftSection={<IconRefresh size={16} />} 
+              onClick={refreshDocuments}
+              loading={isLoadingDocuments}
+            >
+              Actualizar
+            </Button>
+          </Group>
+          
+          {isLoadingDocuments ? (
+            <Center py="xl">
+              <Loader />
+            </Center>
+          ) : documents.length > 0 ? (
             <>
               {certificateFile && (
                 <>
-                  <Title order={4} mb="sm">Mi Certificado Digital</Title>
+                  <Title order={5} mb="sm">Mi Certificado Digital</Title>
                   <Card withBorder radius="md" mb="lg" padding="md">
                     <Group justify="space-between" align="center">
                       <Group>
@@ -174,7 +204,7 @@ const Dashboard = () => {
 
               {pdfDocuments.length > 0 && (
                 <>
-                  <Title order={4} mb="sm">Mis Documentos PDF</Title>
+                  <Title order={5} mb="sm">Mis Documentos PDF</Title>
                   <Divider mb="md" />
                   
                   {pdfDocuments.map((doc) => (
@@ -182,7 +212,14 @@ const Dashboard = () => {
                       <Group justify="space-between" align="center">
                         <Group>
                           <IconFile size={20} />
-                          <Text fw={500}>{doc.name}</Text>
+                          <div>
+                            <Text fw={500}>{doc.name}</Text>
+                            {doc.createdAt && (
+                              <Text size="xs" c="dimmed">
+                                Subido el {formatDate(doc.createdAt)}
+                              </Text>
+                            )}
+                          </div>
                         </Group>
                         <Badge color="yellow">{doc.status}</Badge>
                       </Group>
@@ -199,7 +236,7 @@ const Dashboard = () => {
         </Tabs.Panel>
       </Tabs>
     </Container>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;
