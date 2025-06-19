@@ -1,4 +1,5 @@
 import axios from "axios";
+import Certificate from "../../../server/models/Certificate";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -19,18 +20,18 @@ export function uploadPdfDocument(file: File) {
   const formData = new FormData();
   formData.append("file", file);
 
-  return api.post("/api/uploads", formData, {
+  return api.post("/api/uploads/pdf", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
   });
 }
 
-export function uploadCertificate(file: File) {
+export function uploadCertificate(certificate: Certificate) {
   const formData = new FormData();
-  formData.append("certificate", file);
+  formData.append("certificate", certificate);
 
-  return api.post("/api/uploads/certificate", formData, {
+  return api.post("/api/uploads/certificates", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
