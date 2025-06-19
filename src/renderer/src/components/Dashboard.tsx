@@ -1,5 +1,5 @@
-import { useAuth } from '../context/AuthContext'
-import { useNavigate } from "react-router-dom"
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from "react-router-dom";
 import {
   Container,
   Title,
@@ -11,14 +11,25 @@ import {
   Badge,
   Card,
   Divider,
-  Box
-} from '@mantine/core'
-import { IconUpload, IconLogout, IconFileUpload, IconFile, IconUser } from '@tabler/icons-react'
-import { toast } from 'react-toastify'
-import { useDocumentManager } from '../hooks/useDocumentManager'
+  Box,
+  Grid,
+  Tabs
+} from '@mantine/core';
+import { 
+  IconUpload, 
+  IconLogout, 
+  IconFileUpload, 
+  IconFile, 
+  IconUser,
+  IconCertificate,
+  IconFileText,
+  IconKey
+} from '@tabler/icons-react';
+import { toast } from 'react-toastify';
+import { useDocumentManager } from '../hooks/useDocumentManager';
 
 const Dashboard = () => {
-  const { documents, isLoading, handleFileChange } = useDocumentManager();
+  const { documents, pdfDocuments, certificateFile, isLoading, handleFileChange } = useDocumentManager();
   const { setToken, userName } = useAuth();
   const navigate = useNavigate();
 
@@ -51,56 +62,142 @@ const Dashboard = () => {
         </Group>
       </Paper>
 
-      <Title order={2} mb="lg">Firma Electrónica</Title>
+      <Title order={2} mb="lg" ta="center">Firma Electrónica</Title>
 
-      <Paper radius="md" p="xl" withBorder mb="xl">
-        <Center style={{ flexDirection: 'column' }} py="lg">
-          <IconUpload size={48} color="gray" />
-          <Title order={3} mt="md">Sube tus documentos</Title>
-          <Text c="dimmed" mt="xs" mb="lg">
-            Archivos PDF hasta 10MB
-          </Text>
-          
-          <label htmlFor="file-upload">
-            <Button 
-              component="span" 
-              leftSection={<IconFileUpload size={18} />}
-              style={{ cursor: 'pointer' }}
-              loading={isLoading}
-            >
-              {isLoading ? 'Subiendo...' : 'Seleccionar archivos'}
-              <input
-                id="file-upload"
-                name="file-upload"
-                type="file"
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-                accept=".pdf"
-                disabled={isLoading}
-              />
-            </Button>
-          </label>
-        </Center>
-      </Paper>
+      <Tabs defaultValue="upload" mb="xl">
+        <Tabs.List grow>
+          <Tabs.Tab value="upload" leftSection={<IconUpload size={16} />}>
+            Subir Archivos
+          </Tabs.Tab>
+          <Tabs.Tab value="documents" leftSection={<IconFile size={16} />}>
+            Mis Documentos
+          </Tabs.Tab>
+        </Tabs.List>
 
-      {documents.length > 0 && (
-        <Paper radius="md" p="xl" withBorder>
-          <Title order={3} mb="md">Documentos subidos</Title>
-          <Divider mb="md" />
-          
-          {documents.map((doc) => (
-            <Card key={doc.id} withBorder radius="md" mb="sm" padding="md">
-              <Group justify="space-between" align="center">
-                <Group>
-                  <IconFile size={20} />
-                  <Text fw={500}>{doc.name}</Text>
-                </Group>
-                <Badge color="yellow">{doc.status}</Badge>
-              </Group>
-            </Card>
-          ))}
-        </Paper>
-      )}
+        <Tabs.Panel value="upload" pt="md">
+          <Grid>
+            {/* Certificado Digital */}
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <Paper radius="md" p="xl" withBorder h="100%">
+                <Center style={{ flexDirection: 'column' }} py="lg">
+                  <IconCertificate size={48} color="teal" />
+                  <Title order={3} mt="md">Certificado Digital</Title>
+                  <Text c="dimmed" mt="xs" mb="lg" ta="center">
+                    Sube tu archivo .p12 para firmar documentos
+                  </Text>
+                  
+                  <label htmlFor="certificate-upload">
+                    <Button 
+                      component="span" 
+                      leftSection={<IconKey size={18} />}
+                      style={{ cursor: 'pointer' }}
+                      loading={isLoading}
+                      color="teal"
+                    >
+                      {isLoading ? 'Subiendo...' : certificateFile ? 'Cambiar certificado' : 'Seleccionar certificado'}
+                      <input
+                        id="certificate-upload"
+                        name="certificate-upload"
+                        type="file"
+                        style={{ display: 'none' }}
+                        onChange={(e) => handleFileChange(e, 'p12')}
+                        accept=".p12"
+                        disabled={isLoading}
+                      />
+                    </Button>
+                  </label>
+                  
+                  {certificateFile && (
+                    <Box mt="md">
+                      <Badge color="teal" size="lg" variant="light">
+                        {certificateFile.name}
+                      </Badge>
+                    </Box>
+                  )}
+                </Center>
+              </Paper>
+            </Grid.Col>
+            
+            {/* Documento PDF */}
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <Paper radius="md" p="xl" withBorder h="100%">
+                <Center style={{ flexDirection: 'column' }} py="lg">
+                  <IconFileText size={48} color="blue" />
+                  <Title order={3} mt="md">Documento PDF</Title>
+                  <Text c="dimmed" mt="xs" mb="lg" ta="center">
+                    Sube el documento PDF que quieres firmar
+                  </Text>
+                  
+                  <label htmlFor="pdf-upload">
+                    <Button 
+                      component="span" 
+                      leftSection={<IconFileUpload size={18} />}
+                      style={{ cursor: 'pointer' }}
+                      loading={isLoading}
+                      color="blue"
+                    >
+                      {isLoading ? 'Subiendo...' : 'Seleccionar PDF'}
+                      <input
+                        id="pdf-upload"
+                        name="pdf-upload"
+                        type="file"
+                        style={{ display: 'none' }}
+                        onChange={(e) => handleFileChange(e, 'pdf')}
+                        accept=".pdf"
+                        disabled={isLoading}
+                      />
+                    </Button>
+                  </label>
+                </Center>
+              </Paper>
+            </Grid.Col>
+          </Grid>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="documents" pt="md">
+          {documents.length > 0 ? (
+            <>
+              {certificateFile && (
+                <>
+                  <Title order={4} mb="sm">Mi Certificado Digital</Title>
+                  <Card withBorder radius="md" mb="lg" padding="md">
+                    <Group justify="space-between" align="center">
+                      <Group>
+                        <IconCertificate size={20} />
+                        <Text fw={500}>{certificateFile.name}</Text>
+                      </Group>
+                      <Badge color="teal">{certificateFile.status}</Badge>
+                    </Group>
+                  </Card>
+                </>
+              )}
+
+              {pdfDocuments.length > 0 && (
+                <>
+                  <Title order={4} mb="sm">Mis Documentos PDF</Title>
+                  <Divider mb="md" />
+                  
+                  {pdfDocuments.map((doc) => (
+                    <Card key={doc.id} withBorder radius="md" mb="sm" padding="md">
+                      <Group justify="space-between" align="center">
+                        <Group>
+                          <IconFile size={20} />
+                          <Text fw={500}>{doc.name}</Text>
+                        </Group>
+                        <Badge color="yellow">{doc.status}</Badge>
+                      </Group>
+                    </Card>
+                  ))}
+                </>
+              )}
+            </>
+          ) : (
+            <Center py="xl">
+              <Text c="dimmed">Aún no has subido ningún archivo</Text>
+            </Center>
+          )}
+        </Tabs.Panel>
+      </Tabs>
     </Container>
   )
 }
