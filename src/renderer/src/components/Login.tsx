@@ -14,10 +14,11 @@ import { useForm } from "@mantine/form";
 import { useSpring, animated } from "@react-spring/web";
 import { login as LoginApi } from "../utils/api";
 import { useAuth } from "../context/AuthContext";
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { setToken } = useAuth();
+  const { setToken, setUserName } = useAuth();
 
   const form = useForm({
     initialValues: {
@@ -40,10 +41,19 @@ const Login = () => {
     try {
       const response = await LoginApi(form.values.email, form.values.password);
       setToken(response.data.token);
+      
+      if (response.data.name) {
+        setUserName(response.data.name);
+      } else {
+        const nameFromEmail = form.values.email.split('@')[0];
+        setUserName(nameFromEmail);
+      }
+      
+      toast.success('¡Inicio de sesión exitoso!');
       navigate("/main");
     } catch (error: any) {
       console.error("Error al iniciar sesión:", error);
-      alert("Error al iniciar sesión. Por favor, verifica tus credenciales.");
+      toast.error('Error al iniciar sesión. Verifica tus credenciales.');
     }
   };
 

@@ -13,6 +13,7 @@ import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
 import { useSpring, animated } from "@react-spring/web";
 import { register as RegisterApi } from "../utils/api";
+import { toast } from 'react-toastify';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -36,7 +37,6 @@ const Register = () => {
   });
 
   // Animations
-
   const [registerProps, registerApi] = useSpring(() => ({
     scale: 1,
     config: { tension: 300, friction: 10 },
@@ -49,10 +49,11 @@ const Register = () => {
         form.values.email,
         form.values.password
       );
+      toast.success('¡Cuenta creada con éxito!');
       navigate("/login");
     } catch (error: any) {
       console.error("Error al registrarse:", error);
-      alert("Error al registrarse. Por favor, intenta de nuevo.");
+      toast.error('Error al registrarse. Por favor, intenta de nuevo.');
     }
   };
 
