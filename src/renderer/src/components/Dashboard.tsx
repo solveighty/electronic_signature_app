@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from "react-router-dom"
 import {
@@ -16,55 +15,17 @@ import {
 } from '@mantine/core'
 import { IconUpload, IconLogout, IconFileUpload, IconFile, IconUser } from '@tabler/icons-react'
 import { toast } from 'react-toastify'
+import { useDocumentManager } from '../hooks/useDocumentManager'
 
 const Dashboard = () => {
-  const [documents, setDocuments] = useState<Array<{ id: number; name: string; status: string }>>([])
-  const { setToken, userName } = useAuth(); 
+  const { documents, isLoading, handleFileChange } = useDocumentManager();
+  const { setToken, userName } = useAuth();
   const navigate = useNavigate();
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  if (e.target.files && e.target.files.length > 0) {
-    const file = e.target.files[0]; 
-
-      // Validación en frontend: solo PDF
-      if (file.type !== "application/pdf") {
-        toast.error("Solo se permiten archivos PDF")
-        return
-      }
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch("http://localhost:3000/api/uploads", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) throw new Error(result.error || "Error al subir archivo");
-
-        setDocuments((prevDocs) => [
-          ...prevDocs,
-          {
-            id: Date.now(),
-            name: result.file.originalname,
-            status: "Pendiente de firma",
-          },
-        ]);
-        
-        toast.success("Archivo subido correctamente")
-      } catch (error: any) {
-        toast.error(error.message || "Error al subir el archivo")
-      }
-    }
-  }
-
   const handleLogout = () => {
-    setToken(null) // Clear the token in context
+    setToken(null)
     toast.info('Sesión cerrada correctamente')
-    navigate('/login') // Redirect to login page
+    navigate('/login')
   }
 
   return (
@@ -105,15 +66,17 @@ const Dashboard = () => {
               component="span" 
               leftSection={<IconFileUpload size={18} />}
               style={{ cursor: 'pointer' }}
+              loading={isLoading}
             >
-              Seleccionar archivos
+              {isLoading ? 'Subiendo...' : 'Seleccionar archivos'}
               <input
                 id="file-upload"
                 name="file-upload"
                 type="file"
                 style={{ display: 'none' }}
-                onChange={handleFileUpload}
+                onChange={handleFileChange}
                 accept=".pdf"
+                disabled={isLoading}
               />
             </Button>
           </label>
