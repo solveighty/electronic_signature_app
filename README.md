@@ -34,6 +34,11 @@ npm install
 VITE_SUPABASE_URL=tu_url_de_supabase
 VITE_SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
 JWT_SECRET=tu_clave_secreta_para_jwt
+VITE_API_HOST=tu_host
+VITE_API_PORT=tu_puerto_host
+VITE_API_URL=http://${VITE_API_HOST}:${VITE_API_PORT}
+VITE_MONGODB_URL=tu_url_de_mongo
+ENCRYPTION_KEY=tu_clave_de_encriptación
 ```
 
 ## Desarrollo
