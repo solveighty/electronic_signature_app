@@ -37,6 +37,17 @@ export function uploadCertificate(file: File) {
   });
 }
 
+export function updateCertificate(file: File) {
+  const formData = new FormData();
+  formData.append("certificate", file);
+
+  return api.put("/api/uploads/certificates", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+}
+
 export function getUserDocuments() {
   return api.get("/api/documents");
 }

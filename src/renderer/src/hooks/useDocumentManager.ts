@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { uploadPdfDocument as uploadPdfApi, uploadCertificate as uploadCertificateApi, getUserDocuments } from '../utils/api';
+import { uploadPdfDocument as uploadPdfApi, uploadCertificate as uploadCertificateApi, getUserDocuments, updateCertificate } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
 export interface Document {
@@ -216,6 +216,42 @@ export const useDocumentManager = () => {
     }
   };
 
+
+  const updateCertificateFile = async (file: File): Promise<boolean> => {
+    // validar si es p12
+    if (!file.name.endsWith('.p12') && file.type !== "application/x-pkcs12") {
+        toast.error("Solo se permiten archivos P12");
+        return false;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await updateCertificate(file);
+
+      const newCertificate = {
+        id: Date.now(),
+        name: file.name,
+        type: 'p12' as const,
+        status: "Certificado disponible",
+      };
+
+      setCertificateFile(newCertificate);
+      setDocuments(prevDocs => [...prevDocs.filter(doc => doc.type !== 'p12'), newCertificate]);
+      
+      toast.success("Certificado P12 subido correctamente");
+      setIsLoading(false);
+      return true;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || "Error al subir el certificado";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setIsLoading(false);
+      return false;
+    }
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, fileType: 'pdf' | 'p12'): Promise<boolean> => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
@@ -224,6 +260,8 @@ export const useDocumentManager = () => {
         return await uploadPdf(file);
       } else if (fileType === 'p12') {
         return await uploadCertificateFile(file);
+      } else if (fileType === 'updateP12') {
+        return await updateCertificateFile(file);
       }
     }
     return false;

@@ -4,6 +4,7 @@ import * as path from "path";
 import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import { storePdfDocument, getUserPdfDocuments } from "../services/pdfService";
+import { storeCertificate } from "../services/crtService";
 import jwt from "jsonwebtoken";
 import 'dotenv/config';
 
@@ -126,6 +127,76 @@ export const getUserDocuments = async (req: Request, res: Response) => {
     console.error('Error en getUserDocuments:', error);
     res.status(error.message === 'No autorizado' ? 401 : 500).json({
       error: error.message || "Error al obtener documentos"
+    });
+  }
+};
+
+// Controlador para manejar la subida de certificados P12
+
+export const handleCertificateUpload = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No se ha subido ningún archivo" });
+    }
+
+    console.log('Archivo de certificado recibido:', req.file);
+    console.log('Ruta del archivo de certificado:', req.file.path);
+
+    // Extraer el ID del usuario del token
+    const userId = extractUserIdFromToken(req);
+
+    // Guardar solo el hash y metadatos en MongoDB, y eliminar el archivo local
+    const certificateId = await storeCertificate(
+      req.file.path,
+      req.file.originalname,
+      userId
+    );
+
+    // Aquí está guardado exitosamente, ASEGÚRATE de enviar una respuesta
+    console.log('Enviando respuesta al cliente...');
+    return res.status(200).json({
+      message: "Certificado subido y hash guardado correctamente",
+      certificateId,
+      fileName: req.file.originalname
+    });
+  } catch (error: any) {
+    console.error('Error en handleCertificateUpload:', error);
+    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
+      error: error.message || "Error al procesar el certificado"
+    });
+  }
+};
+
+export const updateCertificate = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No se ha subido ningún archivo" });
+    }
+
+    console.log('Archivo de certificado recibido (PUT):', req.file);
+    console.log('Ruta del archivo de certificado:', req.file.path);
+
+    // Extraer el ID del usuario del token
+    const userId = extractUserIdFromToken(req);
+
+    // Guardar solo el hash y metadatos en MongoDB, y eliminar el archivo local
+    const certificateId = await storeCertificate(
+      req.file.path,
+      req.file.originalname,
+      userId
+    );
+
+    // Aquí está guardado exitosamente, ASEGÚRATE de enviar una respuesta
+    console.log('Enviando respuesta al cliente (PUT)...');
+    return res.status(200).json({
+      message: "Certificado actualizado y hash guardado correctamente",
+      certificateId,
+      fileName: req.file.originalname
+    });
+  } catch (error: any) {
+    console.error('Error en updateCertificate:', error);
+    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
+      error: error.message || "Error al actualizar el certificado"
     });
   }
 };
