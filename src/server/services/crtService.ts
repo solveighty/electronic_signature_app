@@ -24,9 +24,7 @@ export const storeCertificate = async (
     
     // Si existe un certificado previo, se elimina
     if (existingCertificates.length > 0) {
-      console.log(`Eliminando certificado anterior para usuario ${userId}`);
       await Certificate.deleteOne({ _id: existingCertificates[0]._id });
-      console.log('Certificado anterior eliminado');
     }
     
     if (!fs.existsSync(filePath)) {

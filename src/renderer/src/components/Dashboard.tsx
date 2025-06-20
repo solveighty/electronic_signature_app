@@ -25,8 +25,10 @@ import {
   IconCertificate,
   IconFileText,
   IconKey,
-  IconRefresh
+  IconRefresh,
+  IconSignature
 } from '@tabler/icons-react';
+import SignDocument from './SignDocument';
 import { toast } from 'react-toastify';
 import { useDocumentManager } from '../hooks/useDocumentManager';
 
@@ -82,6 +84,9 @@ const Dashboard = () => {
         <Tabs.List grow>
           <Tabs.Tab value="upload" leftSection={<IconUpload size={16} />}>
             Subir Archivos
+          </Tabs.Tab>
+          <Tabs.Tab value="sign" leftSection={<IconSignature size={16} />}>
+            Firmar Documentos
           </Tabs.Tab>
           <Tabs.Tab value="documents" leftSection={<IconFile size={16} />}>
             Mis Documentos
@@ -184,6 +189,10 @@ const Dashboard = () => {
               </Paper>
             </Grid.Col>
           </Grid>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="sign" pt="md">
+          <SignDocument />
         </Tabs.Panel>
 
         <Tabs.Panel value="documents" pt="md">
