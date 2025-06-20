@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { uploadPdfDocument as uploadPdfApi, uploadCertificate as uploadCertificateApi, getUserDocuments, updateCertificate } from '../utils/api';
+import { uploadPdfDocument as uploadPdfApi, uploadCertificate as uploadCertificateApi, getUserDocuments, updateCertificate as updateCertificateApi, getUserCertificate } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
 export interface Document {
@@ -24,6 +24,7 @@ export const useDocumentManager = () => {
   useEffect(() => {
     if (token) {
       fetchUserDocuments();
+      fetchUserCertificate();
     }
   }, [token]);
 
@@ -47,6 +48,45 @@ export const useDocumentManager = () => {
       console.error('Error al cargar documentos:', error);
       const errorMessage = error.response?.data?.error || error.message || "Error al cargar documentos";
       toast.error(errorMessage);
+    } finally {
+      setIsLoadingDocuments(false);
+    }
+  };
+
+  const fetchUserCertificate = async () => {
+    try {
+      setIsLoadingDocuments(true);
+      const response = await getUserCertificate();
+      
+      if (response.data && response.data.certificate) {
+        const cert = response.data.certificate;
+        setCertificateFile({
+          id: cert._id,
+          name: cert.fileName,
+          type: 'p12',
+          status: "Certificado disponible",
+          createdAt: new Date(cert.createdAt)
+        });
+        
+        // También agregar a la lista general de documentos
+        setDocuments(prevDocs => {
+          // Filtrar certificados existentes
+          const docsWithoutCerts = prevDocs.filter(doc => doc.type !== 'p12');
+          return [
+            ...docsWithoutCerts,
+            {
+              id: cert._id,
+              name: cert.fileName,
+              type: 'p12',
+              status: "Certificado disponible",
+              createdAt: new Date(cert.createdAt)
+            }
+          ];
+        });
+      }
+    } catch (error) {
+      console.error('Error al cargar certificado:', error);
+      // No mostrar toast de error para no molestar al usuario
     } finally {
       setIsLoadingDocuments(false);
     }
@@ -180,73 +220,67 @@ export const useDocumentManager = () => {
     }
   };
 
-  // subir archivos P12
-  const uploadCertificateFile = async (file: File): Promise<boolean> => {
-    // validar si es p12
+  // Método para manejar certificados P12
+  const handleCertificateUpload = async (file: File): Promise<boolean> => {
+    // Validar si es p12
     if (!file.name.endsWith('.p12') && file.type !== "application/x-pkcs12") {
-        toast.error("Solo se permiten archivos P12");
-        return false;
-    }
-
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const response = await uploadCertificateApi(file);
-
-      const newCertificate = {
-        id: Date.now(),
-        name: file.name,
-        type: 'p12' as const,
-        status: "Certificado disponible",
-      };
-
-      setCertificateFile(newCertificate);
-      setDocuments(prevDocs => [...prevDocs.filter(doc => doc.type !== 'p12'), newCertificate]);
-      
-      toast.success("Certificado P12 subido correctamente");
-      setIsLoading(false);
-      return true;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || error.message || "Error al subir el certificado";
-      setError(errorMessage);
-      toast.error(errorMessage);
-      setIsLoading(false);
+      toast.error("Solo se permiten archivos P12");
       return false;
     }
-  };
-
-
-  const updateCertificateFile = async (file: File): Promise<boolean> => {
-    // validar si es p12
-    if (!file.name.endsWith('.p12') && file.type !== "application/x-pkcs12") {
-        toast.error("Solo se permiten archivos P12");
-        return false;
-    }
 
     setIsLoading(true);
     setError(null);
     
+    // Mostrar mensaje apropiado según si es actualización o nueva carga
+    const toastId = toast.info(
+      certificateFile 
+        ? 'Actualizando certificado...' 
+        : 'Subiendo certificado...', 
+      { autoClose: false }
+    );
+    
     try {
-      const response = await updateCertificate(file);
+      // Usar la API adecuada según si ya existe un certificado
+      const response = certificateFile 
+        ? await updateCertificateApi(file) 
+        : await uploadCertificateApi(file);
 
       const newCertificate = {
-        id: Date.now(),
+        id: response.data.certificateId || Date.now(),
         name: file.name,
         type: 'p12' as const,
         status: "Certificado disponible",
+        createdAt: new Date()
       };
 
       setCertificateFile(newCertificate);
-      setDocuments(prevDocs => [...prevDocs.filter(doc => doc.type !== 'p12'), newCertificate]);
       
-      toast.success("Certificado P12 subido correctamente");
+      // Eliminar el certificado anterior (si existe) y agregar el nuevo
+      setDocuments(prevDocs => [
+        ...prevDocs.filter(doc => doc.type !== 'p12'), 
+        newCertificate
+      ]);
+      
+      toast.update(toastId, {
+        render: certificateFile 
+          ? 'Certificado actualizado correctamente' 
+          : 'Certificado subido correctamente',
+        type: 'success',
+        autoClose: 5000
+      });
+      
       setIsLoading(false);
       return true;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || error.message || "Error al subir el certificado";
+      const errorMessage = error.response?.data?.error || error.message || "Error al procesar el certificado";
       setError(errorMessage);
-      toast.error(errorMessage);
+      
+      toast.update(toastId, {
+        render: `Error: ${errorMessage}`,
+        type: 'error',
+        autoClose: 5000
+      });
+      
       setIsLoading(false);
       return false;
     }
@@ -259,9 +293,7 @@ export const useDocumentManager = () => {
       if (fileType === 'pdf') {
         return await uploadPdf(file);
       } else if (fileType === 'p12') {
-        return await uploadCertificateFile(file);
-      } else if (fileType === 'updateP12') {
-        return await updateCertificateFile(file);
+        return await handleCertificateUpload(file);
       }
     }
     return false;
@@ -275,8 +307,9 @@ export const useDocumentManager = () => {
     isLoadingDocuments,
     error,
     uploadPdf,
-    uploadCertificateFile,
+    handleCertificateUpload, // Exportamos el método unificado
     handleFileChange,
-    refreshDocuments: fetchUserDocuments
+    refreshDocuments: fetchUserDocuments,
+    hasCertificate: !!certificateFile // Helper para verificar si ya tiene un certificado
   };
 };

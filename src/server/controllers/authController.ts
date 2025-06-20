@@ -7,7 +7,11 @@ import { Request, Response } from "express";
 import "dotenv/config";
 
 const users: User[] = [];
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET is not defined in environment variables");
+}
 
 export const register = async (req: Request, res: Response) => {
   try {

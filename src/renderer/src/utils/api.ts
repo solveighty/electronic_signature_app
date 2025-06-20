@@ -4,7 +4,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const api = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: 30000,
 });
 
 export function login(email: string, password: string) {
@@ -50,6 +50,10 @@ export function updateCertificate(file: File) {
 
 export function getUserDocuments() {
   return api.get("/api/documents");
+}
+
+export function getUserCertificate() {
+  return api.get("/api/certificate");
 }
 
 // Configurar interceptor para añadir token de autenticación a las peticiones

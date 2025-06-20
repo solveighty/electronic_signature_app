@@ -4,10 +4,10 @@ import Certificate from '../models/Certificate';
 import 'dotenv/config';
 import mongoose from 'mongoose';
 
-const ENCRYPTION_SECRET = process.env.ENCRYPTION_SECRET;
+const ENCRYPTION_SECRET = process.env.ENCRYPTION_KEY_CERTIFICATE;
 
 if (!ENCRYPTION_SECRET) {
-  throw new Error('ENCRYPTION_SECRET no está definido en las variables de entorno');
+  throw new Error('ENCRYPTION_KEY_CERTIFICATE no está definido en las variables de entorno');
 }
 
 /**
@@ -19,6 +19,16 @@ export const storeCertificate = async (
   userId: string
 ): Promise<string> => {
   try {
+    // Verificar primero si el usuario ya tiene un certificado
+    const existingCertificates = await Certificate.find({ userId });
+    
+    // Si existe un certificado previo, se elimina
+    if (existingCertificates.length > 0) {
+      console.log(`Eliminando certificado anterior para usuario ${userId}`);
+      await Certificate.deleteOne({ _id: existingCertificates[0]._id });
+      console.log('Certificado anterior eliminado');
+    }
+    
     if (!fs.existsSync(filePath)) {
       throw new Error(`El archivo no existe en la ruta: ${filePath}`);
     }
@@ -83,10 +93,13 @@ export const retrieveCertificateHash = async (certificateId: string): Promise<st
  */
 export const getUserCertificates = async (userId: string) => {
   try {
-    const certificates = await Certificate.find(
-      { userId }
-    ).sort({ createdAt: -1 });
-
+    if (!userId) {
+      throw new Error("ID de usuario no proporcionado");
+    }
+    
+    const certificates = await Certificate.find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(1);
     return certificates;
   } catch (error) {
     console.error('Error al obtener certificados del usuario:', error);

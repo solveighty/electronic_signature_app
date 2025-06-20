@@ -4,7 +4,7 @@ import * as path from "path";
 import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import { storePdfDocument, getUserPdfDocuments } from "../services/pdfService";
-import { storeCertificate } from "../services/crtService";
+import { storeCertificate, getUserCertificates } from "../services/crtService";
 import jwt from "jsonwebtoken";
 import 'dotenv/config';
 
@@ -197,6 +197,26 @@ export const updateCertificate = async (req: Request, res: Response) => {
     console.error('Error en updateCertificate:', error);
     return res.status(error.message === 'No autorizado' ? 401 : 500).json({
       error: error.message || "Error al actualizar el certificado"
+    });
+  }
+};
+
+export const getUserCertificate = async (req: Request, res: Response) => {
+  try {
+    // Extraer el ID del usuario del token
+    const userId = extractUserIdFromToken(req);
+    
+    // Obtener el certificado del usuario (solo el más reciente)
+    const certificates = await getUserCertificates(userId);
+    
+    // Devolver solo el más reciente (o null si no hay ninguno)
+    res.status(200).json({
+      certificate: certificates.length > 0 ? certificates[0] : null
+    });
+  } catch (error: any) {
+    console.error('Error en getUserCertificate:', error);
+    res.status(error.message === 'No autorizado' ? 401 : 500).json({
+      error: error.message || "Error al obtener certificado"
     });
   }
 };

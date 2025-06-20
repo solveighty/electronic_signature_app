@@ -3,7 +3,10 @@ import * as crypto from 'crypto';
 import PdfDocument from '../models/PdfDocument';
 import 'dotenv/config';
 
-const ENCRYPTION_SECRET = process.env.ENCRYPTION_SECRET;
+const ENCRYPTION_SECRET = process.env.ENCRYPTION_KEY_PDF;
+if (!ENCRYPTION_SECRET) {
+  throw new Error('ENCRYPTION_KEY_PDF no está definido en las variables de entorno');
+}
 
 /**
  * Cifra un archivo PDF y lo almacena en MongoDB

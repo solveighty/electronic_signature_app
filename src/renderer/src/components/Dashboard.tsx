@@ -97,7 +97,9 @@ const Dashboard = () => {
                   <IconCertificate size={48} color="teal" />
                   <Title order={3} mt="md">Certificado Digital</Title>
                   <Text c="dimmed" mt="xs" mb="lg" ta="center">
-                    Sube tu archivo .p12 para firmar documentos
+                    {certificateFile 
+                      ? "Ya tienes un certificado. Puedes reemplazarlo si lo necesitas."
+                      : "Sube tu archivo .p12 para firmar documentos"}
                   </Text>
                   
                   <label htmlFor="certificate-upload">
@@ -108,7 +110,11 @@ const Dashboard = () => {
                       loading={isLoading}
                       color="teal"
                     >
-                      {isLoading ? 'Subiendo...' : certificateFile ? 'Cambiar certificado' : 'Seleccionar certificado'}
+                      {isLoading 
+                        ? 'Procesando...' 
+                        : certificateFile 
+                          ? 'Reemplazar certificado' 
+                          : 'Seleccionar certificado'}
                       <input
                         id="certificate-upload"
                         name="certificate-upload"
@@ -121,12 +127,24 @@ const Dashboard = () => {
                     </Button>
                   </label>
                   
-                  {certificateFile && (
-                    <Box mt="md">
-                      <Badge color="teal" size="lg" variant="light">
-                        {certificateFile.name}
-                      </Badge>
-                    </Box>
+                  {isLoadingDocuments ? (
+                    <Center>
+                      <Loader size="sm" />
+                    </Center>
+                  ) : (
+                    certificateFile && (
+                      <Box mt="md">
+                        <Text size="sm" c="dimmed" mb="xs">Certificado actual:</Text>
+                        <Badge color="teal" size="lg" variant="light">
+                          {certificateFile.name}
+                        </Badge>
+                        {certificateFile.createdAt && (
+                          <Text size="xs" c="dimmed" mt={5}>
+                            Subido el {formatDate(certificateFile.createdAt)}
+                          </Text>
+                        )}
+                      </Box>
+                    )
                   )}
                 </Center>
               </Paper>
