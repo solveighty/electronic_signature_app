@@ -75,11 +75,26 @@ export const storeCertificate = async (
 /**
  * Recupera el hash de un certificado desde MongoDB
  */
-export const retrieveCertificateHash = async (certificateId: string): Promise<string> => {
+export const decryptandretrieveCertificate = async (certificateId: string): Promise<string> => {
   try {
     const cert = await Certificate.findById(certificateId);
     if (!cert) throw new Error('Certificado no encontrado');
-    return cert.hash;
+
+    // hashBundle = salt:iv:encryptedHash
+    const [saltHex, ivHex, encryptedHash] = cert.hash.split(':');
+    if (!saltHex || !ivHex || !encryptedHash) throw new Error('Formato de hash inválido');
+
+    const salt = Buffer.from(saltHex, 'hex');
+    const iv = Buffer.from(ivHex, 'hex');
+    const key = crypto.pbkdf2Sync(ENCRYPTION_SECRET, salt, 100000, 32, 'sha256');
+
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    let decrypted = decipher.update(encryptedHash, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+
+    console.log('Hash desencriptado:', decrypted);
+
+    return decrypted; // Este es el hash original (SHA-256) del archivo .p12
   } catch (error) {
     console.error('Error al recuperar el hash del certificado:', error);
     throw new Error('No se pudo recuperar el hash del certificado');

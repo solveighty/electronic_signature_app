@@ -4,7 +4,7 @@ import * as path from "path";
 import { fileURLToPath } from 'url';
 import * as fs from 'fs';
 import { storePdfDocument, getUserPdfDocuments } from "../services/pdfService";
-import { storeCertificate, getUserCertificates } from "../services/crtService";
+import { storeCertificate, getUserCertificates, decryptandretrieveCertificate } from "../services/crtService";
 import jwt from "jsonwebtoken";
 import 'dotenv/config';
 
@@ -145,14 +145,26 @@ export const handleCertificateUpload = async (req: Request, res: Response) => {
     // Extraer el ID del usuario del token
     const userId = extractUserIdFromToken(req);
 
-    // Guardar solo el hash y metadatos en MongoDB, y eliminar el archivo local
+    // 1. Guardar el hash y metadatos en MongoDB, y eliminar el archivo local
     const certificateId = await storeCertificate(
       req.file.path,
       req.file.originalname,
       userId
     );
 
-    // Aquí está guardado exitosamente, ASEGÚRATE de enviar una respuesta
+    // 2. Recuperar el documento recién guardado desde la base de datos
+    const certDoc = await getUserCertificates(userId);
+    const justSaved = certDoc.find(c => c._id.toString() === certificateId);
+
+    if (!justSaved) {
+      throw new Error('No se pudo recuperar el certificado recién guardado');
+    }
+
+    // 3. Desencriptar el hash del documento recuperado
+    const decryptedHash = await decryptandretrieveCertificate(justSaved._id.toString());
+    console.log('Hash desencriptado tras guardar:', decryptedHash);
+
+    // Responder al cliente
     console.log('Enviando respuesta al cliente...');
     return res.status(200).json({
       message: "Certificado subido y hash guardado correctamente",
