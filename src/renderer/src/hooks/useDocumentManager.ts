@@ -299,6 +299,107 @@ export const useDocumentManager = () => {
     return false;
   };
 
+  // Función para eliminar un certificado
+  const deleteCertificate = async (): Promise<boolean> => {
+    if (!certificateFile) {
+      toast.error("No hay certificado para eliminar");
+      return false;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    // Mostrar toast de información
+    const toastId = toast.info('Eliminando certificado...', {
+      autoClose: false,
+      closeButton: false
+    });
+
+    try {
+      // Por ahora, solo un placeholder para la futura implementación
+      console.log('Borrando certificado...', certificateFile.id);
+      
+      // Se simula una operación asíncrona
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Se actualiza el estado local
+      setCertificateFile(null);
+      setDocuments(prevDocs => prevDocs.filter(doc => doc.type !== 'p12'));
+
+      toast.update(toastId, {
+        render: 'Certificado eliminado correctamente',
+        type: 'success',
+        autoClose: 5000
+      });
+
+      setIsLoading(false);
+      return true;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || "Error al eliminar el certificado";
+      setError(errorMessage);
+
+      toast.update(toastId, {
+        render: `Error: ${errorMessage}`,
+        type: 'error',
+        autoClose: 5000
+      });
+
+      setIsLoading(false);
+      return false;
+    }
+  };
+
+  // Función para eliminar un documento PDF
+  const deletePdf = async (documentId: string): Promise<boolean> => {
+    const documentToDelete = pdfDocuments.find(doc => doc.id === documentId);
+
+    if (!documentToDelete) {
+      toast.error("Documento no encontrado");
+      return false;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    const toastId = toast.info('Eliminando documento...', {
+      autoClose: false,
+      closeButton: false
+    });
+
+    try {
+      // Por ahora, solo un placeholder para la futura implementación
+      console.log('Borrando documento PDF...', documentId);
+      
+      // Simulamos una operación asíncrona
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Actualizamos el estado local
+      setPdfDocuments(prevDocs => prevDocs.filter(doc => doc.id !== documentId));
+      setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== documentId));
+
+      toast.update(toastId, {
+        render: 'Documento eliminado correctamente',
+        type: 'success',
+        autoClose: 5000
+      });
+
+      setIsLoading(false);
+      return true;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error || error.message || "Error al eliminar el documento";
+      setError(errorMessage);
+
+      toast.update(toastId, {
+        render: `Error: ${errorMessage}`,
+        type: 'error',
+        autoClose: 5000
+      });
+
+      setIsLoading(false);
+      return false;
+    }
+  };
+
   return {
     documents,
     pdfDocuments,
@@ -307,9 +408,11 @@ export const useDocumentManager = () => {
     isLoadingDocuments,
     error,
     uploadPdf,
-    handleCertificateUpload, // Exportamos el método unificado
+    handleCertificateUpload,
     handleFileChange,
     refreshDocuments: fetchUserDocuments,
-    hasCertificate: !!certificateFile // Helper para verificar si ya tiene un certificado
+    hasCertificate: !!certificateFile,
+    deleteCertificate,
+    deletePdf
   };
 };

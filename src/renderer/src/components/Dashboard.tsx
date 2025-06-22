@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,7 +15,9 @@ import {
   Box,
   Grid,
   Tabs,
-  Loader
+  Loader,
+  ActionIcon,
+  Modal
 } from '@mantine/core';
 import { 
   IconUpload, 
@@ -26,16 +29,35 @@ import {
   IconFileText,
   IconKey,
   IconRefresh,
-  IconSignature
+  IconSignature,
+  IconTrash,
+  IconAlertCircle
 } from '@tabler/icons-react';
 import SignDocument from './SignDocument';
 import { toast } from 'react-toastify';
 import { useDocumentManager } from '../hooks/useDocumentManager';
+import { useDisclosure } from '@mantine/hooks';
 
 const Dashboard = () => {
-  const { documents, pdfDocuments, certificateFile, isLoading, isLoadingDocuments, handleFileChange, refreshDocuments } = useDocumentManager();
+  const { 
+    documents, 
+    pdfDocuments, 
+    certificateFile, 
+    isLoading, 
+    isLoadingDocuments, 
+    handleFileChange, 
+    refreshDocuments,
+    deleteCertificate,
+    deletePdf
+  } = useDocumentManager();
+  
   const { setToken, userName } = useAuth();
   const navigate = useNavigate();
+
+  // Estado para los modales de confirmación
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
+  const [deleteCertificateModalOpened, { open: openDeleteCertificateModal, close: closeDeleteCertificateModal }] = useDisclosure(false);
 
   const handleLogout = () => {
     setToken(null);
@@ -53,6 +75,31 @@ const Dashboard = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  // Manejar la eliminación de un documento PDF
+  const handleDeletePdf = (documentId: string) => {
+    setDocumentToDelete(documentId);
+    openDeleteModal();
+  };
+
+  // Confirmar eliminación de un documento PDF
+  const confirmDeletePdf = async () => {
+    if (documentToDelete) {
+      const success = await deletePdf(documentToDelete);
+      if (success) {
+        closeDeleteModal();
+        setDocumentToDelete(null);
+      }
+    }
+  };
+
+  // Confirmar eliminación de certificado
+  const confirmDeleteCertificate = async () => {
+    const success = await deleteCertificate();
+    if (success) {
+      closeDeleteCertificateModal();
+    }
   };
 
   return (
@@ -107,30 +154,45 @@ const Dashboard = () => {
                       : "Sube tu archivo .p12 para firmar documentos"}
                   </Text>
                   
-                  <label htmlFor="certificate-upload">
-                    <Button 
-                      component="span" 
-                      leftSection={<IconKey size={18} />}
-                      style={{ cursor: 'pointer' }}
-                      loading={isLoading}
-                      color="teal"
-                    >
-                      {isLoading 
-                        ? 'Procesando...' 
-                        : certificateFile 
-                          ? 'Reemplazar certificado' 
-                          : 'Seleccionar certificado'}
-                      <input
-                        id="certificate-upload"
-                        name="certificate-upload"
-                        type="file"
-                        style={{ display: 'none' }}
-                        onChange={(e) => handleFileChange(e, 'p12')}
-                        accept=".p12"
+                  <Group>
+                    <label htmlFor="certificate-upload">
+                      <Button 
+                        component="span" 
+                        leftSection={<IconKey size={18} />}
+                        style={{ cursor: 'pointer' }}
+                        loading={isLoading}
+                        color="teal"
+                      >
+                        {isLoading 
+                          ? 'Procesando...' 
+                          : certificateFile 
+                            ? 'Reemplazar certificado' 
+                            : 'Seleccionar certificado'}
+                        <input
+                          id="certificate-upload"
+                          name="certificate-upload"
+                          type="file"
+                          style={{ display: 'none' }}
+                          onChange={(e) => handleFileChange(e, 'p12')}
+                          accept=".p12"
+                          disabled={isLoading}
+                        />
+                      </Button>
+                    </label>
+                    
+                    {/* Botón para eliminar certificado */}
+                    {certificateFile && (
+                      <Button
+                        color="red"
+                        variant="outline"
+                        onClick={openDeleteCertificateModal}
+                        leftSection={<IconTrash size={18} />}
                         disabled={isLoading}
-                      />
-                    </Button>
-                  </label>
+                      >
+                        Eliminar
+                      </Button>
+                    )}
+                  </Group>
                   
                   {isLoadingDocuments ? (
                     <Center>
@@ -223,7 +285,17 @@ const Dashboard = () => {
                         <IconCertificate size={20} />
                         <Text fw={500}>{certificateFile.name}</Text>
                       </Group>
-                      <Badge color="teal">{certificateFile.status}</Badge>
+                      <Group>
+                        <Badge color="teal">{certificateFile.status}</Badge>
+                        <ActionIcon 
+                          color="red" 
+                          variant="subtle" 
+                          onClick={openDeleteCertificateModal}
+                          disabled={isLoading}
+                        >
+                          <IconTrash size={18} />
+                        </ActionIcon>
+                      </Group>
                     </Group>
                   </Card>
                 </>
@@ -248,7 +320,17 @@ const Dashboard = () => {
                             )}
                           </div>
                         </Group>
-                        <Badge color="yellow">{doc.status}</Badge>
+                        <Group>
+                          <Badge color="yellow">{doc.status}</Badge>
+                          <ActionIcon 
+                            color="red" 
+                            variant="subtle" 
+                            onClick={() => handleDeletePdf(doc.id.toString())}
+                            disabled={isLoading}
+                          >
+                            <IconTrash size={18} />
+                          </ActionIcon>
+                        </Group>
                       </Group>
                     </Card>
                   ))}
@@ -262,6 +344,56 @@ const Dashboard = () => {
           )}
         </Tabs.Panel>
       </Tabs>
+
+      {/* Modal de confirmación para eliminar PDF */}
+      <Modal
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        title={
+          <Group>
+            <IconAlertCircle size={20} color="red" />
+            <Text fw={700}>Eliminar documento</Text>
+          </Group>
+        }
+        centered
+      >
+        <Text mb="xl">
+          ¿Estás seguro de que deseas eliminar este documento? Esta acción no se puede deshacer.
+        </Text>
+        <Group justify="flex-end">
+          <Button variant="default" onClick={closeDeleteModal}>
+            Cancelar
+          </Button>
+          <Button color="red" onClick={confirmDeletePdf} loading={isLoading}>
+            Eliminar
+          </Button>
+        </Group>
+      </Modal>
+
+      {/* Modal de confirmación para eliminar certificado */}
+      <Modal
+        opened={deleteCertificateModalOpened}
+        onClose={closeDeleteCertificateModal}
+        title={
+          <Group>
+            <IconAlertCircle size={20} color="red" />
+            <Text fw={700}>Eliminar certificado</Text>
+          </Group>
+        }
+        centered
+      >
+        <Text mb="xl">
+          ¿Estás seguro de que deseas eliminar tu certificado digital? Esta acción no se puede deshacer y no podrás firmar documentos hasta que subas un nuevo certificado.
+        </Text>
+        <Group justify="flex-end">
+          <Button variant="default" onClick={closeDeleteCertificateModal}>
+            Cancelar
+          </Button>
+          <Button color="red" onClick={confirmDeleteCertificate} loading={isLoading}>
+            Eliminar certificado
+          </Button>
+        </Group>
+      </Modal>
     </Container>
   );
 };
