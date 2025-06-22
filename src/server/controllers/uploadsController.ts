@@ -154,14 +154,15 @@ export const handleCertificateUpload = async (req: Request, res: Response) => {
 
     // 2. Recuperar el documento recién guardado desde la base de datos
     const certDoc = await getUserCertificates(userId);
-    const justSaved = certDoc.find(c => c._id.toString() === certificateId);
+    const justSaved = certDoc.find(c => (c as { _id: { toString(): string } })._id.toString() === certificateId);
 
     if (!justSaved) {
       throw new Error('No se pudo recuperar el certificado recién guardado');
     }
 
     // 3. Desencriptar el hash del documento recuperado
-    const decryptedHash = await decryptandretrieveCertificate(justSaved._id.toString());
+    const { _id } = justSaved as { _id: { toString(): string } };
+    const decryptedHash = await decryptandretrieveCertificate(_id.toString());
     console.log('Hash desencriptado tras guardar:', decryptedHash);
 
     // Responder al cliente
