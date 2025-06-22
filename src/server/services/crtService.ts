@@ -31,31 +31,40 @@ export const storeCertificate = async (
       throw new Error(`El archivo no existe en la ruta: ${filePath}`);
     }
 
+    // Leer el archivo y crear un hash SHA-256
     const fileBuffer = fs.readFileSync(filePath);
     const hash = crypto.createHash('sha256').update(fileBuffer).digest('hex');
 
+    // Generar salt y IV aleatorios
     const salt = crypto.randomBytes(16);
     const iv = crypto.randomBytes(16);
+    
+    // Derivar clave de cifrado usando PBKDF2
     const key = crypto.pbkdf2Sync(ENCRYPTION_SECRET, salt, 100000, 32, 'sha256');
 
+    // Cifrar el hash del certificado
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encryptedHash = cipher.update(hash, 'utf8', 'hex');
     encryptedHash += cipher.final('hex');
 
-    // Guardar todo junto: salt:iv:encryptedHash
-    const hashBundle = `${salt.toString('hex')}:${iv.toString('hex')}:${encryptedHash}`;
+    // Convertir salt e IV a formato hexadecimal
+    const saltHex = salt.toString('hex');
+    const ivHex = iv.toString('hex');
 
+    // Crear documento con los campos separados
     const certDoc = new Certificate({
       userId,
       fileName,
-      hash: hashBundle,
+      encryptionSalt: saltHex,
+      encryptionIV: ivHex,
+      certificateData: encryptedHash,
       type: 'p12'
     });
 
-    //guardar el documento en MongoDB
+    // Guardar el documento en MongoDB
     await certDoc.save();
 
-    // Log para verificar que se guardó correctamente
+    // Eliminar el archivo temporal
     try {
       fs.unlinkSync(filePath);
     } catch (unlinkError) {
@@ -80,21 +89,24 @@ export const decryptandretrieveCertificate = async (certificateId: string): Prom
     const cert = await Certificate.findById(certificateId);
     if (!cert) throw new Error('Certificado no encontrado');
 
-    // hashBundle = salt:iv:encryptedHash
-    const [saltHex, ivHex, encryptedHash] = cert.hash.split(':');
-    if (!saltHex || !ivHex || !encryptedHash) throw new Error('Formato de hash inválido');
+    // Verificar que todos los campos necesarios estén presentes
+    if (!cert.encryptionSalt || !cert.encryptionIV || !cert.certificateData) {
+      throw new Error('El certificado no tiene el formato esperado');
+    }
 
-    const salt = Buffer.from(saltHex, 'hex');
-    const iv = Buffer.from(ivHex, 'hex');
+    // Convertir de hexadecimal a Buffer
+    const salt = Buffer.from(cert.encryptionSalt, 'hex');
+    const iv = Buffer.from(cert.encryptionIV, 'hex');
+    
+    // Derivar clave usando el mismo proceso que al cifrar
     const key = crypto.pbkdf2Sync(ENCRYPTION_SECRET, salt, 100000, 32, 'sha256');
 
+    // Descifrar el hash
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-    let decrypted = decipher.update(encryptedHash, 'hex', 'utf8');
+    let decrypted = decipher.update(cert.certificateData, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
 
-    console.log('Hash desencriptado:', decrypted);
-
-    return decrypted; // Este es el hash original (SHA-256) del archivo .p12
+    return decrypted;
   } catch (error) {
     console.error('Error al recuperar el hash del certificado:', error);
     throw new Error('No se pudo recuperar el hash del certificado');
@@ -117,5 +129,18 @@ export const getUserCertificates = async (userId: string) => {
   } catch (error) {
     console.error('Error al obtener certificados del usuario:', error);
     throw new Error('No se pudieron obtener los certificados');
+  }
+};
+
+/**
+ * Verifica si el usuario ya tiene un certificado
+ */
+export const userHasCertificate = async (userId: string): Promise<boolean> => {
+  try {
+    const count = await Certificate.countDocuments({ userId });
+    return count > 0;
+  } catch (error) {
+    console.error('Error al verificar certificado del usuario:', error);
+    return false;
   }
 };
