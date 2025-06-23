@@ -11,7 +11,6 @@ import {
   Group,
   Badge,
   Card,
-  Divider,
   Box,
   Grid,
   Tabs,
@@ -291,13 +290,22 @@ const Dashboard = () => {  const {
                 <>
                   <Title order={5} mb="sm">Mi Certificado Digital</Title>
                   <Card withBorder radius="md" mb="lg" padding="md">
-                    <Group justify="space-between" align="center">
-                      <Group>
-                        <IconCertificate size={20} />
-                        <Text fw={500}>{certificateFile.name}</Text>
+                    <Group justify="space-between" align="flex-start">
+                      <Group align="flex-start" wrap="nowrap">
+                        <IconCertificate size={20} style={{ marginTop: 4 }} />
+                        <Box>
+                          <Text fw={500}>{certificateFile.name}</Text>
+                          {certificateFile.createdAt && (
+                            <Text size="xs" c="dimmed">
+                              Subido el {formatDate(certificateFile.createdAt)}
+                            </Text>
+                          )}
+                        </Box>
                       </Group>
                       <Group>
-                        <Badge color="teal">{certificateFile.status}</Badge>
+                        <Badge color="teal" variant="filled">
+                          {certificateFile.status || "CERTIFICADO DISPONIBLE"}
+                        </Badge>
                         <ActionIcon 
                           color="red" 
                           variant="subtle" 
@@ -315,34 +323,54 @@ const Dashboard = () => {  const {
               {pdfDocuments.length > 0 && (
                 <>
                   <Title order={5} mb="sm">Mis Documentos PDF</Title>
-                  <Divider mb="md" />
                   
-                  {pdfDocuments.map((doc) => (                    <Card key={doc.id} withBorder radius="md" mb="sm" padding="md">
-                      <Group justify="space-between" align="center">
-                        <Group>
+                  {/* Tabla de cabecera */}
+                  <Paper withBorder p="xs" mb="xs" radius="md">
+                    <Group grow gap={0} justify="space-between">
+                      <Text fw={700} size="sm" pl={8}>Nombre del documento</Text>
+                      <Text fw={700} size="sm" style={{ maxWidth: '180px' }}>Fecha de subida</Text>
+                      <Text fw={700} size="sm" ta="center">Estado</Text>
+                      <Text fw={700} size="sm" ta="center" style={{ maxWidth: '80px' }}>Acción</Text>
+                    </Group>
+                  </Paper>
+                  
+                  {/* Filas de documentos */}
+                  {pdfDocuments.map((doc) => (
+                    <Paper key={doc.id} withBorder p="xs" mb="xs" radius="md">
+                      <Group grow gap={0} justify="space-between" align="center">
+                        <Group wrap="nowrap" gap="xs">
                           <IconFile size={20} />
-                          <div>
-                            <Text fw={500}>{doc.name}</Text>
-                            {doc.createdAt && (
-                              <Text size="xs" c="dimmed">
-                                Subido el {formatDate(doc.createdAt)}
-                              </Text>
-                            )}
-                          </div>
+                          <Text lineClamp={1}>
+                            {doc.name}
+                          </Text>
                         </Group>
-                        <Group>
-                          <Badge color="yellow">{doc.status}</Badge>
+                        
+                        <Text size="sm" c="dimmed" style={{ maxWidth: '180px' }}>
+                          {doc.createdAt && formatDate(doc.createdAt)}
+                        </Text>
+                        
+                        <Box ta="center">
+                          <Badge 
+                            color={doc.status === "Firmado" ? "green" : "yellow"}
+                            variant="filled"
+                          >
+                            {doc.status}
+                          </Badge>
+                        </Box>
+                        
+                        <Box ta="center" style={{ maxWidth: '80px' }}>
                           <ActionIcon 
                             color="red" 
                             variant="subtle" 
                             onClick={() => handleDeletePdf(doc.id.toString())}
                             disabled={isLoadingPdf}
+                            mx="auto"
                           >
                             <IconTrash size={18} />
                           </ActionIcon>
-                        </Group>
+                        </Box>
                       </Group>
-                    </Card>
+                    </Paper>
                   ))}
                 </>
               )}
