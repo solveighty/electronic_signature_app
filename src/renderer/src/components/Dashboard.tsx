@@ -38,12 +38,12 @@ import { toast } from 'react-toastify';
 import { useDocumentManager } from '../hooks/useDocumentManager';
 import { useDisclosure } from '@mantine/hooks';
 
-const Dashboard = () => {
-  const { 
+const Dashboard = () => {  const { 
     documents, 
     pdfDocuments, 
     certificateFile, 
-    isLoading, 
+    isLoadingPdf,
+    isLoadingCertificate,
     isLoadingDocuments, 
     handleFileChange, 
     refreshDocuments,
@@ -58,6 +58,9 @@ const Dashboard = () => {
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [deleteCertificateModalOpened, { open: openDeleteCertificateModal, close: closeDeleteCertificateModal }] = useDisclosure(false);
+
+  // Añadir esto para manejar el cambio de pestañas
+  const [activeTab, setActiveTab] = useState('upload');
 
   const handleLogout = () => {
     setToken(null);
@@ -102,6 +105,14 @@ const Dashboard = () => {
     }
   };
 
+  // Función para manejar el cambio de pestañas (simplificada para evitar refrescos automáticos)
+  const handleTabChange = (value: string | null) => {
+    if (value) {
+      setActiveTab(value);
+      // Eliminamos los refrescos automáticos
+    }
+  };
+
   return (
     <Container size="lg" py={40}>
       {/* Header con saludo personalizado */}
@@ -127,7 +138,7 @@ const Dashboard = () => {
 
       <Title order={2} mb="lg" ta="center">Firma Electrónica</Title>
 
-      <Tabs defaultValue="upload" mb="xl">
+      <Tabs value={activeTab} onChange={handleTabChange} mb="xl">
         <Tabs.List grow>
           <Tabs.Tab value="upload" leftSection={<IconUpload size={16} />}>
             Subir Archivos
@@ -160,10 +171,10 @@ const Dashboard = () => {
                         component="span" 
                         leftSection={<IconKey size={18} />}
                         style={{ cursor: 'pointer' }}
-                        loading={isLoading}
+                        loading={isLoadingCertificate}
                         color="teal"
                       >
-                        {isLoading 
+                        {isLoadingCertificate
                           ? 'Procesando...' 
                           : certificateFile 
                             ? 'Reemplazar certificado' 
@@ -175,7 +186,7 @@ const Dashboard = () => {
                           style={{ display: 'none' }}
                           onChange={(e) => handleFileChange(e, 'p12')}
                           accept=".p12"
-                          disabled={isLoading}
+                          disabled={isLoadingCertificate}
                         />
                       </Button>
                     </label>
@@ -187,7 +198,7 @@ const Dashboard = () => {
                         variant="outline"
                         onClick={openDeleteCertificateModal}
                         leftSection={<IconTrash size={18} />}
-                        disabled={isLoading}
+                        disabled={isLoadingCertificate}
                       >
                         Eliminar
                       </Button>
@@ -232,10 +243,10 @@ const Dashboard = () => {
                       component="span" 
                       leftSection={<IconFileUpload size={18} />}
                       style={{ cursor: 'pointer' }}
-                      loading={isLoading}
+                      loading={isLoadingPdf}
                       color="blue"
                     >
-                      {isLoading ? 'Subiendo...' : 'Seleccionar PDF'}
+                      {isLoadingPdf ? 'Subiendo...' : 'Seleccionar PDF'}
                       <input
                         id="pdf-upload"
                         name="pdf-upload"
@@ -243,7 +254,7 @@ const Dashboard = () => {
                         style={{ display: 'none' }}
                         onChange={(e) => handleFileChange(e, 'pdf')}
                         accept=".pdf"
-                        disabled={isLoading}
+                        disabled={isLoadingPdf}
                       />
                     </Button>
                   </label>
@@ -291,7 +302,7 @@ const Dashboard = () => {
                           color="red" 
                           variant="subtle" 
                           onClick={openDeleteCertificateModal}
-                          disabled={isLoading}
+                          disabled={isLoadingCertificate}
                         >
                           <IconTrash size={18} />
                         </ActionIcon>
@@ -306,8 +317,7 @@ const Dashboard = () => {
                   <Title order={5} mb="sm">Mis Documentos PDF</Title>
                   <Divider mb="md" />
                   
-                  {pdfDocuments.map((doc) => (
-                    <Card key={doc.id} withBorder radius="md" mb="sm" padding="md">
+                  {pdfDocuments.map((doc) => (                    <Card key={doc.id} withBorder radius="md" mb="sm" padding="md">
                       <Group justify="space-between" align="center">
                         <Group>
                           <IconFile size={20} />
@@ -326,7 +336,7 @@ const Dashboard = () => {
                             color="red" 
                             variant="subtle" 
                             onClick={() => handleDeletePdf(doc.id.toString())}
-                            disabled={isLoading}
+                            disabled={isLoadingPdf}
                           >
                             <IconTrash size={18} />
                           </ActionIcon>
@@ -364,7 +374,7 @@ const Dashboard = () => {
           <Button variant="default" onClick={closeDeleteModal}>
             Cancelar
           </Button>
-          <Button color="red" onClick={confirmDeletePdf} loading={isLoading}>
+          <Button color="red" onClick={confirmDeletePdf} loading={isLoadingPdf}>
             Eliminar
           </Button>
         </Group>
@@ -389,7 +399,7 @@ const Dashboard = () => {
           <Button variant="default" onClick={closeDeleteCertificateModal}>
             Cancelar
           </Button>
-          <Button color="red" onClick={confirmDeleteCertificate} loading={isLoading}>
+          <Button color="red" onClick={confirmDeleteCertificate} loading={isLoadingCertificate}>
             Eliminar certificado
           </Button>
         </Group>

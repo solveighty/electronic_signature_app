@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import {
   Container,
   Title,
@@ -30,10 +30,11 @@ import {
   IconLock,
   IconEye,
   IconEyeOff,
-  IconDownload
+  IconDownload,
+  IconRefresh
 } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
-import { useDocumentManager, Document } from '../hooks/useDocumentManager';
+import { useDocumentManager } from '../hooks/useDocumentManager';
 import { toast } from 'react-toastify';
 
 
@@ -49,7 +50,14 @@ const SignDocument = () => {
   const [opened, { open, close }] = useDisclosure(false);
   
   // Obtenemos los documentos y el certificado del usuario
-  const { pdfDocuments, certificateFile, isLoadingDocuments, refreshDocuments } = useDocumentManager();
+  const { 
+    pdfDocuments, 
+    certificateFile, 
+    isLoadingDocuments, 
+    refreshDocuments,
+    refreshCertificate,
+    hasCertificate 
+  } = useDocumentManager();
   
   // Documento seleccionado actualmente
   const selectedDocument = pdfDocuments.find(doc => doc.id === selectedDocumentId);
@@ -62,8 +70,19 @@ const SignDocument = () => {
       label: doc.name
     }));
   
-  // Verificar si hay certificado disponible
-  const hasCertificate = !!certificateFile;
+  useEffect(() => {
+    // Si estamos en el paso de contraseña pero ya no hay certificado, volver al paso 1
+    if (active === 1 && !hasCertificate) {
+      setActive(0);
+    }
+  }, [hasCertificate, active]);
+  
+  // Función para actualizar manualmente el estado
+  const handleRefresh = () => {
+    refreshCertificate();
+    refreshDocuments();
+    toast.info('Estado actualizado');
+  };
   
   // Verificar si podemos avanzar al siguiente paso
   const canProceedToPassword = hasCertificate && selectedDocumentId;
@@ -129,7 +148,18 @@ const SignDocument = () => {
   return (
     <>
       <Container size="lg" py="md">
-        <Title order={3} mb="lg">Firma de Documentos</Title>
+        
+        <Group justify="space-between" mb="lg">
+          <Title order={3}>Firma de Documentos</Title>
+          <Button 
+            variant="subtle" 
+            leftSection={<IconRefresh size={16} />}
+            onClick={handleRefresh}
+            loading={isLoadingDocuments}
+          >
+            Actualizar estado
+          </Button>
+        </Group>
         
         {/* Tarjeta de estado general */}
         <Card withBorder radius="md" mb="xl" padding="md">

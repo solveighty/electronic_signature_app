@@ -7,6 +7,7 @@ import { storePdfDocument, getUserPdfDocuments } from "../services/pdfService";
 import { storeCertificate, getUserCertificates, decryptandretrieveCertificate } from "../services/crtService";
 import jwt from "jsonwebtoken";
 import 'dotenv/config';
+import { deleteCertificateFromDB, deletePdfDocumentFromDB } from "../services/deleteService";
 
 // Obtener la ruta base del proyecto
 const __filename = fileURLToPath(import.meta.url);
@@ -236,6 +237,63 @@ export const getUserCertificate = async (req: Request, res: Response) => {
     console.error('Error en getUserCertificate:', error);
     res.status(error.message === 'No autorizado' ? 401 : 500).json({
       error: error.message || "Error al obtener certificado"
+    });
+  }
+};
+
+export const deletePdfDocument = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ error: "ID de documento no proporcionado" });
+    }
+    
+    // Extraer el ID del usuario del token
+    const userId = extractUserIdFromToken(req);
+    
+    // Eliminar el documento
+    const result = await deletePdfDocumentFromDB(id, userId);
+    
+    if (result.success) {
+      return res.status(200).json({ 
+        message: "Documento eliminado correctamente",
+        documentId: id
+      });
+    } else {
+      return res.status(result.code || 400).json({ 
+        error: result.message 
+      });
+    }
+  } catch (error: any) {
+    console.error('Error al eliminar documento PDF:', error);
+    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
+      error: error.message || "Error al eliminar el documento"
+    });
+  }
+};
+
+export const deleteCertificateHandler = async (req: Request, res: Response) => {
+  try {
+    // Extraer el ID del usuario del token
+    const userId = extractUserIdFromToken(req);
+    
+    // Eliminar el certificado
+    const result = await deleteCertificateFromDB(userId);
+    
+    if (result.success) {
+      return res.status(200).json({ 
+        message: "Certificado eliminado correctamente"
+      });
+    } else {
+      return res.status(result.code || 404).json({ 
+        error: result.message 
+      });
+    }
+  } catch (error: any) {
+    console.error('Error al eliminar certificado:', error);
+    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
+      error: error.message || "Error al eliminar el certificado"
     });
   }
 };

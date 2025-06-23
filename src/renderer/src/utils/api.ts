@@ -56,6 +56,14 @@ export function getUserCertificate() {
   return api.get("/api/certificate");
 }
 
+export function deleteCertificate() {
+  return api.delete("/api/certificate");
+}
+
+export function deletePdfDocument(documentId: string) {
+  return api.delete(`/api/documents/${documentId}`);
+}
+
 // Configurar interceptor para añadir token de autenticación a las peticiones
 export const setAuthToken = (token: string | null) => {
   if (token) {
