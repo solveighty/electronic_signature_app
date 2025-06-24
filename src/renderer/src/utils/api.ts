@@ -26,9 +26,10 @@ export function uploadPdfDocument(file: File) {
   });
 }
 
-export function uploadCertificate(file: File) {
+export function uploadCertificate(file: File, password: string) {
   const formData = new FormData();
   formData.append("certificate", file);
+  formData.append("password", password);
 
   return api.post("/api/uploads/certificates", formData, {
     headers: {
@@ -37,9 +38,10 @@ export function uploadCertificate(file: File) {
   });
 }
 
-export function updateCertificate(file: File) {
+export function updateCertificate(file: File, password: string) {
   const formData = new FormData();
   formData.append("certificate", file);
+  formData.append("password", password)
 
   return api.put("/api/uploads/certificates", formData, {
     headers: {

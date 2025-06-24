@@ -6,6 +6,8 @@ export interface ICertificate extends Document {
   encryptionSalt: string;
   encryptionIV: string;
   certificateData: string;
+  userSalt: string;
+  userIV: string;
   type?: string;
   createdAt: Date;
 }
@@ -16,6 +18,8 @@ const certificateSchema: Schema = new mongoose.Schema({
   encryptionSalt: { type: String, required: true },
   encryptionIV: { type: String, required: true },
   certificateData: { type: String, required: true },
+  userSalt: { type: String, required: true },
+  userIV: { type: String, required: true },
   type: { type: String, default: 'p12' },
   createdAt: { type: Date, default: Date.now }
 });

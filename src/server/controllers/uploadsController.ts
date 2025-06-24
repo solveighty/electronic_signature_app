@@ -142,6 +142,12 @@ export const handleCertificateUpload = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "No se ha subido ningún archivo" });
     }
 
+    const password = req.body.password;
+    if (!password) {
+      return res.status(400).json({ error: "Contraseña no proporcionada" });
+    }
+
+
     /*
     console.log('Archivo de certificado recibido:', req.file);
     console.log('Ruta del archivo de certificado:', req.file.path);
@@ -154,7 +160,8 @@ export const handleCertificateUpload = async (req: Request, res: Response) => {
     const certificateId = await storeCertificate(
       req.file.path,
       req.file.originalname,
-      userId
+      userId,
+      password
     );
 
     // 2. Recuperar el documento recién guardado desde la base de datos
@@ -167,7 +174,7 @@ export const handleCertificateUpload = async (req: Request, res: Response) => {
 
     // 3. Desencriptar el hash del documento recuperado
     const { _id } = justSaved as { _id: { toString(): string } };
-    const decryptedHash = await decryptandretrieveCertificate(_id.toString());
+    const decryptedHash = await decryptandretrieveCertificate(_id.toString(), password);
     //console.log('Hash desencriptado tras guardar:', decryptedHash);
 
     // Responder al cliente
@@ -203,7 +210,8 @@ export const updateCertificate = async (req: Request, res: Response) => {
     const certificateId = await storeCertificate(
       req.file.path,
       req.file.originalname,
-      userId
+      userId,
+      req.body.password
     );
 
     // Aquí está guardado exitosamente, ASEGÚRATE de enviar una respuesta

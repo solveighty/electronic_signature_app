@@ -243,7 +243,7 @@ export const useDocumentManager = () => {
   };
 
   // Método para manejar certificados P12
-  const handleCertificateUpload = async (file: File): Promise<boolean> => {
+  const handleCertificateUpload = async (file: File, password: string): Promise<boolean> => {
     // Validar si es p12
     if (!file.name.endsWith('.p12') && file.type !== "application/x-pkcs12") {
       toast.error("Solo se permiten archivos P12");
@@ -264,8 +264,8 @@ export const useDocumentManager = () => {
     try {
       // Usar la API adecuada según si ya existe un certificado
       const response = certificateFile 
-        ? await updateCertificateApi(file) 
-        : await uploadCertificateApi(file);
+        ? await updateCertificateApi(file, password) 
+        : await uploadCertificateApi(file, password);
 
       const newCertificate = {
         id: response.data.certificateId || Date.now(),
