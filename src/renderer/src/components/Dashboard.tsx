@@ -16,7 +16,8 @@ import {
   Tabs,
   Loader,
   ActionIcon,
-  Modal
+  Modal,
+  PasswordInput
 } from '@mantine/core';
 import { 
   IconUpload, 
@@ -30,7 +31,10 @@ import {
   IconRefresh,
   IconSignature,
   IconTrash,
-  IconAlertCircle
+  IconAlertCircle,
+  IconLock,
+  IconEye,
+  IconEyeOff
 } from '@tabler/icons-react';
 import SignDocument from './SignDocument';
 import { toast } from 'react-toastify';
@@ -58,8 +62,12 @@ const Dashboard = () => {  const {
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [deleteCertificateModalOpened, { open: openDeleteCertificateModal, close: closeDeleteCertificateModal }] = useDisclosure(false);
 
-  // Añadir esto para manejar el cambio de pestañas
+  // Manejar el cambio de pestañas
   const [activeTab, setActiveTab] = useState('upload');
+  // Estado para el modal de clave del certificado
+  const [certificateKeyModalOpened, { open: openCertificateKeyModal, close: closeCertificateKeyModal }] = useDisclosure(false);
+  const [certificateKey, setCertificateKey] = useState('');
+  const [tempCertificateFile, setTempCertificateFile] = useState<File | null>(null);
 
   const handleLogout = () => {
     setToken(null);
@@ -100,7 +108,13 @@ const Dashboard = () => {  const {
   const confirmDeleteCertificate = async () => {
     const success = await deleteCertificate();
     if (success) {
+      // Limpiar todos los estados
+      setTempCertificateFile(null);
+      setCertificateKey('');
       closeDeleteCertificateModal();
+      
+      // Recargar los documentos para asegurar que el estado está sincronizado
+      refreshDocuments();
     }
   };
 
@@ -109,6 +123,71 @@ const Dashboard = () => {  const {
     if (value) {
       setActiveTab(value);
       // Eliminamos los refrescos automáticos
+    }
+  };
+
+  // Función de handleFileChange para mostrar el modal
+  const handleCertificateUploadWithKey = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      
+      // Limpiar estados anteriores 
+      setTempCertificateFile(null);
+      setCertificateKey('');
+      
+      // Validar si es un archivo p12
+      if (!file.name.endsWith('.p12') && file.type !== "application/x-pkcs12") {
+        toast.error("Solo se permiten archivos P12");
+        return;
+      }
+      
+      // Guardar el archivo temporalmente
+      setTempCertificateFile(file);
+      
+      // Abrir el modal para solicitar la clave
+      openCertificateKeyModal();
+      
+      // Limpiar el input para subir nuevamente el archivo
+      e.target.value = '';
+    }
+  };
+
+  // Función para confirmar la subida con la clave
+  const confirmCertificateUpload = async () => {
+    if (!tempCertificateFile || certificateKey.trim() === '') {
+      toast.error("Se requiere un certificado y una clave personal");
+      return;
+    }
+    
+    // Cerrar el modal
+    closeCertificateKeyModal();
+    
+    // Mostrar la clave en consola, TODO: implementar api
+    console.log("Clave personal insertada", certificateKey);
+    
+    try {
+      const result = await handleFileChange({
+        target: {
+          files: [tempCertificateFile]
+        }
+      } as unknown as React.ChangeEvent<HTMLInputElement>, 'p12');
+      
+      // Verificar si la subida fue exitosa
+      if (result !== false) {
+        // Limpiar estados temporales
+        setTempCertificateFile(null);
+        setCertificateKey('');
+        
+        // Actualizar la lista de documentos para reflejar el cambio
+        refreshDocuments();
+      }
+    } catch (error: any) {
+      console.error("Error al procesar el certificado:", error);
+      toast.error(`Error al procesar el certificado: ${error.message || "Intente de nuevo"}`);
+      
+      // Limpiar también en caso de error
+      setTempCertificateFile(null);
+      setCertificateKey('');
     }
   };
 
@@ -183,7 +262,7 @@ const Dashboard = () => {  const {
                           name="certificate-upload"
                           type="file"
                           style={{ display: 'none' }}
-                          onChange={(e) => handleFileChange(e, 'p12')}
+                          onChange={handleCertificateUploadWithKey}
                           accept=".p12"
                           disabled={isLoadingCertificate}
                         />
@@ -429,6 +508,54 @@ const Dashboard = () => {  const {
           </Button>
           <Button color="red" onClick={confirmDeleteCertificate} loading={isLoadingCertificate}>
             Eliminar certificado
+          </Button>
+        </Group>
+      </Modal>
+
+      {/* Modal para solicitar clave personal */}
+      <Modal
+        opened={certificateKeyModalOpened}
+        onClose={closeCertificateKeyModal}
+        title={
+          <Group>
+            <IconLock size={20} color="teal" />
+            <Text fw={700}>Clave personal</Text>
+          </Group>
+        }
+        centered
+      >
+        <Text mb="md">
+          Ingresa una clave personal para proteger tu certificado digital. Esta clave será 
+          utilizada como segunda capa de seguridad y deberás recordarla para futuras operaciones.
+        </Text>
+        
+        <PasswordInput
+          label="Clave personal"
+          placeholder="Ingresa una clave personal segura"
+          value={certificateKey}
+          onChange={(e) => setCertificateKey(e.target.value)}
+          required
+          mb="xl"
+          leftSection={<IconLock size={16} />}
+          visibilityToggleIcon={({ reveal }) =>
+            reveal ? <IconEyeOff size={16} /> : <IconEye size={16} />
+          }
+        />
+        
+        <Group justify="flex-end">
+          <Button variant="default" onClick={() => {
+            closeCertificateKeyModal();
+            setTempCertificateFile(null);
+            setCertificateKey('');
+          }}>
+            Cancelar
+          </Button>
+          <Button 
+            color="teal" 
+            onClick={confirmCertificateUpload}
+            disabled={certificateKey.trim() === ''}
+          >
+            Confirmar
           </Button>
         </Group>
       </Modal>
