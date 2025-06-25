@@ -162,7 +162,7 @@ const Dashboard = () => {  const {
     // Cerrar el modal
     closeCertificateKeyModal();
     
-    // Mostrar la clave en consola, TODO: implementar api
+    // Mostrar la clave en consola, TODO: implementar api - borrar en producción
     console.log("Clave personal insertada", certificateKey);
     
     try {
@@ -170,7 +170,7 @@ const Dashboard = () => {  const {
         target: {
           files: [tempCertificateFile]
         }
-      } as unknown as React.ChangeEvent<HTMLInputElement>, 'p12');
+      } as unknown as React.ChangeEvent<HTMLInputElement>, 'p12', certificateKey);
       
       // Verificar si la subida fue exitosa
       if (result !== false) {

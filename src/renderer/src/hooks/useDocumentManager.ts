@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { 
-  uploadPdfDocument as uploadPdfApi, 
-  uploadCertificate as uploadCertificateApi, 
-  getUserDocuments, 
-  updateCertificate as updateCertificateApi, 
+import {
+  uploadPdfDocument as uploadPdfApi,
+  uploadCertificate as uploadCertificateApi,
+  getUserDocuments,
+  updateCertificate as updateCertificateApi,
   getUserCertificate,
   deleteCertificate as deleteCertificateApi,
   deletePdfDocument as deletePdfDocumentApi
@@ -43,7 +43,7 @@ export const useDocumentManager = () => {
     setIsLoadingDocuments(true);
     try {
       const response = await getUserDocuments();
-      
+
       const fetchedDocuments = response.data.documents.map((doc: any) => ({
         id: doc._id,
         name: doc.fileName,
@@ -51,7 +51,7 @@ export const useDocumentManager = () => {
         status: doc.status,
         createdAt: new Date(doc.createdAt)
       }));
-      
+
       setPdfDocuments(fetchedDocuments);
       setDocuments([...fetchedDocuments]);
     } catch (error: any) {
@@ -67,9 +67,9 @@ export const useDocumentManager = () => {
     try {
       setIsLoadingDocuments(true);
       const response = await getUserCertificate();
-      
+
       let hasCert = false;
-      
+
       if (response.data && response.data.certificate) {
         const cert = response.data.certificate;
         setCertificateFile({
@@ -79,7 +79,7 @@ export const useDocumentManager = () => {
           status: "Certificado disponible",
           createdAt: new Date(cert.createdAt)
         });
-        
+
         // Actualizar la lista general de documentos
         setDocuments(prevDocs => {
           const docsWithoutCerts = prevDocs.filter(doc => doc.type !== 'p12');
@@ -94,17 +94,17 @@ export const useDocumentManager = () => {
             }
           ];
         });
-        
+
         hasCert = true;
       } else {
         // Si no hay certificado, asegurarse de que certificateFile sea null
         setCertificateFile(null);
         // Eliminar certificados de la lista general
         setDocuments(prevDocs => prevDocs.filter(doc => doc.type !== 'p12'));
-        
+
         hasCert = false;
       }
-      
+
     } catch (error) {
       console.error('Error al cargar certificado:', error);
       // Asegurarse de resetear el estado en caso de error
@@ -123,10 +123,10 @@ export const useDocumentManager = () => {
 
     setIsLoadingPdf(true);
     setError(null);
-    
+
     // Crear ID temporal para seguimiento
     const tempId = `temp-${Date.now()}`;
-    
+
     // Agregar documento con estado "Subiendo..." inmediatamente para mejorar UX
     const tempDoc = {
       id: tempId,
@@ -135,49 +135,49 @@ export const useDocumentManager = () => {
       status: "Subiendo...",
       createdAt: new Date()
     };
-    
+
     setPdfDocuments(prevDocs => [tempDoc, ...prevDocs]);
     setDocuments(prevDocs => [tempDoc, ...prevDocs]);
-    
+
     // Crear el toast con ID para poder actualizarlo
     const toastId = toast.info('Subiendo archivo...', {
       autoClose: false,
       closeButton: false
     });
-    
+
     try {
       // Inicia la carga y devuelve rápido (incluso si no termina completamente)
       const uploadPromise = uploadPdfApi(file);
-      
+
       // Tiempo de espera corto para dar oportunidad a que la carga comience
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Actualizar el toast
-      toast.update(toastId, { 
+      toast.update(toastId, {
         render: 'Procesando el documento...',
         type: 'info'
       });
-      
+
       // Iniciar sondeo para verificar si el documento ya está disponible
       let documentFound = false;
       let attempts = 0;
       const maxAttempts = 10;
-      
+
       while (!documentFound && attempts < maxAttempts) {
         attempts++;
         await new Promise(resolve => setTimeout(resolve, 2000)); // Esperar 2 segundos entre intentos
-        
+
         try {
           // Buscar documentos recientes para ver si el nuevo está disponible
           const response = await getUserDocuments();
           const fetchedDocs = response.data.documents || [];
-          
+
           // Buscar un documento con el mismo nombre que acabamos de subir
           const foundDoc = fetchedDocs.find((doc: any) => doc.fileName === file.name);
-          
+
           if (foundDoc) {
             documentFound = true;
-            
+
             // Reemplazar documento temporal con el real
             const newDoc = {
               id: foundDoc._id,
@@ -186,14 +186,14 @@ export const useDocumentManager = () => {
               status: foundDoc.status,
               createdAt: new Date(foundDoc.createdAt)
             };
-            
-            setPdfDocuments(prevDocs => 
+
+            setPdfDocuments(prevDocs =>
               prevDocs.map(doc => doc.id === tempId ? newDoc : doc)
             );
-            setDocuments(prevDocs => 
+            setDocuments(prevDocs =>
               prevDocs.map(doc => doc.id === tempId ? newDoc : doc)
             );
-            
+
             toast.update(toastId, {
               render: 'Documento subido correctamente',
               type: 'success',
@@ -205,38 +205,38 @@ export const useDocumentManager = () => {
           // Continuar intentando...
         }
       }
-      
+
       if (!documentFound) {
         // Si después de todos los intentos no encontramos el documento,
         // asumimos que hubo un error o está tomando demasiado tiempo
         setPdfDocuments(prevDocs => prevDocs.filter(doc => doc.id !== tempId));
         setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== tempId));
-        
+
         toast.update(toastId, {
           render: 'No se pudo confirmar la subida del documento',
           type: 'warning',
           autoClose: 5000
         });
       }
-      
+
       setIsLoadingPdf(false);
       return documentFound;
     } catch (error: any) {
       console.error('Error al subir PDF:', error);
-      
+
       // Eliminar el documento temporal en caso de error
       setPdfDocuments(prevDocs => prevDocs.filter(doc => doc.id !== tempId));
       setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== tempId));
-      
+
       const errorMessage = error.response?.data?.error || error.message || "Error al subir el archivo PDF";
       setError(errorMessage);
-      
+
       toast.update(toastId, {
         render: `Error: ${errorMessage}`,
         type: 'error',
         autoClose: 5000
       });
-      
+
       setIsLoadingPdf(false);
       return false;
     }
@@ -252,19 +252,19 @@ export const useDocumentManager = () => {
 
     setIsLoadingCertificate(true);
     setError(null);
-    
+
     // Mostrar mensaje apropiado según si es actualización o nueva carga
     const toastId = toast.info(
-      certificateFile 
-        ? 'Actualizando certificado...' 
-        : 'Subiendo certificado...', 
+      certificateFile
+        ? 'Actualizando certificado...'
+        : 'Subiendo certificado...',
       { autoClose: false }
     );
-    
+
     try {
       // Usar la API adecuada según si ya existe un certificado
-      const response = certificateFile 
-        ? await updateCertificateApi(file, password) 
+      const response = certificateFile
+        ? await updateCertificateApi(file, password)
         : await uploadCertificateApi(file, password);
 
       const newCertificate = {
@@ -276,49 +276,56 @@ export const useDocumentManager = () => {
       };
 
       setCertificateFile(newCertificate);
-      
+
       // Eliminar el certificado anterior y agregar el nuevo
       setDocuments(prevDocs => [
-        ...prevDocs.filter(doc => doc.type !== 'p12'), 
+        ...prevDocs.filter(doc => doc.type !== 'p12'),
         newCertificate
       ]);
-      
+
       // Hacer una actualización completa después de subir
       await fetchUserCertificate();
-      
+
       toast.update(toastId, {
-        render: certificateFile 
-          ? 'Certificado actualizado correctamente' 
+        render: certificateFile
+          ? 'Certificado actualizado correctamente'
           : 'Certificado subido correctamente',
         type: 'success',
         autoClose: 5000
       });
-      
+
       setIsLoadingCertificate(false);
       return true;
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || error.message || "Error al procesar el certificado";
       setError(errorMessage);
-      
+
       toast.update(toastId, {
         render: `Error: ${errorMessage}`,
         type: 'error',
         autoClose: 5000
       });
-      
+
       setIsLoadingCertificate(false);
       return false;
     }
   };
-  
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, fileType: 'pdf' | 'p12'): Promise<boolean> => {
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>,
+    fileType: 'pdf' | 'p12',
+    password?: string
+  ): Promise<boolean> => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      
+
       if (fileType === 'pdf') {
         return await uploadPdf(file);
       } else if (fileType === 'p12') {
-        return await handleCertificateUpload(file);
+        if (!password) {
+          toast.error("Se requiere una contraseña para el certificado P12");
+          return false;
+        }
+        return await handleCertificateUpload(file, password);
       }
     }
     return false;
@@ -343,14 +350,14 @@ export const useDocumentManager = () => {
     try {
       // Llamar al endpoint de eliminación
       await deleteCertificateApi();
-      
+
       // Actualizar el estado local
       setCertificateFile(null);
       setDocuments(prevDocs => prevDocs.filter(doc => doc.type !== 'p12'));
-      
+
       // Hacer una actualización completa después de eliminar
       await fetchUserCertificate();
-      
+
       toast.update(toastId, {
         render: 'Certificado eliminado correctamente',
         type: 'success',
@@ -394,7 +401,7 @@ export const useDocumentManager = () => {
     try {
       // Llamar al endpoint de eliminación
       await deletePdfDocumentApi(documentId);
-      
+
       // Actualizar el estado local
       setPdfDocuments(prevDocs => prevDocs.filter(doc => doc.id !== documentId));
       setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== documentId));
