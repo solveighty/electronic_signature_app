@@ -40,6 +40,7 @@ import SignDocument from './SignDocument';
 import { toast } from 'react-toastify';
 import { useDocumentManager } from '../hooks/useDocumentManager';
 import { useDisclosure } from '@mantine/hooks';
+import CertificateCreator from './CertificateCreator';
 
 const Dashboard = () => {  const { 
     documents, 
@@ -68,6 +69,7 @@ const Dashboard = () => {  const {
   const [certificateKeyModalOpened, { open: openCertificateKeyModal, close: closeCertificateKeyModal }] = useDisclosure(false);
   const [certificateKey, setCertificateKey] = useState('');
   const [tempCertificateFile, setTempCertificateFile] = useState<File | null>(null);
+  const [showCreator, setShowCreator] = useState(false);
 
   const handleLogout = () => {
     setToken(null);
@@ -226,6 +228,9 @@ const Dashboard = () => {  const {
           </Tabs.Tab>
           <Tabs.Tab value="documents" leftSection={<IconFile size={16} />}>
             Mis Documentos
+          </Tabs.Tab>
+          <Tabs.Tab value="create-certificate" leftSection={<IconCertificate size={16} />}>
+            Crear Certificado
           </Tabs.Tab>
         </Tabs.List>
 
@@ -458,6 +463,24 @@ const Dashboard = () => {  const {
             <Center py="xl">
               <Text c="dimmed">Aún no has subido ningún archivo</Text>
             </Center>
+          )}
+        </Tabs.Panel>
+
+        <Tabs.Panel value="create-certificate" pt="md">
+          <Group justify="center">
+            <Button 
+              onClick={() => setShowCreator((prev) => !prev)}
+              color={showCreator ? "red" : "teal"}
+              leftSection={<IconCertificate size={18} />}
+            >
+              {showCreator ? 'Cancelar' : 'Crear Certificado'}
+            </Button>
+          </Group>
+          
+          {showCreator && (
+            <Box mt="xl">
+              <CertificateCreator />
+            </Box>
           )}
         </Tabs.Panel>
       </Tabs>
