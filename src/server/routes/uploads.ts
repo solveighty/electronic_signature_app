@@ -8,7 +8,8 @@ import {
   updateCertificate, 
   getUserCertificate,
   deletePdfDocument,
-  deleteCertificateHandler
+  deleteCertificateHandler,
+  generateCertificate
 } from "../controllers/uploadsController";
 
 const router = Router();
@@ -31,6 +32,9 @@ router.delete("/documents/:id", (req, res, next) => {
 });
 router.delete("/certificate", (req, res, next) => {
   deleteCertificateHandler(req, res).catch(next);
+});
+router.post("/uploads/certificates/generate", (req, res, next) => {
+  generateCertificate(req, res).catch(next);
 });
 
 export default router;

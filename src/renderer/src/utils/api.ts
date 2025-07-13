@@ -87,4 +87,19 @@ api.interceptors.response.use(
   }
 );
 
+// Función para generar un certificado
+export function generateCertificate(data: {
+  country: string;
+  state: string;
+  locality: string;
+  organization: string;
+  orgUnit: string;
+  commonName: string;
+  email: string;
+  challengePassword: string;
+  optionalCompany?: string;
+}) {
+  return api.post("/api/uploads/certificates/generate", data);
+}
+
 export default api;

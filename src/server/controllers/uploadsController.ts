@@ -8,6 +8,7 @@ import { storeCertificate, getUserCertificates, decryptandretrieveCertificate } 
 import jwt from "jsonwebtoken";
 import 'dotenv/config';
 import { deleteCertificateFromDB, deletePdfDocumentFromDB } from "../services/deleteService";
+import {generateP12ForUser} from "../services/p12GeneratorService";
 
 // Obtener la ruta base del proyecto
 const __filename = fileURLToPath(import.meta.url);
@@ -225,6 +226,66 @@ export const updateCertificate = async (req: Request, res: Response) => {
     console.error('Error en updateCertificate:', error);
     return res.status(error.message === 'No autorizado' ? 401 : 500).json({
       error: error.message || "Error al actualizar el certificado"
+    });
+  }
+};
+
+// Controlador para crear el certificado P12 del usuario
+export const generateCertificate = async (req: Request, res: Response) => {
+  try {
+    const userId = extractUserIdFromToken(req);
+    const {
+      country,
+      state,
+      locality,
+      organization,
+      orgUnit,
+      commonName,
+      email,
+      challengePassword,
+      optionalCompany
+    } = req.body;
+
+    if (!country || !state || !locality || !organization || !commonName || !email || !challengePassword) {
+      return res.status(400).json({ error: "Faltan campos obligatorios para generar el certificado" });
+    }
+
+    const p12Path = await generateP12ForUser({
+      userId,
+      country,
+      state,
+      locality,
+      organization,
+      orgUnit,
+      commonName,
+      email,
+      challengePassword,
+      optionalCompany
+    });
+
+    const certificateId = await storeCertificate(
+      p12Path,
+      `${userId}-cert.p12`,
+      userId,
+      challengePassword
+    );
+
+    // Eliminar el archivo P12 temporal sólo si existe
+    if (fs.existsSync(p12Path)) {
+      fs.unlinkSync(p12Path);
+      console.log(`Archivo temporal P12 eliminado: ${p12Path}`);
+    } else {
+      console.warn(`No se encontró el archivo P12 para eliminar: ${p12Path}`);
+    }
+
+    return res.status(200).json({
+      message: "Certificado P12 generado y guardado correctamente",
+      certificateId
+    });
+  } catch (error: any) {
+    console.error("Error al generar certificado P12:", error);
+    return res.status(500).json({
+      error: error.message || "Error al generar el certificado P12"
     });
   }
 };

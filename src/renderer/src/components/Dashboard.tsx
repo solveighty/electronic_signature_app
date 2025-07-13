@@ -42,13 +42,15 @@ import { useDocumentManager } from '../hooks/useDocumentManager';
 import { useDisclosure } from '@mantine/hooks';
 import CertificateCreator from './CertificateCreator';
 
-const Dashboard = () => {  const { 
+const Dashboard = () => {
+  const { 
     documents, 
     pdfDocuments, 
     certificateFile, 
     isLoadingPdf,
     isLoadingCertificate,
     isLoadingDocuments, 
+    refreshCertificate,
     handleFileChange, 
     refreshDocuments,
     deleteCertificate,
@@ -62,6 +64,9 @@ const Dashboard = () => {  const {
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [deleteCertificateModalOpened, { open: openDeleteCertificateModal, close: closeDeleteCertificateModal }] = useDisclosure(false);
+
+  // Nuevo estado para el modal de confirmación de sobreescritura
+  const [overwriteModalOpened, setOverwriteModalOpened] = useState(false);
 
   // Manejar el cambio de pestañas
   const [activeTab, setActiveTab] = useState('upload');
@@ -469,7 +474,13 @@ const Dashboard = () => {  const {
         <Tabs.Panel value="create-certificate" pt="md">
           <Group justify="center">
             <Button 
-              onClick={() => setShowCreator((prev) => !prev)}
+              onClick={() => {
+                if (certificateFile) {
+                  setOverwriteModalOpened(true);
+                } else {
+                  setShowCreator((prev) => !prev);
+                }
+              }}
               color={showCreator ? "red" : "teal"}
               leftSection={<IconCertificate size={18} />}
             >
@@ -479,9 +490,44 @@ const Dashboard = () => {  const {
           
           {showCreator && (
             <Box mt="xl">
-              <CertificateCreator />
+              <CertificateCreator onSuccess={() => {
+                setShowCreator(false);
+                refreshCertificate();
+                refreshDocuments();
+              }} />
             </Box>
           )}
+
+          {/* Modal de confirmación para sobreescribir certificado */}
+          <Modal
+            opened={overwriteModalOpened}
+            onClose={() => setOverwriteModalOpened(false)}
+            title={
+              <Group>
+                <IconAlertCircle size={20} color="orange" />
+                <Text fw={700}>Sobrescribir certificado</Text>
+              </Group>
+            }
+            centered
+          >
+            <Text mb="xl">
+              Actualmente ya cuentas con un certificado digital. ¿Deseas sobrescribirlo? Esta acción reemplazará tu certificado actual.
+            </Text>
+            <Group justify="flex-end">
+              <Button variant="default" onClick={() => setOverwriteModalOpened(false)}>
+                Cancelar
+              </Button>
+              <Button
+                color="teal"
+                onClick={() => {
+                  setOverwriteModalOpened(false);
+                  setShowCreator(true);
+                }}
+              >
+                Sí, sobrescribir
+              </Button>
+            </Group>
+          </Modal>
         </Tabs.Panel>
       </Tabs>
 

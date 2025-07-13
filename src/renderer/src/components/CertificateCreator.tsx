@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { generateCertificate } from "../utils/api";
 import {
   Container,
   Title,
@@ -10,8 +11,9 @@ import {
   Alert,
 } from "@mantine/core";
 import { IconCertificate } from "@tabler/icons-react";
+import { toast } from "react-toastify";
 
-const CertificateCreator = () => {
+const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [form, setForm] = useState({
     country: "",
     state: "",
@@ -24,13 +26,14 @@ const CertificateCreator = () => {
     optionalCompany: "",
   });
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Manejo de la creacion del certificado
   const handleCreateCertificate = async () => {
-    // Validación básica
     if (
       !form.country ||
       !form.state ||
@@ -43,11 +46,29 @@ const CertificateCreator = () => {
       setError("Por favor, completa todos los campos obligatorios.");
       return;
     }
-    // Aquí iría la lógica para crear el certificado con los datos ingresados
-    console.log("Datos del certificado:", form);
+    setLoading(true);
     setError(null);
-    // Resetear el formulario si lo deseas
-    // setForm({ ... });
+    try {
+      await generateCertificate(form);
+      toast.success("¡Certificado creado correctamente!");
+      setForm({
+        country: "",
+        state: "",
+        locality: "",
+        organization: "",
+        orgUnit: "",
+        commonName: "",
+        email: "",
+        challengePassword: "",
+        optionalCompany: "",
+      });
+      if (onSuccess) onSuccess(); // Notifica al Dashboard para refrescar
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Error al crear el certificado");
+      toast.error(err.response?.data?.error || "Error al crear el certificado");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -131,7 +152,7 @@ const CertificateCreator = () => {
           mt="md"
         />
         {error && <Alert color="red" mt="md">{error}</Alert>}
-        <Button color="teal" onClick={handleCreateCertificate} mt="md">
+        <Button color="teal" onClick={handleCreateCertificate} mt="md" loading={loading}>
           Crear Certificado
         </Button>
       </Paper>
