@@ -147,9 +147,12 @@ const SignDocument = () => {
   
   return (
     <>
-      <Container size="lg" py="md">
+      <Container size="lg" py="md"
+      className='dark:bg-gray-900 dark:text-gray-100'
+      >
         
-        <Group justify="space-between" mb="lg">
+        <Group justify="space-between" mb="lg"
+         className='dark:bg-gray-800 dark:shadow-lg dark:rounded-lg p-4'>
           <Title order={3}>Firma de Documentos</Title>
           <Button 
             variant="subtle" 
@@ -162,7 +165,8 @@ const SignDocument = () => {
         </Group>
         
         {/* Tarjeta de estado general */}
-        <Card withBorder radius="md" mb="xl" padding="md">
+        <Card withBorder radius="md" mb="xl" padding="md"
+          className='dark:bg-gray-800 dark:shadow-lg dark:rounded-lg dark:text-gray-100'>
           <Group justify="space-between">
             <Group>
               <IconSignature size={24} />
@@ -201,7 +205,8 @@ const SignDocument = () => {
             description="Elige un PDF para firmar"
             allowStepSelect={true}
           >
-            <Paper radius="md" p="xl" withBorder mt="xl">
+            <Paper radius="md" p="xl" withBorder mt="xl"
+            className='dark:bg-gray-800 dark:shadow-lg dark:rounded-lg dark:text-gray-100'>
               <Text fw={500} mb="md">Selecciona un documento para firmar</Text>
               
               {isLoadingDocuments ? (
@@ -263,7 +268,9 @@ const SignDocument = () => {
                   title="Sin documentos para firmar" 
                   color="yellow"
                 >
-                  No tienes documentos pendientes de firma. Sube un documento PDF primero.
+                  <Text
+                  className='dark:text-gray-200'
+                  >No tienes documentos pendientes de firma. Sube un documento PDF primero.</Text>
                 </Alert>
               )}
             </Paper>

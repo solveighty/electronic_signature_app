@@ -72,11 +72,14 @@ const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
   };
 
   return (
-    <Container size="sm" py="xl">
+    <Container size="sm" py="xl"
+      className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+    >
       <Title order={3} mb="lg" ta="center">
         Crear Certificado Digital
       </Title>
-      <Paper radius="md" p="xl" withBorder>
+      <Paper radius="md" p="xl" withBorder
+        className="dark:bg-gray-800 dark:shadow-lg dark:rounded-lg dark:text-gray-100">
         <Group mb="md">
           <IconCertificate size={32} color="teal" />
           <Text fw={500}>Ingresa los datos para tu certificado</Text>
@@ -88,6 +91,11 @@ const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
           onChange={(e) => handleChange("country", e.target.value)}
           required
           mt="md"
+          classNames={{
+            input:
+              "bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400",
+            label: "text-gray-900 dark:text-gray-200",
+          }}
         />
         <TextInput
           label="Nombre de la provincia o estado"
@@ -96,6 +104,11 @@ const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
           onChange={(e) => handleChange("state", e.target.value)}
           required
           mt="md"
+          classNames={{
+            input:
+              "bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400",
+            label: "text-gray-900 dark:text-gray-200",
+          }}
         />
         <TextInput
           label="Nombre de la localidad (ciudad)"
@@ -104,6 +117,11 @@ const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
           onChange={(e) => handleChange("locality", e.target.value)}
           required
           mt="md"
+          classNames={{
+            input:
+              "bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400",
+            label: "text-gray-900 dark:text-gray-200",
+          }}
         />
         <TextInput
           label="Nombre de la organización"
@@ -112,6 +130,11 @@ const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
           onChange={(e) => handleChange("organization", e.target.value)}
           required
           mt="md"
+          classNames={{
+            input:
+              "bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400",
+            label: "text-gray-900 dark:text-gray-200",
+          }}
         />
         <TextInput
           label="Nombre de la unidad organizativa"
@@ -119,6 +142,11 @@ const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
           value={form.orgUnit}
           onChange={(e) => handleChange("orgUnit", e.target.value)}
           mt="md"
+          classNames={{
+            input:
+              "bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400",
+            label: "text-gray-900 dark:text-gray-200",
+          }}
         />
         <TextInput
           label="Nombre común (FQDN o tu nombre)"
@@ -127,6 +155,11 @@ const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
           onChange={(e) => handleChange("commonName", e.target.value)}
           required
           mt="md"
+          classNames={{
+            input:
+              "bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400",
+            label: "text-gray-900 dark:text-gray-200",
+          }}
         />
         <TextInput
           label="Email"
@@ -135,6 +168,11 @@ const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
           onChange={(e) => handleChange("email", e.target.value)}
           required
           mt="md"
+          classNames={{
+            input:
+              "bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400",
+            label: "text-gray-900 dark:text-gray-200",
+          }}
         />
         <TextInput
           label="Contraseña de desafío"
@@ -143,13 +181,22 @@ const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
           onChange={(e) => handleChange("challengePassword", e.target.value)}
           required
           mt="md"
+          classNames={{
+            input:
+              "bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400",
+            label: "text-gray-900 dark:text-gray-200",
+          }}
         />
         <TextInput
           label="Nombre de la empresa (opcional)"
           placeholder="Ej: Kingdom PC"
           value={form.optionalCompany}
           onChange={(e) => handleChange("optionalCompany", e.target.value)}
-          mt="md"
+          mt="md" classNames={{
+            input:
+              "bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400",
+            label: "text-gray-900 dark:text-gray-200",
+          }}
         />
         {error && <Alert color="red" mt="md">{error}</Alert>}
         <Button color="teal" onClick={handleCreateCertificate} mt="md" loading={loading}>

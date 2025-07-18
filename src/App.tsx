@@ -6,27 +6,30 @@ import Dashboard from "./renderer/src/components/Dashboard";
 import { AuthProvider } from "./renderer/src/context/AuthContext";
 import PrivateRoute from "./renderer/src/components/PrivateRoute";
 import { ToastContainer } from "react-toastify";
+import { DarkModeProvider } from "./renderer/src/context/DarkMode";
 
 function App() {
   return (
     <>
-      <AuthProvider>
-        <HashRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/main"
-              element={
-                <PrivateRoute>
-                  <Dashboard />
-                </PrivateRoute>
-              }
-            />
-          </Routes>
-        </HashRouter>
-      </AuthProvider>
+      <DarkModeProvider>
+        <AuthProvider>
+          <HashRouter>
+            <Routes>
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/main"
+                element={
+                  <PrivateRoute>
+                    <Dashboard />
+                  </PrivateRoute>
+                }
+              />
+            </Routes>
+          </HashRouter>
+        </AuthProvider>
+      </DarkModeProvider>
       <ToastContainer
         position="top-right"
         autoClose={2000}

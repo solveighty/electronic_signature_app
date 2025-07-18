@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from "react-router-dom";
+import { useDarkMode } from '../context/DarkMode';
 import {
   Container,
   Title,
@@ -19,11 +20,11 @@ import {
   Modal,
   PasswordInput
 } from '@mantine/core';
-import { 
-  IconUpload, 
-  IconLogout, 
-  IconFileUpload, 
-  IconFile, 
+import {
+  IconUpload,
+  IconLogout,
+  IconFileUpload,
+  IconFile,
   IconUser,
   IconCertificate,
   IconFileText,
@@ -43,22 +44,23 @@ import { useDisclosure } from '@mantine/hooks';
 import CertificateCreator from './CertificateCreator';
 
 const Dashboard = () => {
-  const { 
-    documents, 
-    pdfDocuments, 
-    certificateFile, 
+  const {
+    documents,
+    pdfDocuments,
+    certificateFile,
     isLoadingPdf,
     isLoadingCertificate,
-    isLoadingDocuments, 
+    isLoadingDocuments,
     refreshCertificate,
-    handleFileChange, 
+    handleFileChange,
     refreshDocuments,
     deleteCertificate,
     deletePdf
   } = useDocumentManager();
-  
+
   const { setToken, userName } = useAuth();
   const navigate = useNavigate();
+  const { darkMode, toggleDarkMode } = useDarkMode();
 
   // Estado para los modales de confirmación
   const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
@@ -119,7 +121,7 @@ const Dashboard = () => {
       setTempCertificateFile(null);
       setCertificateKey('');
       closeDeleteCertificateModal();
-      
+
       // Recargar los documentos para asegurar que el estado está sincronizado
       refreshDocuments();
     }
@@ -137,23 +139,23 @@ const Dashboard = () => {
   const handleCertificateUploadWithKey = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      
+
       // Limpiar estados anteriores 
       setTempCertificateFile(null);
       setCertificateKey('');
-      
+
       // Validar si es un archivo p12
       if (!file.name.endsWith('.p12') && file.type !== "application/x-pkcs12") {
         toast.error("Solo se permiten archivos P12");
         return;
       }
-      
+
       // Guardar el archivo temporalmente
       setTempCertificateFile(file);
-      
+
       // Abrir el modal para solicitar la clave
       openCertificateKeyModal();
-      
+
       // Limpiar el input para subir nuevamente el archivo
       e.target.value = '';
     }
@@ -165,33 +167,33 @@ const Dashboard = () => {
       toast.error("Se requiere un certificado y una clave personal");
       return;
     }
-    
+
     // Cerrar el modal
     closeCertificateKeyModal();
-    
+
     // Mostrar la clave en consola, TODO: implementar api - borrar en producción
     console.log("Clave personal insertada", certificateKey);
-    
+
     try {
       const result = await handleFileChange({
         target: {
           files: [tempCertificateFile]
         }
       } as unknown as React.ChangeEvent<HTMLInputElement>, 'p12', certificateKey);
-      
+
       // Verificar si la subida fue exitosa
       if (result !== false) {
         // Limpiar estados temporales
         setTempCertificateFile(null);
         setCertificateKey('');
-        
+
         // Actualizar la lista de documentos para reflejar el cambio
         refreshDocuments();
       }
     } catch (error: any) {
       console.error("Error al procesar el certificado:", error);
       toast.error(`Error al procesar el certificado: ${error.message || "Intente de nuevo"}`);
-      
+
       // Limpiar también en caso de error
       setTempCertificateFile(null);
       setCertificateKey('');
@@ -199,9 +201,12 @@ const Dashboard = () => {
   };
 
   return (
-    <Container size="lg" py={40}>
+    <Container size="lg" py={40}
+      className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Header con saludo personalizado */}
-      <Paper radius="md" p="md" withBorder mb="lg">
+      <Paper radius="md" p="md" withBorder mb="lg"
+        className='bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+      >
         <Group justify="space-between" align="center">
           <Group>
             <IconUser size={24} />
@@ -210,9 +215,15 @@ const Dashboard = () => {
               <Text fw={700}>Hola, {userName || 'Usuario'}</Text>
             </Box>
           </Group>
-          <Button 
-            variant="subtle" 
-            color="gray" 
+          <Button
+            onClick={toggleDarkMode}
+            className='px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded'
+          >
+            Cambiar a modo {darkMode ? 'claro' : 'oscuro'}
+          </Button>
+          <Button
+            variant="subtle"
+            color="gray"
             onClick={handleLogout}
             leftSection={<IconLogout size={18} />}
           >
@@ -223,15 +234,21 @@ const Dashboard = () => {
 
       <Title order={2} mb="lg" ta="center">Firma Electrónica</Title>
 
-      <Tabs value={activeTab} onChange={handleTabChange} mb="xl">
-        <Tabs.List grow>
+      <Tabs value={activeTab}
+        onChange={handleTabChange}
+        mb="xl"
+
+      >
+        <Tabs.List grow
+          >
           <Tabs.Tab value="upload" leftSection={<IconUpload size={16} />}>
             Subir Archivos
           </Tabs.Tab>
           <Tabs.Tab value="sign" leftSection={<IconSignature size={16} />}>
             Firmar Documentos
           </Tabs.Tab>
-          <Tabs.Tab value="documents" leftSection={<IconFile size={16} />}>
+          <Tabs.Tab value="documents" leftSection={<IconFile size={16} />}
+          >
             Mis Documentos
           </Tabs.Tab>
           <Tabs.Tab value="create-certificate" leftSection={<IconCertificate size={16} />}>
@@ -243,29 +260,30 @@ const Dashboard = () => {
           <Grid>
             {/* Certificado Digital */}
             <Grid.Col span={{ base: 12, md: 6 }}>
-              <Paper radius="md" p="xl" withBorder h="100%">
+              <Paper radius="md" p="xl" withBorder h="100%"
+                className='bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'>
                 <Center style={{ flexDirection: 'column' }} py="lg">
                   <IconCertificate size={48} color="teal" />
                   <Title order={3} mt="md">Certificado Digital</Title>
                   <Text c="dimmed" mt="xs" mb="lg" ta="center">
-                    {certificateFile 
+                    {certificateFile
                       ? "Ya tienes un certificado. Puedes reemplazarlo si lo necesitas."
                       : "Sube tu archivo .p12 para firmar documentos"}
                   </Text>
-                  
+
                   <Group>
                     <label htmlFor="certificate-upload">
-                      <Button 
-                        component="span" 
+                      <Button
+                        component="span"
                         leftSection={<IconKey size={18} />}
                         style={{ cursor: 'pointer' }}
                         loading={isLoadingCertificate}
                         color="teal"
                       >
                         {isLoadingCertificate
-                          ? 'Procesando...' 
-                          : certificateFile 
-                            ? 'Reemplazar certificado' 
+                          ? 'Procesando...'
+                          : certificateFile
+                            ? 'Reemplazar certificado'
                             : 'Seleccionar certificado'}
                         <input
                           id="certificate-upload"
@@ -278,7 +296,7 @@ const Dashboard = () => {
                         />
                       </Button>
                     </label>
-                    
+
                     {/* Botón para eliminar certificado */}
                     {certificateFile && (
                       <Button
@@ -292,7 +310,7 @@ const Dashboard = () => {
                       </Button>
                     )}
                   </Group>
-                  
+
                   {isLoadingDocuments ? (
                     <Center>
                       <Loader size="sm" />
@@ -315,20 +333,21 @@ const Dashboard = () => {
                 </Center>
               </Paper>
             </Grid.Col>
-            
+
             {/* Documento PDF */}
             <Grid.Col span={{ base: 12, md: 6 }}>
-              <Paper radius="md" p="xl" withBorder h="100%">
+              <Paper radius="md" p="xl" withBorder h="100%"
+                className='bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'>
                 <Center style={{ flexDirection: 'column' }} py="lg">
                   <IconFileText size={48} color="blue" />
                   <Title order={3} mt="md">Documento PDF</Title>
                   <Text c="dimmed" mt="xs" mb="lg" ta="center">
                     Sube el documento PDF que quieres firmar
                   </Text>
-                  
+
                   <label htmlFor="pdf-upload">
-                    <Button 
-                      component="span" 
+                    <Button
+                      component="span"
                       leftSection={<IconFileUpload size={18} />}
                       style={{ cursor: 'pointer' }}
                       loading={isLoadingPdf}
@@ -359,16 +378,16 @@ const Dashboard = () => {
         <Tabs.Panel value="documents" pt="md">
           <Group justify="space-between" mb="md">
             <Title order={4}>Mis Documentos</Title>
-            <Button 
-              variant="subtle" 
-              leftSection={<IconRefresh size={16} />} 
+            <Button
+              variant="subtle"
+              leftSection={<IconRefresh size={16} />}
               onClick={refreshDocuments}
               loading={isLoadingDocuments}
             >
               Actualizar
             </Button>
           </Group>
-          
+
           {isLoadingDocuments ? (
             <Center py="xl">
               <Loader />
@@ -378,7 +397,8 @@ const Dashboard = () => {
               {certificateFile && (
                 <>
                   <Title order={5} mb="sm">Mi Certificado Digital</Title>
-                  <Card withBorder radius="md" mb="lg" padding="md">
+                  <Card withBorder radius="md" mb="lg" padding="md"
+                    className='dark:bg-gray-800 dark:shadow-lg dark:rounded-lg dark:text-gray-100'>
                     <Group justify="space-between" align="flex-start">
                       <Group align="flex-start" wrap="nowrap">
                         <IconCertificate size={20} style={{ marginTop: 4 }} />
@@ -395,9 +415,9 @@ const Dashboard = () => {
                         <Badge color="teal" variant="filled">
                           {certificateFile.status || "CERTIFICADO DISPONIBLE"}
                         </Badge>
-                        <ActionIcon 
-                          color="red" 
-                          variant="subtle" 
+                        <ActionIcon
+                          color="red"
+                          variant="subtle"
                           onClick={openDeleteCertificateModal}
                           disabled={isLoadingCertificate}
                         >
@@ -412,7 +432,7 @@ const Dashboard = () => {
               {pdfDocuments.length > 0 && (
                 <>
                   <Title order={5} mb="sm">Mis Documentos PDF</Title>
-                  
+
                   {/* Tabla de cabecera */}
                   <Paper withBorder p="xs" mb="xs" radius="md">
                     <Group grow gap={0} justify="space-between">
@@ -422,7 +442,7 @@ const Dashboard = () => {
                       <Text fw={700} size="sm" ta="center" style={{ maxWidth: '80px' }}>Acción</Text>
                     </Group>
                   </Paper>
-                  
+
                   {/* Filas de documentos */}
                   {pdfDocuments.map((doc) => (
                     <Paper key={doc.id} withBorder p="xs" mb="xs" radius="md">
@@ -433,24 +453,24 @@ const Dashboard = () => {
                             {doc.name}
                           </Text>
                         </Group>
-                        
+
                         <Text size="sm" c="dimmed" style={{ maxWidth: '180px' }}>
                           {doc.createdAt && formatDate(doc.createdAt)}
                         </Text>
-                        
+
                         <Box ta="center">
-                          <Badge 
+                          <Badge
                             color={doc.status === "Firmado" ? "green" : "yellow"}
                             variant="filled"
                           >
                             {doc.status}
                           </Badge>
                         </Box>
-                        
+
                         <Box ta="center" style={{ maxWidth: '80px' }}>
-                          <ActionIcon 
-                            color="red" 
-                            variant="subtle" 
+                          <ActionIcon
+                            color="red"
+                            variant="subtle"
                             onClick={() => handleDeletePdf(doc.id.toString())}
                             disabled={isLoadingPdf}
                             mx="auto"
@@ -473,7 +493,7 @@ const Dashboard = () => {
 
         <Tabs.Panel value="create-certificate" pt="md">
           <Group justify="center">
-            <Button 
+            <Button
               onClick={() => {
                 if (certificateFile) {
                   setOverwriteModalOpened(true);
@@ -487,7 +507,7 @@ const Dashboard = () => {
               {showCreator ? 'Cancelar' : 'Crear Certificado'}
             </Button>
           </Group>
-          
+
           {showCreator && (
             <Box mt="xl">
               <CertificateCreator onSuccess={() => {
@@ -594,10 +614,10 @@ const Dashboard = () => {
         centered
       >
         <Text mb="md">
-          Ingresa una clave personal para proteger tu certificado digital. Esta clave será 
+          Ingresa una clave personal para proteger tu certificado digital. Esta clave será
           utilizada como segunda capa de seguridad y deberás recordarla para futuras operaciones.
         </Text>
-        
+
         <PasswordInput
           label="Clave personal"
           placeholder="Ingresa una clave personal segura"
@@ -610,7 +630,7 @@ const Dashboard = () => {
             reveal ? <IconEyeOff size={16} /> : <IconEye size={16} />
           }
         />
-        
+
         <Group justify="flex-end">
           <Button variant="default" onClick={() => {
             closeCertificateKeyModal();
@@ -619,8 +639,8 @@ const Dashboard = () => {
           }}>
             Cancelar
           </Button>
-          <Button 
-            color="teal" 
+          <Button
+            color="teal"
             onClick={confirmCertificateUpload}
             disabled={certificateKey.trim() === ''}
           >

@@ -68,12 +68,13 @@ export const generateP12ForUser = async (data: CertificateUserData): Promise<str
     await execPromise(`openssl pkcs12 -export -out "${p12Path}" -inkey "${keyPath}" -in "${crtPath}" -passin pass:"${pass}" -passout pass:"${pass}"`, env);
 
     if (fs.existsSync(p12Path)) {
-      console.log(`✅ Archivo P12 generado correctamente en: ${p12Path}`);
+      console.log(`Archivo P12 generado correctamente en: ${p12Path}`);
     } else {
-      throw new Error(`❌ No se pudo generar el archivo .p12 en: ${p12Path}`);
+      throw new Error(`No se pudo generar el archivo .p12 en: ${p12Path}`);
     }
 
     // Borra solo archivos temporales (key, csr, crt)
+    
     [keyPath, csrPath, crtPath].forEach(file => {
       if (fs.existsSync(file)) {
         try {

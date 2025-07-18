@@ -8,7 +8,7 @@ import { storeCertificate, getUserCertificates, decryptandretrieveCertificate } 
 import jwt from "jsonwebtoken";
 import 'dotenv/config';
 import { deleteCertificateFromDB, deletePdfDocumentFromDB } from "../services/deleteService";
-import {generateP12ForUser} from "../services/p12GeneratorService";
+import { generateP12ForUser } from "../services/p12GeneratorService";
 
 // Obtener la ruta base del proyecto
 const __filename = fileURLToPath(import.meta.url);
@@ -64,11 +64,11 @@ export const uploadP12 = multer({ storage: storageP12, fileFilter: fileFilterP12
 const extractUserIdFromToken = (req: Request): string => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
-    
+
     if (!token) {
       throw new Error('Token no proporcionado');
     }
-    
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret') as { id: string };
     return decoded.id;
   } catch (error) {
@@ -83,7 +83,7 @@ export const handlePdfUpload = async (req: Request, res: Response) => {
     if (!req.file) {
       return res.status(400).json({ error: "No se ha subido ningún archivo" });
     }
-    
+
     /*
     console.log('Archivo recibido:', req.file);
     console.log('Ruta del archivo:', req.file.path);
@@ -91,15 +91,14 @@ export const handlePdfUpload = async (req: Request, res: Response) => {
 
     // Extraer el ID del usuario del token
     const userId = extractUserIdFromToken(req);
-    
+
     // Almacenar el PDF cifrado en MongoDB
     const documentId = await storePdfDocument(
       req.file.path,
       req.file.originalname,
       userId
     );
-    
-    // Aquí está guardado exitosamente, ASEGÚRATE de enviar una respuesta
+
     console.log('Enviando respuesta al cliente...');
     return res.status(200).json({
       message: "Archivo subido y cifrado correctamente",
@@ -120,10 +119,10 @@ export const getUserDocuments = async (req: Request, res: Response) => {
   try {
     // Extraer el ID del usuario del token
     const userId = extractUserIdFromToken(req);
-    
+
     // Obtener documentos del usuario
     const documents = await getUserPdfDocuments(userId);
-    
+
     res.status(200).json({
       documents
     });
@@ -294,10 +293,10 @@ export const getUserCertificate = async (req: Request, res: Response) => {
   try {
     // Extraer el ID del usuario del token
     const userId = extractUserIdFromToken(req);
-    
+
     // Obtener el certificado del usuario (solo el más reciente)
     const certificates = await getUserCertificates(userId);
-    
+
     // Devolver solo el más reciente (o null si no hay ninguno)
     res.status(200).json({
       certificate: certificates.length > 0 ? certificates[0] : null
@@ -313,25 +312,25 @@ export const getUserCertificate = async (req: Request, res: Response) => {
 export const deletePdfDocument = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    
+
     if (!id) {
       return res.status(400).json({ error: "ID de documento no proporcionado" });
     }
-    
+
     // Extraer el ID del usuario del token
     const userId = extractUserIdFromToken(req);
-    
+
     // Eliminar el documento
     const result = await deletePdfDocumentFromDB(id, userId);
-    
+
     if (result.success) {
-      return res.status(200).json({ 
+      return res.status(200).json({
         message: "Documento eliminado correctamente",
         documentId: id
       });
     } else {
-      return res.status(result.code || 400).json({ 
-        error: result.message 
+      return res.status(result.code || 400).json({
+        error: result.message
       });
     }
   } catch (error: any) {
@@ -346,17 +345,17 @@ export const deleteCertificateHandler = async (req: Request, res: Response) => {
   try {
     // Extraer el ID del usuario del token
     const userId = extractUserIdFromToken(req);
-    
+
     // Eliminar el certificado
     const result = await deleteCertificateFromDB(userId);
-    
+
     if (result.success) {
-      return res.status(200).json({ 
+      return res.status(200).json({
         message: "Certificado eliminado correctamente"
       });
     } else {
-      return res.status(result.code || 404).json({ 
-        error: result.message 
+      return res.status(result.code || 404).json({
+        error: result.message
       });
     }
   } catch (error: any) {
