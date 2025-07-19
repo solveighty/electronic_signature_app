@@ -1,8 +1,8 @@
 import "./App.css";
-import Login from "./renderer/src/components/Login";
-import Register from "./renderer/src/components/Register";
+import Login from "./renderer/src/pages/Login";
+import Register from "./renderer/src/pages/Register";
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
-import Dashboard from "./renderer/src/components/Dashboard";
+import Dashboard from "./renderer/src/pages/Dashboard";
 import { AuthProvider } from "./renderer/src/context/AuthContext";
 import PrivateRoute from "./renderer/src/components/PrivateRoute";
 import { ToastContainer } from "react-toastify";

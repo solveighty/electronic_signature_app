@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import {
   TextInput,
   PasswordInput,
@@ -10,52 +9,11 @@ import {
   Anchor,
   Center,
 } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import { useSpring, animated } from "@react-spring/web";
-import { login as LoginApi } from "../utils/api";
-import { useAuth } from "../context/AuthContext";
-import { toast } from 'react-toastify';
+import { animated } from "@react-spring/web";
+import { useLoginLogic } from "../hooks/useLoginLogic";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const { setToken, setUserName } = useAuth();
-
-  const form = useForm({
-    initialValues: {
-      email: "",
-      password: "",
-    },
-    validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Email inválido"),
-      password: (value) =>
-        value.length < 1 ? "Contraseña es requerida" : null,
-    },
-  });
-  // Animations
-  const [loginProps, loginApi] = useSpring(() => ({
-    scale: 1,
-    config: { tension: 300, friction: 10 },
-  }));
-
-  const handleSubmit = async () => {
-    try {
-      const response = await LoginApi(form.values.email, form.values.password);
-      setToken(response.data.token);
-      
-      if (response.data.name) {
-        setUserName(response.data.name);
-      } else {
-        const nameFromEmail = form.values.email.split('@')[0];
-        setUserName(nameFromEmail);
-      }
-      
-      toast.success('¡Inicio de sesión exitoso!');
-      navigate("/main");
-    } catch (error: any) {
-      console.error("Error al iniciar sesión:", error);
-      toast.error('Error al iniciar sesión. Verifica tus credenciales.');
-    }
-  };
+  const { form, loginProps, loginApi, handleSubmit, navigate } = useLoginLogic();
 
   return (
     <Container size={420} my={40}>
