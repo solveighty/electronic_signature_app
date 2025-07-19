@@ -102,4 +102,17 @@ export function generateCertificate(data: {
   return api.post("/api/uploads/certificates/generate", data);
 }
 
+export async function getPdfDocumentUrl(documentId: string): Promise<string | null> {
+  try {
+    const response = await api.get(`/api/pdf/${documentId}/download`, {
+      responseType: "blob"
+    });
+    const blob = response.data as Blob;
+    return URL.createObjectURL(blob);
+  } catch (error) {
+    console.error("Error al obtener PDF:", error);
+    return null;
+  }
+}
+
 export default api;

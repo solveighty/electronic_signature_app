@@ -9,7 +9,8 @@ import {
   getUserCertificate,
   deletePdfDocument,
   deleteCertificateHandler,
-  generateCertificate
+  generateCertificate,
+  downloadPdfDocument
 } from "../controllers/uploadsController";
 
 const router = Router();
@@ -36,5 +37,6 @@ router.delete("/certificate", (req, res, next) => {
 router.post("/uploads/certificates/generate", (req, res, next) => {
   generateCertificate(req, res).catch(next);
 });
+router.get('/pdf/:id/download', downloadPdfDocument);
 
 export default router;

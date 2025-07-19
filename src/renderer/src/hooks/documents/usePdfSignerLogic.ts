@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { getPdfDocumentUrl } from "../../utils/api";
 
 export function usePdfSignerLogic() {
+  const { token } = useAuth();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [selectedPage, setSelectedPage] = useState(1);
   const [signaturePosition, setSignaturePosition] = useState<{ x: number; y: number } | null>(null);
@@ -12,6 +15,12 @@ export function usePdfSignerLogic() {
     setSignaturePosition({ x, y });
   };
 
+  const pdfUrl = pdfFile ? URL.createObjectURL(pdfFile) : null;
+
+  const fetchPdfUrl = async (documentId: string) => {
+    return await getPdfDocumentUrl(documentId);
+  };
+
   return {
     pdfFile,
     setPdfFile,
@@ -20,5 +29,7 @@ export function usePdfSignerLogic() {
     signaturePosition,
     setSignaturePosition,
     handlePdfClick,
+    pdfUrl,
+    fetchPdfUrl,
   };
 }

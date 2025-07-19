@@ -98,10 +98,11 @@ export const retrievePdfDocument = async (documentId: string): Promise<Buffer> =
     
     // Descifrar
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-    return Buffer.concat([
+    const pdfBuffer = Buffer.concat([
       decipher.update(encryptedData),
       decipher.final()
     ]);
+    return pdfBuffer;
   } catch (error) {
     console.error('Error al recuperar el PDF:', error);
     throw new Error('No se pudo recuperar el archivo PDF');
@@ -123,4 +124,24 @@ export const getUserPdfDocuments = async (userId: string) => {
     console.error('Error al obtener documentos del usuario:', error);
     throw new Error('No se pudieron obtener los documentos');
   }
+};
+
+export const getDecryptedPdfBuffer = async (documentId: string, userId: string): Promise<Buffer> => {
+  const doc = await PdfDocument.findOne({ _id: documentId, userId });
+  if (!doc) throw new Error("Documento no encontrado");
+
+  const parts = doc.encryptedContent.split(':');
+  if (parts.length !== 2) {
+    throw new Error('Formato de datos cifrados no válido');
+  }
+
+  const iv = Buffer.from(parts[0], 'hex');
+  const encryptedData = Buffer.from(parts[1], 'base64');
+  const key = crypto.createHash('sha256').update(String(ENCRYPTION_SECRET)).digest();
+
+  const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+  return Buffer.concat([
+    decipher.update(encryptedData),
+    decipher.final()
+  ]);
 };

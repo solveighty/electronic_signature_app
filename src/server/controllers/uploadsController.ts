@@ -9,6 +9,7 @@ import jwt from "jsonwebtoken";
 import 'dotenv/config';
 import { deleteCertificateFromDB, deletePdfDocumentFromDB } from "../services/deleteService";
 import { generateP12ForUser } from "../services/p12GeneratorService";
+import { getDecryptedPdfBuffer } from "../services/pdfService";
 
 // Obtener la ruta base del proyecto
 const __filename = fileURLToPath(import.meta.url);
@@ -363,5 +364,22 @@ export const deleteCertificateHandler = async (req: Request, res: Response) => {
     return res.status(error.message === 'No autorizado' ? 401 : 500).json({
       error: error.message || "Error al eliminar el certificado"
     });
+  }
+};
+
+export const downloadPdfDocument = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = extractUserIdFromToken(req);
+
+    // Aquí deberías desencriptar el PDF y obtener el buffer
+    const pdfBuffer = await getDecryptedPdfBuffer(id, userId); // Implementa esto en tu servicio
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename=documento.pdf');
+    res.send(pdfBuffer);
+  } catch (error: any) {
+    console.error('Error al descargar PDF:', error);
+    res.status(500).json({ error: error.message || "Error al descargar el PDF" });
   }
 };

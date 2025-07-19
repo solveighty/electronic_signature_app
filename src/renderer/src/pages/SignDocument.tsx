@@ -1,13 +1,30 @@
 import { 
-  Container, Title, Paper, Text, Button, Group, Select, TextInput, Modal, Stepper, Box, Card, Badge, Center, PasswordInput, Alert, Loader, Flex, Divider
+  Container, Title, Paper, Text, Button, Group, Select, Modal, Stepper, Box, Card, Badge, Center, PasswordInput, Alert, Loader, Flex, Divider
 } from '@mantine/core';
 import { 
   IconFile, IconCertificate, IconSignature, IconCheck, IconX, IconAlertCircle, IconLock, IconEye, IconEyeOff, IconDownload, IconRefresh
 } from '@tabler/icons-react';
 import { useSignDocumentLogic } from '../hooks/documents/useSignDocumentLogic';
+import { usePdfSignerLogic } from '../hooks/documents/usePdfSignerLogic';
+import { Viewer } from '@react-pdf-viewer/core';
+import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+import { useEffect, useState } from 'react';
+
+(pdfjsLib as any).GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${(pdfjsLib as any).version}/pdf.worker.min.js`;
 
 const SignDocument = () => {
   const logic = useSignDocumentLogic();
+  const pdfSigner = usePdfSignerLogic();
+
+  const [securePdfUrl, setSecurePdfUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (logic.selectedDocument) {
+      pdfSigner.fetchPdfUrl(String(logic.selectedDocument.id)).then(setSecurePdfUrl);
+    } else {
+      setSecurePdfUrl(null);
+    }
+  }, [logic.selectedDocument]);
 
   return (
     <>
@@ -179,62 +196,44 @@ const SignDocument = () => {
             allowStepSelect={!!logic.canProceedToPosition}
           >
             <Paper radius="md" p="xl" withBorder mt="xl">
-              <Text fw={500} mb="md">Define la posición de la firma en el documento</Text>
-              <Group grow mb="md">
-                <TextInput
-                  label="Página"
-                  placeholder="Número de página"
-                  type="number"
-                  min={1}
-                  value={logic.signaturePosition.page}
-                  onChange={(e) => logic.setSignaturePosition({...logic.signaturePosition, page: e.target.value})}
-                />
-                <TextInput
-                  label="Posición X (%)"
-                  placeholder="Posición horizontal"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={logic.signaturePosition.x}
-                  onChange={(e) => logic.setSignaturePosition({...logic.signaturePosition, x: e.target.value})}
-                />
-                <TextInput
-                  label="Posición Y (%)"
-                  placeholder="Posición vertical"
-                  type="number"
-                  min={0}
-                  max={100}
-                  value={logic.signaturePosition.y}
-                  onChange={(e) => logic.setSignaturePosition({...logic.signaturePosition, y: e.target.value})}
-                />
-              </Group>
+              <Text fw={500} mb="md">Selecciona la posición de la firma en el documento PDF</Text>
+              {securePdfUrl && (
+                <div style={{ position: 'relative', border: '1px solid #ddd', borderRadius: 8, overflow: 'hidden', marginBottom: 24 }}>
+                  <div
+                    style={{ cursor: 'crosshair' }}
+                    onClick={pdfSigner.handlePdfClick}
+                  >
+                    <Viewer fileUrl={securePdfUrl} />
+                  </div>
+                  {pdfSigner.signaturePosition && (
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: `${pdfSigner.signaturePosition.x}%`,
+                        top: `${pdfSigner.signaturePosition.y}%`,
+                        width: 40,
+                        height: 40,
+                        background: 'rgba(0,156,140,0.5)',
+                        borderRadius: 8,
+                        pointerEvents: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <span style={{ color: '#fff', fontWeight: 700 }}>Firma aquí</span>
+                    </div>
+                  )}
+                </div>
+              )}
               <Alert 
                 icon={<IconAlertCircle size={16} />} 
                 title="Previsualización" 
                 color="blue" 
                 mb="md"
               >
-                La firma se colocará en la página {logic.signaturePosition.page}, 
-                a {logic.signaturePosition.x}% desde la izquierda y {logic.signaturePosition.y}% desde arriba.
+                Haz clic en el PDF para seleccionar la posición de la firma.
               </Alert>
-              <Button
-                onClick={logic.open}
-                fullWidth
-                variant="outline"
-                mb="md"
-              >
-                Previsualizar posición de la firma
-              </Button>
-              {logic.error && (
-                <Alert 
-                  icon={<IconAlertCircle size={16} />} 
-                  title="Error" 
-                  color="red" 
-                  mb="md"
-                >
-                  {logic.error}
-                </Alert>
-              )}
               <Group justify="space-between" mt="xl">
                 <Button variant="default" onClick={() => logic.setActive(1)}>
                   Atrás
