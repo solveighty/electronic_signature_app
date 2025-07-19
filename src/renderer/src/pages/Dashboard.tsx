@@ -1,8 +1,8 @@
 import { Container, Title, Paper, Text, Button, Center, Group, Badge, Card, Box, Grid, Tabs, Loader, ActionIcon, Modal, PasswordInput } from '@mantine/core';
 import { IconUpload, IconLogout, IconFileUpload, IconFile, IconUser, IconCertificate, IconFileText, IconKey, IconRefresh, IconSignature, IconTrash, IconAlertCircle, IconLock, IconEye, IconEyeOff } from '@tabler/icons-react';
 import { useDashboardLogic } from '../hooks/useDashboardLogic';
-import SignDocument from '../components/SignDocument';
-import CertificateCreator from '../components/CertificateCreator';
+import SignDocument from './SignDocument';
+import CertificateCreator from './CertificateCreator';
 
 const Dashboard = () => {
   const logic = useDashboardLogic();
