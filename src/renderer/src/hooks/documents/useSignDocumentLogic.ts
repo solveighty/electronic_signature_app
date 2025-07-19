@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { useDocumentManager } from './useDocumentManager';
 import { toast } from 'react-toastify';
-import { signPdfDocument } from '../../utils/api';
+import { signPdfDocument, getPdfDocumentUrl } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 
 export function useSignDocumentLogic() {
@@ -69,6 +69,9 @@ export function useSignDocumentLogic() {
 
       if (selectedDocumentId !== null) {
         await signPdfDocument(selectedDocumentId as string, token || "");
+        
+        const url = await getPdfDocumentUrl(selectedDocumentId as string);
+        setSignedDocumentUrl(url);
       }
 
       setActive(3);
