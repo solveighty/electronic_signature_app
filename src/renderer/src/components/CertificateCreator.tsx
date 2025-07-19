@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { generateCertificate } from "../utils/api";
 import {
   Container,
   Title,
@@ -11,65 +9,16 @@ import {
   Alert,
 } from "@mantine/core";
 import { IconCertificate } from "@tabler/icons-react";
-import { toast } from "react-toastify";
+import { useCertificateCreatorLogic } from "../hooks/useCertificateCreatorLogic";
 
 const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
-  const [form, setForm] = useState({
-    country: "",
-    state: "",
-    locality: "",
-    organization: "",
-    orgUnit: "",
-    commonName: "",
-    email: "",
-    challengePassword: "",
-    optionalCompany: "",
-  });
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (field: string, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  // Manejo de la creacion del certificado
-  const handleCreateCertificate = async () => {
-    if (
-      !form.country ||
-      !form.state ||
-      !form.locality ||
-      !form.organization ||
-      !form.commonName ||
-      !form.email ||
-      !form.challengePassword
-    ) {
-      setError("Por favor, completa todos los campos obligatorios.");
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    try {
-      await generateCertificate(form);
-      toast.success("¡Certificado creado correctamente!");
-      setForm({
-        country: "",
-        state: "",
-        locality: "",
-        organization: "",
-        orgUnit: "",
-        commonName: "",
-        email: "",
-        challengePassword: "",
-        optionalCompany: "",
-      });
-      if (onSuccess) onSuccess(); // Notifica al Dashboard para refrescar
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Error al crear el certificado");
-      toast.error(err.response?.data?.error || "Error al crear el certificado");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    form,
+    error,
+    loading,
+    handleChange,
+    handleCreateCertificate,
+  } = useCertificateCreatorLogic(onSuccess);
 
   return (
     <Container size="sm" py="xl"
@@ -192,7 +141,8 @@ const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
           placeholder="Ej: Kingdom PC"
           value={form.optionalCompany}
           onChange={(e) => handleChange("optionalCompany", e.target.value)}
-          mt="md" classNames={{
+          mt="md"
+          classNames={{
             input:
               "bg-white text-black border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400",
             label: "text-gray-900 dark:text-gray-200",
