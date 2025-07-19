@@ -213,8 +213,8 @@ export const useDocumentManager = () => {
         setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== tempId));
 
         toast.update(toastId, {
-          render: 'No se pudo confirmar la subida del documento',
-          type: 'warning',
+          render: 'El documento está siendo procesado y aparecerá pronto.',
+          type: 'info',
           autoClose: 5000
         });
       }
@@ -225,8 +225,16 @@ export const useDocumentManager = () => {
       console.error('Error al subir PDF:', error);
 
       // Eliminar el documento temporal en caso de error
-      setPdfDocuments(prevDocs => prevDocs.filter(doc => doc.id !== tempId));
-      setDocuments(prevDocs => prevDocs.filter(doc => doc.id !== tempId));
+      setPdfDocuments(prevDocs =>
+        prevDocs.map(doc =>
+          doc.id === tempId ? { ...doc, status: "Procesando..." } : doc
+        )
+      );
+      setDocuments(prevDocs =>
+        prevDocs.map(doc =>
+          doc.id === tempId ? { ...doc, status: "Procesando..." } : doc
+        )
+      );
 
       const errorMessage = error.response?.data?.error || error.message || "Error al subir el archivo PDF";
       setError(errorMessage);
