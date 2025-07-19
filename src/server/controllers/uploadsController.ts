@@ -10,6 +10,7 @@ import 'dotenv/config';
 import { deleteCertificateFromDB, deletePdfDocumentFromDB } from "../services/deleteService";
 import { generateP12ForUser } from "../services/p12GeneratorService";
 import { getDecryptedPdfBuffer } from "../services/pdfService";
+import PdfDocument from '../models/PdfDocument';
 
 // Obtener la ruta base del proyecto
 const __filename = fileURLToPath(import.meta.url);
@@ -381,5 +382,30 @@ export const downloadPdfDocument = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Error al descargar PDF:', error);
     res.status(500).json({ error: error.message || "Error al descargar el PDF" });
+  }
+};
+
+export const signPdfDocument = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = extractUserIdFromToken(req);
+
+    // Aquí va la lógica para firmar el PDF... TODO
+
+    // Actualiza el estado del documento a "Firmado"
+    await PdfDocument.updateOne(
+      { _id: id, userId },
+      { $set: { status: "Firmado" } }
+    );
+
+    return res.status(200).json({
+      message: "Documento firmado correctamente",
+      documentId: id
+    });
+  } catch (error: any) {
+    console.error('Error al firmar documento:', error);
+    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
+      error: error.message || "Error al firmar el documento"
+    });
   }
 };

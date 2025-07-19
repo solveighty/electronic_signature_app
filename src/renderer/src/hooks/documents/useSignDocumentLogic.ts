@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { useDocumentManager } from './useDocumentManager';
 import { toast } from 'react-toastify';
+import { signPdfDocument } from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 
 export function useSignDocumentLogic() {
   const [active, setActive] = useState(0);
@@ -21,6 +23,8 @@ export function useSignDocumentLogic() {
     refreshCertificate,
     hasCertificate
   } = useDocumentManager();
+
+  const { token } = useAuth();
 
   const selectedDocument = pdfDocuments.find(doc => doc.id === selectedDocumentId);
 
@@ -63,11 +67,13 @@ export function useSignDocumentLogic() {
       // Simulación de proceso de firma
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Simular URL de documento firmado
-      setSignedDocumentUrl('https://ejemplo.com/documento-firmado.pdf');
+      if (selectedDocumentId !== null) {
+        await signPdfDocument(selectedDocumentId as string, token || "");
+      }
 
       setActive(3);
       toast.success('Documento firmado con éxito');
+      handleDownloadSignedDocument();
       await refreshDocuments();
     } catch (error: any) {
       setError(error.message || 'Error al firmar el documento');

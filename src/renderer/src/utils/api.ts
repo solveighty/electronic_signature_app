@@ -115,4 +115,12 @@ export async function getPdfDocumentUrl(documentId: string): Promise<string | nu
   }
 }
 
+export async function signPdfDocument(documentId: string, token: string) {
+  return api.post(`/api/pdf/${documentId}/sign`, {}, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
+
 export default api;
