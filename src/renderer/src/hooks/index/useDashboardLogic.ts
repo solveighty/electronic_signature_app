@@ -18,7 +18,8 @@ export function useDashboardLogic() {
     handleFileChange,
     refreshDocuments,
     deleteCertificate,
-    deletePdf
+    deletePdf,
+    getPdfDocumentUrl
   } = useDocumentManager();
 
   const { setToken, userName } = useAuth();
@@ -121,6 +122,16 @@ export function useDashboardLogic() {
     }
   };
 
+  const handleDownloadPdf = async (documentId: string) => {
+    const url = await getPdfDocumentUrl(documentId);
+    if (url) {
+      window.open(url, '_blank');
+      toast.info('Descargando documento firmado...');
+    } else {
+      toast.error('No se pudo descargar el documento.');
+    }
+  };
+
   return {
     documents,
     pdfDocuments,
@@ -166,6 +177,7 @@ export function useDashboardLogic() {
     confirmDeleteCertificate,
     handleTabChange,
     handleCertificateUploadWithKey,
-    confirmCertificateUpload
+    confirmCertificateUpload,
+    handleDownloadPdf
   };
 }

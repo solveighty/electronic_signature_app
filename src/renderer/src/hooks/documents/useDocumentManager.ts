@@ -7,7 +7,8 @@ import {
   updateCertificate as updateCertificateApi,
   getUserCertificate,
   deleteCertificate as deleteCertificateApi,
-  deletePdfDocument as deletePdfDocumentApi
+  deletePdfDocument as deletePdfDocumentApi,
+  getPdfDocumentUrl
 } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -453,6 +454,7 @@ export const useDocumentManager = () => {
     refreshCertificate: fetchUserCertificate,
     hasCertificate: !!certificateFile,
     deleteCertificate,
-    deletePdf
+    deletePdf,
+    getPdfDocumentUrl
   };
 };

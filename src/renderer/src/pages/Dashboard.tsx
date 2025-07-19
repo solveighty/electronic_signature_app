@@ -1,5 +1,5 @@
 import { Container, Title, Paper, Text, Button, Center, Group, Badge, Card, Box, Grid, Tabs, Loader, ActionIcon, Modal, PasswordInput } from '@mantine/core';
-import { IconUpload, IconLogout, IconFileUpload, IconFile, IconUser, IconCertificate, IconFileText, IconKey, IconRefresh, IconSignature, IconTrash, IconAlertCircle, IconLock, IconEye, IconEyeOff } from '@tabler/icons-react';
+import { IconUpload, IconLogout, IconFileUpload, IconFile, IconUser, IconCertificate, IconFileText, IconKey, IconRefresh, IconSignature, IconTrash, IconAlertCircle, IconLock, IconEye, IconEyeOff, IconDownload } from '@tabler/icons-react';
 import { useDashboardLogic } from '../hooks/index/useDashboardLogic';
 import SignDocument from './SignDocument';
 import CertificateCreator from './CertificateCreator';
@@ -275,6 +275,14 @@ const Dashboard = () => {
                         </Box>
 
                         <Box ta="center" style={{ maxWidth: '80px' }}>
+                          <ActionIcon
+                            color="blue"
+                            variant="subtle"
+                            onClick={() => logic.handleDownloadPdf(doc.id.toString())}
+                            mx="auto"
+                          >
+                            <IconDownload size={18} />
+                          </ActionIcon>
                           <ActionIcon
                             color="red"
                             variant="subtle"
