@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { generateCertificate } from "../utils/api";
+import { generateCertificate } from "../../utils/api";
 import { toast } from "react-toastify";
 
 export function useCertificateCreatorLogic(onSuccess?: () => void) {

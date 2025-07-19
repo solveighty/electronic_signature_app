@@ -9,7 +9,7 @@ import {
   Alert,
 } from "@mantine/core";
 import { IconCertificate } from "@tabler/icons-react";
-import { useCertificateCreatorLogic } from "../hooks/useCertificateCreatorLogic";
+import { useCertificateCreatorLogic } from "../hooks/documents/useCertificateCreatorLogic";
 
 const CertificateCreator = ({ onSuccess }: { onSuccess?: () => void }) => {
   const {

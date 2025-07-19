@@ -8,8 +8,8 @@ import {
   getUserCertificate,
   deleteCertificate as deleteCertificateApi,
   deletePdfDocument as deletePdfDocumentApi
-} from '../utils/api';
-import { useAuth } from '../context/AuthContext';
+} from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
 
 export interface Document {
   id: number | string;

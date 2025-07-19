@@ -4,7 +4,7 @@ import {
 import { 
   IconFile, IconCertificate, IconSignature, IconCheck, IconX, IconAlertCircle, IconLock, IconEye, IconEyeOff, IconDownload, IconRefresh
 } from '@tabler/icons-react';
-import { useSignDocumentLogic } from '../hooks/useSignDocumentLogic';
+import { useSignDocumentLogic } from '../hooks/documents/useSignDocumentLogic';
 
 const SignDocument = () => {
   const logic = useSignDocumentLogic();

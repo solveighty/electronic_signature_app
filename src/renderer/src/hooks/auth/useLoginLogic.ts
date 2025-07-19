@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useForm } from "@mantine/form";
 import { useSpring } from "@react-spring/web";
-import { login as LoginApi } from "../utils/api";
-import { useAuth } from "../context/AuthContext";
+import { login as LoginApi } from "../../utils/api";
+import { useAuth } from "../../context/AuthContext";
 import { toast } from 'react-toastify';
 
 export function useLoginLogic() {

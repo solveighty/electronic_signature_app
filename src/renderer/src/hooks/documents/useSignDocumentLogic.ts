@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDisclosure } from '@mantine/hooks';
-import { useDocumentManager } from '../hooks/useDocumentManager';
+import { useDocumentManager } from './useDocumentManager';
 import { toast } from 'react-toastify';
 
 export function useSignDocumentLogic() {

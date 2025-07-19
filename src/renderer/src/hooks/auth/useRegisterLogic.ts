@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useForm } from "@mantine/form";
 import { useSpring } from "@react-spring/web";
-import { register as RegisterApi } from "../utils/api";
+import { register as RegisterApi } from "../../utils/api";
 import { toast } from 'react-toastify';
 
 export function useRegisterLogic() {

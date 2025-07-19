@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from "react-router-dom";
-import { useDarkMode } from '../context/DarkMode';
-import { useDocumentManager } from '../hooks/useDocumentManager';
+import { useDarkMode } from '../../context/DarkMode';
+import { useDocumentManager } from '../documents/useDocumentManager';
 import { useDisclosure } from '@mantine/hooks';
 import { toast } from 'react-toastify';
 
