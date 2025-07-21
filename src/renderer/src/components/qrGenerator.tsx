@@ -4,9 +4,12 @@ import { useAuth } from "../context/AuthContext";
 
 type Props = {
   text: string;
+  documentId: string;
+  certId: string;
+  certPassword: string;
 };
 
-const SignatureStamp: React.FC<Props> = ({ text }) => {
+const SignatureStamp: React.FC<Props> = ({ text, documentId, certId, certPassword }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { userName } = useAuth();
 
@@ -63,8 +66,32 @@ const SignatureStamp: React.FC<Props> = ({ text }) => {
     drawStamp();
   }, [text, userName]);
 
+  // Nueva función para enviar el PNG al backend
+  const sendStampToBackend = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      const formData = new FormData();
+      formData.append("stampImage", blob, "stamp.png");
+      formData.append("documentId", documentId);
+      formData.append("certId", certId);
+      formData.append("certPassword", certPassword);
+
+      await fetch("/api/firmar-con-estampa", {
+        method: "POST",
+        body: formData,
+        // Si usas autenticación, agrega los headers necesarios
+      });
+      alert("Estampa enviada y PDF firmado.");
+    }, "image/png");
+  };
+
   return (
-    <canvas ref={canvasRef} style={{ border: "1px solid #ccc", background: "#fff" }} />
+    <div>
+      <canvas ref={canvasRef} style={{ border: "1px solid #ccc", background: "#fff" }} />
+      <button onClick={sendStampToBackend}>Firmar PDF con esta estampa</button>
+    </div>
   );
 };
 

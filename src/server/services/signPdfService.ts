@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { PDFDocument, rgb } from 'pdf-lib';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -14,20 +15,60 @@ if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
 }
 
+// Esta función agrega un texto y una imagen al PDF
+async function addStampToPdf(pdfBuffer: Buffer, stampText: string, stampImageBuffer?: Buffer): Promise<Buffer> {
+    const pdfDoc = await PDFDocument.load(pdfBuffer);
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+
+    // Debug: guardar la imagen recibida
+    if (stampImageBuffer) {
+        fs.writeFileSync(path.join(outputDir, 'debug_stamp.png'), stampImageBuffer);
+        console.log('Stamp image buffer size:', stampImageBuffer.length);
+        const pngImage = await pdfDoc.embedPng(stampImageBuffer);
+        firstPage.drawImage(pngImage, {
+            x: 50,
+            y: 50,
+            width: 300,
+            height: 150,
+        });
+    } else {
+        console.log('No se recibió imagen de estampa');
+    }
+
+    const modifiedPdfBytes = await pdfDoc.save({
+        useObjectStreams: false,
+        addDefaultPage: false,
+    });
+    return Buffer.from(modifiedPdfBytes);
+}
+
 export async function signPdfAndReplace(
     documentId: string,
     certId: string,
-    certPassword: string
+    certPassword: string,
+    stampImageBuffer?: Buffer // <-- Nuevo parámetro opcional
 ): Promise<void> {
     try {
         console.log('[signPdfAndReplace] Recuperando PDF original...');
-        const pdfBuffer = await retrievePdfDocument(documentId);
-        console.log(`[signPdfAndReplace] PDF recuperado: ${pdfBuffer.length} bytes`);
+        // 1. Recuperar el PDF original
+        let pdfBuffer = await retrievePdfDocument(documentId);
 
-        console.log('[signPdfAndReplace] Recuperando certificado .p12...');
+        // 2. Recuperar el certificado desencriptado
         const p12Buffer = await decryptandretrieveCertificate(certId, certPassword);
-        console.log(`[signPdfAndReplace] Certificado recuperado: ${p12Buffer.length} bytes`);
 
+        // 3. Agregar estampado visual usando la imagen recibida
+        const stampText = 'Firmado electrónicamente por PUCESE'; // Personaliza el texto
+        // Si tienes un buffer de imagen (por ejemplo, QR generado), pásalo como segundo argumento
+        pdfBuffer = await addStampToPdf(pdfBuffer, stampText, stampImageBuffer);
+
+        // 4. Verificar que el PDF termina con %%EOF
+        const eofMarker = Buffer.from('%%EOF');
+        if (!pdfBuffer.slice(-eofMarker.length).equals(eofMarker)) {
+            pdfBuffer = Buffer.concat([pdfBuffer, Buffer.from('\n%%EOF')]);
+        }
+
+        // 5. Agregar placeholder y firmar como ya lo haces
         console.log('[signPdfAndReplace] Agregando placeholder para firma...');
         const pdfWithPlaceholder = plainAddPlaceholder({
             pdfBuffer,
@@ -36,9 +77,9 @@ export async function signPdfAndReplace(
         });
 
         // Guardar temporalmente para verificar
-        const placeholderPath = path.join(outputDir, `debug_pdf_with_placeholder_${documentId}.pdf`);
-        fs.writeFileSync(placeholderPath, pdfWithPlaceholder);
-        console.log(`[signPdfAndReplace] Placeholder guardado en: ${placeholderPath}`);
+        //const placeholderPath = path.join(outputDir, `debug_pdf_with_placeholder_${documentId}.pdf`);
+        //fs.writeFileSync(placeholderPath, pdfWithPlaceholder);
+        //console.log(`[signPdfAndReplace] Placeholder guardado en: ${placeholderPath}`);
 
         console.log('[signPdfAndReplace] Firmando el PDF...');
         const signer = new SignPdf();
@@ -48,9 +89,8 @@ export async function signPdfAndReplace(
         console.log(`[signPdfAndReplace] PDF firmado. Tamaño: ${signedPdf.length} bytes`);
 
         // Guardar temporalmente para verificar firma
-        const signedPdfPath = path.join(outputDir, `debug_signed_pdf_${documentId}.pdf`);
+        const signedPdfPath = path.join(outputDir, `${documentId}_firmado.pdf`);
         fs.writeFileSync(signedPdfPath, signedPdf);
-        console.log(`[signPdfAndReplace] PDF firmado guardado temporalmente en: ${signedPdfPath}`);
 
         console.log('[signPdfAndReplace] Guardando PDF firmado en base de datos...');
         await updateSignedPdf(documentId, signedPdf);

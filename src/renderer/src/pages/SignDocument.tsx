@@ -224,7 +224,12 @@ const SignDocument = () => {
                         boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
                       }}
                     >
-                      <SignatureStamp text={logic.selectedDocument?.name || "Documento"} />
+                      <SignatureStamp
+                        text={logic.selectedDocument?.name || "Documento"}
+                        documentId={logic.selectedDocument?.id?.toString() || ""}
+                        certId={logic.certificateFile?.id?.toString() || ""}
+                        certPassword={logic.certificatePassword}
+                      />
                     </div>
                   )}
                 </div>
