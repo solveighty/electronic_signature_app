@@ -48,14 +48,14 @@ export function useSignDocumentLogic() {
   };
 
   const canProceedToPassword = hasCertificate && selectedDocumentId;
-  const canProceedToPosition = canProceedToPassword && certificatePassword.length >= 4;
+  const canProceedToPosition = canProceedToPassword && certificatePassword.length >= 1;
   const canSignDocument = canProceedToPosition &&
     signaturePosition.page &&
     signaturePosition.x &&
     signaturePosition.y;
 
   const handleSignDocument = async () => {
-    if (!selectedDocumentId || !certificatePassword || !hasCertificate) {
+    if (!selectedDocumentId || !certificatePassword || !hasCertificate || !certificateFile?.id) {
       setError('Falta información requerida para firmar el documento');
       return;
     }
@@ -64,17 +64,19 @@ export function useSignDocumentLogic() {
       setIsSigningInProgress(true);
       setError(null);
 
-      // Simulación de proceso de firma
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Llama a la API pasando certId y certPassword
+      await signPdfDocument(
+        selectedDocumentId,
+        certificateFile.id.toString(),    
+        certificatePassword,
+        token || ""
+      );
 
-      if (selectedDocumentId !== null) {
-        await signPdfDocument(selectedDocumentId as string, token || "");
-        
-        const url = await getPdfDocumentUrl(selectedDocumentId as string);
-        setSignedDocumentUrl(url);
-      }
+      // Obtener URL del PDF firmado para descargar/previsualizar
+      const url = await getPdfDocumentUrl(selectedDocumentId);
+      setSignedDocumentUrl(url);
 
-      setActive(3);
+      setActive(3); // Paso final del Stepper: completado
       toast.success('Documento firmado con éxito');
       handleDownloadSignedDocument();
       await refreshDocuments();

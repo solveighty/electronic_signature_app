@@ -107,20 +107,40 @@ export async function getPdfDocumentUrl(documentId: string): Promise<string | nu
     const response = await api.get(`/api/pdf/${documentId}/download`, {
       responseType: "blob"
     });
-    const blob = response.data as Blob;
-    return URL.createObjectURL(blob);
+    return URL.createObjectURL(response.data);
   } catch (error) {
     console.error("Error al obtener PDF:", error);
     return null;
   }
 }
 
-export async function signPdfDocument(documentId: string, token: string) {
-  return api.post(`/api/pdf/${documentId}/sign`, {}, {
+export async function signPdfDocument(
+  documentId: string, 
+  certId: string, 
+  certPassword: string, 
+  token: string
+) {
+  return api.post(`/api/pdf/${documentId}/sign`, {
+    certId,
+    certPassword
+  }, {
     headers: {
       Authorization: `Bearer ${token}`
     }
   });
+}
+
+
+export async function getCertificateUrl(certificateId: string): Promise<string | null> {
+  try {
+    const response = await api.get(`/api/certificates/${certificateId}/download`, {
+      responseType: "blob"
+    });
+    return URL.createObjectURL(response.data);
+  } catch (error) {
+    console.error("Error al obtener certificado:", error);
+    return null;
+  }
 }
 
 export default api;

@@ -11,6 +11,7 @@ import { deleteCertificateFromDB, deletePdfDocumentFromDB } from "../services/de
 import { generateP12ForUser } from "../services/p12GeneratorService";
 import { getDecryptedPdfBuffer } from "../services/pdfService";
 import PdfDocument from '../models/PdfDocument';
+import { signPdfAndReplace } from "../services/signPdfService";
 
 // Obtener la ruta base del proyecto
 const __filename = fileURLToPath(import.meta.url);
@@ -216,7 +217,6 @@ export const updateCertificate = async (req: Request, res: Response) => {
       req.body.password
     );
 
-    // Aquí está guardado exitosamente, ASEGÚRATE de enviar una respuesta
     console.log('Enviando respuesta al cliente (PUT)...');
     return res.status(200).json({
       message: "Certificado actualizado y hash guardado correctamente",
@@ -368,29 +368,73 @@ export const deleteCertificateHandler = async (req: Request, res: Response) => {
   }
 };
 
+export const downloadCertificate = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = extractUserIdFromToken(req);
+
+    if (!userId) {
+      return res.status(401).json({ error: 'No autorizado' });
+    }
+
+    // Obtiene el buffer descifrado del certificado .p12
+    const certBuffer = await decryptandretrieveCertificate(id, userId);
+
+    if (!certBuffer) {
+      return res.status(404).json({ error: 'Certificado no encontrado o no autorizado' });
+    }
+
+    res.setHeader('Content-Type', 'application/x-pkcs12');
+    res.setHeader('Content-Disposition', `attachment; filename=certificado_${id}.p12`);
+    return res.send(certBuffer);
+
+  } catch (error: any) {
+    console.error('Error al descargar certificado:', error);
+    return res.status(500).json({ error: error.message || 'Error al descargar el certificado' });
+  }
+};
+
 export const downloadPdfDocument = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const userId = extractUserIdFromToken(req);
 
-    // Aquí deberías desencriptar el PDF y obtener el buffer
-    const pdfBuffer = await getDecryptedPdfBuffer(id, userId); // Implementa esto en tu servicio
+    if (!userId) {
+      return res.status(401).json({ error: 'No autorizado' });
+    }
+
+    // Obtener buffer PDF descifrado
+    const pdfBuffer = await getDecryptedPdfBuffer(id, userId);
+
+    if (!pdfBuffer) {
+      return res.status(404).json({ error: 'Documento no encontrado o no autorizado' });
+    }
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'inline; filename=documento.pdf');
-    res.send(pdfBuffer);
+    // inline para verlo en el navegador, attachment para forzar descarga
+    res.setHeader('Content-Disposition', `inline; filename="documento_${id}.pdf"`);
+
+    return res.send(pdfBuffer);
+
   } catch (error: any) {
     console.error('Error al descargar PDF:', error);
-    res.status(500).json({ error: error.message || "Error al descargar el PDF" });
+    return res.status(500).json({ error: error.message || 'Error al descargar el PDF' });
   }
 };
 
 export const signPdfDocument = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const { certId, certPassword } = req.body;
+
+    if (!certId || !certPassword) {
+      return res.status(400).json({ error: "certId y certPassword son requeridos" });
+    }
+
     const userId = extractUserIdFromToken(req);
 
-    // Aquí va la lógica para firmar el PDF... TODO
+    // Ejecutar lógica de firma del servicio
+    await signPdfAndReplace(id, certId, certPassword);
 
     // Actualiza el estado del documento a "Firmado"
     await PdfDocument.updateOne(
