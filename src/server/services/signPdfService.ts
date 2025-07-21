@@ -1,6 +1,6 @@
 import forge from 'node-forge';
 import { plainAddPlaceholder } from 'node-signpdf';
-import { sign } from 'node-signpdf'; 
+import sign  from 'node-signpdf'; 
 import {
     decryptandretrieveCertificate,
     deleteCertificate,
