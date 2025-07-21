@@ -13,6 +13,8 @@ export function usePdfSignerLogic() {
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
     setSignaturePosition({ x, y });
+
+    console.log(`Coordenadas de firma: x=${x.toFixed(2)}%, y=${y.toFixed(2)}%`);
   };
 
   const pdfUrl = pdfFile ? URL.createObjectURL(pdfFile) : null;
