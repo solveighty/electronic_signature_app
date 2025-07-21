@@ -4,6 +4,7 @@ import Certificate from '../models/Certificate';
 import 'dotenv/config';
 import mongoose from 'mongoose';
 
+
 const ENCRYPTION_SECRET = process.env.ENCRYPTION_KEY_CERTIFICATE;
 
 if (!ENCRYPTION_SECRET) {
@@ -86,16 +87,16 @@ export const storeCertificate = async (
 };
 
 //Eliminar certificado localmente
-export const deleteCertificate = async (certId: string): Promise<void> => {
+export const deleteLocalFile = (filePath: string): void => {
   try {
-    const result = await Certificate.deleteOne({ _id: certId });
-    if (result.deletedCount === 0) {
-      throw new Error('Certificado no encontrado');
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      console.log('Archivo local eliminado:', filePath);
+    } else {
+      console.warn('Archivo local no existe:', filePath);
     }
-    console.log('Certificado eliminado correctamente');
   } catch (error) {
-    console.error('Error al eliminar el certificado:', error);
-    throw new Error('No se pudo eliminar el certificado');
+    console.error('Error al eliminar archivo local:', error);
   }
 };
 
@@ -143,19 +144,19 @@ export const decryptandretrieveCertificate = async (
     const userKey = crypto.pbkdf2Sync(password, userSalt, 100000, 32, 'sha256');
     const userDecipher = crypto.createDecipheriv('aes-256-cbc', userKey, userIV);
 
-    let decrypted= userDecipher.update(userEncrypted);
+    let decrypted = userDecipher.update(userEncrypted);
     decrypted = Buffer.concat([
       decrypted,
       userDecipher.final()
     ]);
 
     return decrypted;
-    
+
   } catch (error) {
     console.error('Error al recuperar el hash del certificado:', error);
     throw new Error('No se pudo recuperar el hash del certificado');
   }
-  
+
 };
 
 

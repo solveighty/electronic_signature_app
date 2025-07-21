@@ -1,14 +1,18 @@
-import forge from 'node-forge';
-import { plainAddPlaceholder } from 'node-signpdf';
-import sign  from 'node-signpdf'; 
-import {
-    decryptandretrieveCertificate,
-    deleteCertificate,
-} from './crtService';
-import {
-    retrievePdfDocument,
-    updateSignedPdf,
-} from './pdfService';
+import { SignPdf, plainAddPlaceholder } from 'node-signpdf';
+import { decryptandretrieveCertificate, deleteLocalFile } from './crtService';
+import { retrievePdfDocument, updateSignedPdf } from './pdfService';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const outputDir = join(__dirname, '..', '..', 'files', 'pdf');
+if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+}
 
 export async function signPdfAndReplace(
     documentId: string,
@@ -16,46 +20,48 @@ export async function signPdfAndReplace(
     certPassword: string
 ): Promise<void> {
     try {
+        console.log('[signPdfAndReplace] Recuperando PDF original...');
         const pdfBuffer = await retrievePdfDocument(documentId);
-        const p12Buffer = await decryptandretrieveCertificate(certId, certPassword);
+        console.log(`[signPdfAndReplace] PDF recuperado: ${pdfBuffer.length} bytes`);
 
+        console.log('[signPdfAndReplace] Recuperando certificado .p12...');
+        const p12Buffer = await decryptandretrieveCertificate(certId, certPassword);
+        console.log(`[signPdfAndReplace] Certificado recuperado: ${p12Buffer.length} bytes`);
+
+        console.log('[signPdfAndReplace] Agregando placeholder para firma...');
         const pdfWithPlaceholder = plainAddPlaceholder({
             pdfBuffer,
             reason: 'Firmado digitalmente',
             signatureLength: 8192,
         });
 
-        const p12Der = forge.util.createBuffer(p12Buffer.toString('binary'));
-        const p12Asn1 = forge.asn1.fromDer(p12Der);
-        const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, certPassword);
+        // Guardar temporalmente para verificar
+        const placeholderPath = path.join(outputDir, `debug_pdf_with_placeholder_${documentId}.pdf`);
+        fs.writeFileSync(placeholderPath, pdfWithPlaceholder);
+        console.log(`[signPdfAndReplace] Placeholder guardado en: ${placeholderPath}`);
 
-        const keyBags = p12.getBags({ bagType: forge.pki.oids.pkcs8ShroudedKeyBag });
-        const keyBagArray = keyBags[forge.pki.oids.pkcs8ShroudedKeyBag];
-        if (!keyBagArray || keyBagArray.length === 0 || !keyBagArray[0].key) {
-            throw new Error('No se encontró la clave privada en el certificado');
-        }
-        const privateKeyPem = forge.pki.privateKeyToPem(keyBagArray[0].key);
-
-        const certBags = p12.getBags({ bagType: forge.pki.oids.certBag });
-        const certBagArray = certBags[forge.pki.oids.certBag];
-        if (!certBagArray || certBagArray.length === 0 || !certBagArray[0].cert) {
-            throw new Error('No se encontró el certificado X.509 en el .p12');
-        }
-        const certPem = forge.pki.certificateToPem(certBagArray[0].cert);
-
-        // Usar la función sign directamente
-        const signedPdf = sign(pdfWithPlaceholder, {
-            key: Buffer.from(privateKeyPem),
-            cert: Buffer.from(certPem),
+        console.log('[signPdfAndReplace] Firmando el PDF...');
+        const signer = new SignPdf();
+        const signedPdf = signer.sign(pdfWithPlaceholder, p12Buffer, {
             passphrase: certPassword,
         });
+        console.log(`[signPdfAndReplace] PDF firmado. Tamaño: ${signedPdf.length} bytes`);
 
+        // Guardar temporalmente para verificar firma
+        const signedPdfPath = path.join(outputDir, `debug_signed_pdf_${documentId}.pdf`);
+        fs.writeFileSync(signedPdfPath, signedPdf);
+        console.log(`[signPdfAndReplace] PDF firmado guardado temporalmente en: ${signedPdfPath}`);
+
+        console.log('[signPdfAndReplace] Guardando PDF firmado en base de datos...');
         await updateSignedPdf(documentId, signedPdf);
-        await deleteCertificate(certId);
+        console.log(`[signPdfAndReplace] Documento ${documentId} actualizado con PDF firmado en BD.`);
 
-        console.log('Documento firmado y certificado eliminado correctamente.');
+        console.log('[signPdfAndReplace] Eliminando certificado temporal...');
+        deleteLocalFile(certId);
+
+        console.log('[signPdfAndReplace] Proceso finalizado correctamente.');
     } catch (error) {
-        console.error('Error durante el proceso de firma:', error);
+        console.error('[signPdfAndReplace] Error durante el proceso:', error);
         throw new Error('Fallo al firmar el documento');
     }
 }

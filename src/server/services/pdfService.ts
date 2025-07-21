@@ -144,32 +144,39 @@ export const getDecryptedPdfBuffer = async (documentId: string, userId: string):
     decipher.update(encryptedData),
     decipher.final()
   ]);
-}
+};
 
 //Actualizar el pdf firmado
-export const updateSignedPdf = async (documentId: string, signedPdf: Buffer): Promise<void> => {
+export const updateSignedPdf = async (
+  documentId: string,
+  signedPdf: Buffer
+): Promise<void> => {
   try {
+    console.log('[updateSignedPdf] Iniciando guardado...');
+    console.log('[updateSignedPdf] Buffer firmado tamaño:', signedPdf.length);
+
     const pdfDoc = await PdfDocument.findById(documentId);
     if (!pdfDoc) {
       throw new Error('Documento no encontrado');
     }
 
-    // Actualizar el contenido cifrado con el PDF firmado
+    const key = crypto.createHash('sha256').update(String(process.env.ENCRYPTION_KEY_PDF)).digest();
     const iv = crypto.randomBytes(16);
-    const key = crypto.createHash('sha256').update(String(ENCRYPTION_SECRET)).digest();
 
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     const encryptedData = Buffer.concat([
       cipher.update(signedPdf),
-      cipher.final()
+      cipher.final(),
     ]);
 
     pdfDoc.encryptedContent = iv.toString('hex') + ':' + encryptedData.toString('base64');
     pdfDoc.status = 'Firmado';
 
+    console.log('[updateSignedPdf] Guardando documento en BD...');
     await pdfDoc.save();
+    console.log('[updateSignedPdf] Documento guardado exitosamente.');
   } catch (error) {
-    console.error('Error al actualizar el PDF firmado:', error);
+    console.error('[updateSignedPdf] Error al guardar PDF firmado:', error);
     throw new Error('No se pudo actualizar el PDF firmado');
   }
-}
+};

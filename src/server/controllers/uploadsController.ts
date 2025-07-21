@@ -403,15 +403,15 @@ export const downloadPdfDocument = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'No autorizado' });
     }
 
-    // Obtener buffer PDF descifrado
     const pdfBuffer = await getDecryptedPdfBuffer(id, userId);
 
     if (!pdfBuffer) {
       return res.status(404).json({ error: 'Documento no encontrado o no autorizado' });
     }
 
+    console.log(`[downloadPdfDocument] Enviando PDF descifrado con tamaño: ${pdfBuffer.length} bytes`);
+
     res.setHeader('Content-Type', 'application/pdf');
-    // inline para verlo en el navegador, attachment para forzar descarga
     res.setHeader('Content-Disposition', `inline; filename="documento_${id}.pdf"`);
 
     return res.send(pdfBuffer);
