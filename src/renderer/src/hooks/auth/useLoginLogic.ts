@@ -31,11 +31,10 @@ export function useLoginLogic() {
       const response = await LoginApi(form.values.email, form.values.password);
       setToken(response.data.token);
 
-      if (response.data.name) {
-        setUserName(response.data.name);
+      if (response.data.user && response.data.user.name) {
+        setUserName(response.data.user.name);
       } else {
-        const nameFromEmail = form.values.email.split('@')[0];
-        setUserName(nameFromEmail);
+        setUserName(form.values.email.split('@')[0]);
       }
 
       toast.success('¡Inicio de sesión exitoso!');

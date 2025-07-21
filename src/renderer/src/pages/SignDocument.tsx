@@ -9,6 +9,7 @@ import { usePdfSignerLogic } from '../hooks/documents/usePdfSignerLogic';
 import { Viewer } from '@react-pdf-viewer/core';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 import { useEffect, useState } from 'react';
+import SignatureStamp from '../components/qrGenerator';
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${(pdfjsLib as any).version}/pdf.worker.min.js`;
 
@@ -211,17 +212,19 @@ const SignDocument = () => {
                         position: 'absolute',
                         left: `${pdfSigner.signaturePosition.x}%`,
                         top: `${pdfSigner.signaturePosition.y}%`,
-                        width: 40,
-                        height: 40,
-                        background: 'rgba(0,156,140,0.5)',
-                        borderRadius: 8,
+                        width: 160,
+                        height: 80,
                         pointerEvents: 'none',
+                        transform: 'translate(-50%, -50%)',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        background: 'rgba(255,255,255,0.8)',
+                        borderRadius: 8,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
                       }}
                     >
-                      <span style={{ color: '#fff', fontWeight: 700 }}>Firma aquí</span>
+                      <SignatureStamp text={logic.selectedDocument?.name || "Documento"} />
                     </div>
                   )}
                 </div>
