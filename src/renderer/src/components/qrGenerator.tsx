@@ -35,9 +35,13 @@ const SignatureStamp: React.FC<Props> = ({ text }) => {
       const qrImg = new window.Image();
       qrImg.src = qrDataUrl;
       qrImg.onload = () => {
-        const textWidth = 200;
-        const width = qrImg.width + textWidth;
-        const height = qrImg.height;
+        ctx.font = "16px sans-serif";
+        const lines = qrText.split("\n");
+        const textWidth = Math.max(...lines.map((line) => ctx.measureText(line).width));
+        const padding = 20;
+        const width = qrImg.width + textWidth + padding;
+        const height = Math.max(qrImg.height, lines.length * 22 + 20);
+
         canvas.width = width;
         canvas.height = height;
 
@@ -50,11 +54,8 @@ const SignatureStamp: React.FC<Props> = ({ text }) => {
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
 
-        // Dividir texto en líneas
-        const lines = qrText.split("\n");
-        const lineHeight = 22;
         lines.forEach((line, i) => {
-          ctx.fillText(line, qrImg.width + 10, 10 + i * lineHeight);
+          ctx.fillText(line, qrImg.width + 10, 10 + i * 22);
         });
       };
     };
@@ -63,7 +64,7 @@ const SignatureStamp: React.FC<Props> = ({ text }) => {
   }, [text, userName]);
 
   return (
-    <canvas ref={canvasRef} style={{ border: "1px solid #ccc" }} />
+    <canvas ref={canvasRef} style={{ border: "1px solid #ccc", background: "#fff" }} />
   );
 };
 
