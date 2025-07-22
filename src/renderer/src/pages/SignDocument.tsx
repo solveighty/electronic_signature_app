@@ -210,7 +210,15 @@ const SignDocument = () => {
             <Paper radius="md" p="xl" withBorder mt="xl">
               <Text fw={500} mb="md">Selecciona la posición de la firma en el documento PDF</Text>
               {securePdfUrl && (
-                <div style={{ position: 'relative', border: '1px solid #ddd', borderRadius: 8, overflow: 'hidden', marginBottom: 24 }}>
+                <div
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    marginBottom: 24,
+                  }}
+                >
                   <Group justify="center" mb="xs">
                     <Button
                       size="xs"
@@ -224,13 +232,23 @@ const SignDocument = () => {
                     <Button
                       size="xs"
                       variant="light"
-                      onClick={() => pdfSigner.setSelectedPage(pdfSigner.selectedPage + 1)}
+                      disabled={pdfSigner.selectedPage >= pdfSigner.totalPages}
+                      onClick={() => {
+                        if (pdfSigner.selectedPage < pdfSigner.totalPages) {
+                          pdfSigner.setSelectedPage(pdfSigner.selectedPage + 1);
+                        }
+                      }}
                     >
                       Página siguiente
                     </Button>
                   </Group>
                   <div
-                    style={{ cursor: 'crosshair' }}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      width: '100%',
+                      position: 'relative',
+                    }}
                     onClick={pdfSigner.handlePdfClick}
                   >
                     <PdfPageViewer
@@ -238,33 +256,33 @@ const SignDocument = () => {
                       pageNumber={pdfSigner.selectedPage}
                       width={600}
                     />
+                    {pdfSigner.signaturePosition && (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          left: `${pdfSigner.signaturePosition.x}%`,
+                          top: `${pdfSigner.signaturePosition.y}%`,
+                          width: 160,
+                          height: 80,
+                          pointerEvents: 'none',
+                          transform: 'translate(-50%, -50%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: 'rgba(255,255,255,0.8)',
+                          borderRadius: 8,
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                        }}
+                      >
+                        <SignatureStamp
+                          text={logic.selectedDocument?.name || "Documento"}
+                          documentId={logic.selectedDocument?.id?.toString() || ""}
+                          certId={logic.certificateFile?.id?.toString() || ""}
+                          certPassword={logic.certificatePassword}
+                        />
+                      </div>
+                    )}
                   </div>
-                  {pdfSigner.signaturePosition && (
-                    <div
-                      style={{
-                        position: 'absolute',
-                        left: `${pdfSigner.signaturePosition.x}%`,
-                        top: `${pdfSigner.signaturePosition.y}%`,
-                        width: 160,
-                        height: 80,
-                        pointerEvents: 'none',
-                        transform: 'translate(-50%, -50%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'rgba(255,255,255,0.8)',
-                        borderRadius: 8,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-                      }}
-                    >
-                      <SignatureStamp
-                        text={logic.selectedDocument?.name || "Documento"}
-                        documentId={logic.selectedDocument?.id?.toString() || ""}
-                        certId={logic.certificateFile?.id?.toString() || ""}
-                        certPassword={logic.certificatePassword}
-                      />
-                    </div>
-                  )}
                 </div>
               )}
               <Alert 
