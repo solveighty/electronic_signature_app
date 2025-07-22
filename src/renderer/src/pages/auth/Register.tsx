@@ -10,7 +10,9 @@ const Register = () => {
 
   return (
     <Container size={420} my={40}>
+      {/* Header de Registro */}
       <RegisterHeader />
+      {/* Contenedor principal del formulario de registro */}
       <Paper radius="md" p="xl" withBorder>
         <RegisterForm
           form={form}
@@ -18,6 +20,7 @@ const Register = () => {
           registerApi={registerApi}
           handleSubmit={handleSubmit}
         />
+        {/* Pie de página con enlace a inicio de sesión */}
         <RegisterFooter onLogin={() => navigate("/login")} />
       </Paper>
     </Container>
