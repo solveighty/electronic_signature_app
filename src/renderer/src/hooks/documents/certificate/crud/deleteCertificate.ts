@@ -1,5 +1,5 @@
 import { toast } from 'react-toastify';
-import { deleteCertificate as deleteCertificateApi } from '../../../../utils/api';
+import { deleteCertificate as deleteCertificateApi } from '../../../../utils/api/api';
 import { fetchUserCertificate } from './fetchUserCertificate';
 import { Document } from '../../../../types/document';
 

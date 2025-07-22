@@ -1,4 +1,5 @@
 import axios from "axios";
+import { GenerateCertificateData } from "./types/generateCertificate";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -88,17 +89,7 @@ api.interceptors.response.use(
 );
 
 // Función para generar un certificado
-export function generateCertificate(data: {
-  country: string;
-  state: string;
-  locality: string;
-  organization: string;
-  orgUnit: string;
-  commonName: string;
-  email: string;
-  challengePassword: string;
-  optionalCompany?: string;
-}) {
+export function generateCertificate(data: GenerateCertificateData) {
   return api.post("/api/uploads/certificates/generate", data);
 }
 

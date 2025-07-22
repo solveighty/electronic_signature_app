@@ -1,4 +1,4 @@
-import { uploadPdfDocument as uploadPdfApi, getUserDocuments } from '../../../../utils/api';
+import { uploadPdfDocument as uploadPdfApi, getUserDocuments } from '../../../../utils/api/api';
 import { toast } from 'react-toastify';
 import { Document } from '../../../../types/document';
 

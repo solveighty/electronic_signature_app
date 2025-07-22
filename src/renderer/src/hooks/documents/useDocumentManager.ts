@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getPdfDocumentUrl } from "../../utils/api";
+import { getPdfDocumentUrl } from "../../utils/api/api";
 import { useAuth } from "../../context/AuthContext";
 import { fetchUserDocuments } from "./pdf/crud/fetchUserDocuments";
 import { uploadPdf } from "./pdf/crud/uploadPdf";

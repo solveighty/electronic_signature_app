@@ -2,7 +2,7 @@ import { toast } from "react-toastify";
 import {
   uploadCertificate as uploadCertificateApi,
   updateCertificate as updateCertificateApi,
-} from "../../../../utils/api";
+} from "../../../../utils/api/api";
 import { fetchUserCertificate } from "./fetchUserCertificate";
 import { Document } from '../../../../types/document';
 

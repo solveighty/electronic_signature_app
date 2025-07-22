@@ -1,4 +1,4 @@
-import { getUserDocuments } from '../../../../utils/api';
+import { getUserDocuments } from '../../../../utils/api/api';
 import { Document } from '../../../../types/document';
 
 export const fetchUserDocuments = async (): Promise<Document[]> => {

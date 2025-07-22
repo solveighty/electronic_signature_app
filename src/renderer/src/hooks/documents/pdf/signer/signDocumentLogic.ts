@@ -1,5 +1,5 @@
 import { toast } from 'react-toastify';
-import { signPdfWithStamp, signPdfDocument, getPdfDocumentUrl } from '../../../../utils/api';
+import { signPdfWithStamp, signPdfDocument, getPdfDocumentUrl } from '../../../../utils/api/api';
 
 export async function handleSignDocumentLogic({
   selectedDocumentId,

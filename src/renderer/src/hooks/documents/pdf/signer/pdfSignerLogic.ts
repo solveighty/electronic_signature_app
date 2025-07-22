@@ -1,5 +1,5 @@
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
-import { getPdfDocumentUrl } from "../../../../utils/api";
+import { getPdfDocumentUrl } from "../../../../utils/api/api";
 
 export const fetchPdfUrl = async (
   documentId: string,

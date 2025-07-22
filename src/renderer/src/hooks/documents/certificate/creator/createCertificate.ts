@@ -1,4 +1,4 @@
-import { generateCertificate } from "../../../../utils/api";
+import { generateCertificate } from "../../../../utils/api/api";
 import { toast } from "react-toastify";
 import { CertificateForm } from "../../../../types/certificate";
 export const createCertificate = async (

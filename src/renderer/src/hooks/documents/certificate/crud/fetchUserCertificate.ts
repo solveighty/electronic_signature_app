@@ -1,4 +1,4 @@
-import { getUserCertificate } from "../../../../utils/api";
+import { getUserCertificate } from "../../../../utils/api/api";
 import { Document } from '../../../../types/document';
 
 export const fetchUserCertificate = async (

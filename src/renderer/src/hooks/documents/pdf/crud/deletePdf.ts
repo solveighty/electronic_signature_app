@@ -1,5 +1,5 @@
 import { toast } from 'react-toastify';
-import { deletePdfDocument as deletePdfDocumentApi } from '../../../../utils/api';
+import { deletePdfDocument as deletePdfDocumentApi } from '../../../../utils/api/api';
 import { Document } from '../../../../types/document';
 
 export const deletePdf = async (
