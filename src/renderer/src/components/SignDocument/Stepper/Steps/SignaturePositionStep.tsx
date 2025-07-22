@@ -60,6 +60,7 @@ const SignaturePositionStep = ({
             fileUrl={securePdfUrl}
             pageNumber={pdfSigner.selectedPage}
             width={600}
+            onClick={pdfSigner.handlePdfClick}
           />
           {pdfSigner.signaturePosition && (
             <div

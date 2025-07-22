@@ -4,7 +4,13 @@ import { PdfPageViewerProps } from "./types/pdfPageViewer";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${(pdfjsLib as any).version}/pdf.worker.min.js`;
 
-const PdfPageViewer = ({ fileUrl, pageNumber, width = 600 }: PdfPageViewerProps) => {
+interface PdfPageViewerPropsWithClick extends PdfPageViewerProps {
+  onClick?: (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => void;
+}
+
+const ZOOM_FACTOR = 1.79; // Define un factor de zoom mayor que 1
+
+const PdfPageViewer = ({ fileUrl, pageNumber, width = 600, onClick }: PdfPageViewerPropsWithClick) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -18,7 +24,7 @@ const PdfPageViewer = ({ fileUrl, pageNumber, width = 600 }: PdfPageViewerProps)
       // Suma la rotación del viewport (usualmente 0) y la de la página
       const rotation = (page.rotate || 0) + (page.viewerRotation || 0);
       const viewport = page.getViewport({ 
-        scale: width / page.getViewport({ scale: 1 }).width, 
+        scale: (width / page.getViewport({ scale: 1 }).width) * ZOOM_FACTOR,
         rotation 
       });
       const canvas = canvasRef.current;
@@ -44,7 +50,13 @@ const PdfPageViewer = ({ fileUrl, pageNumber, width = 600 }: PdfPageViewerProps)
     };
   }, [fileUrl, pageNumber, width]);
 
-  return <canvas ref={canvasRef} style={{ borderRadius: 8, border: "1px solid #ddd" }} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ borderRadius: 8, border: "1px solid #ddd" }}
+      onClick={onClick}
+    />
+  );
 };
 
 export default PdfPageViewer;
