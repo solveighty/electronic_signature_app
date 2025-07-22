@@ -459,11 +459,8 @@ export const signPdfWithStamp = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { certId, certPassword, page, x, y } = req.body;
     const stampImageBuffer = req.file?.buffer;
-    const userId = extractUserIdFromToken(req);
 
-    if (!id || !certId || !certPassword || !userId) {
-      return res.status(400).json({ error: "Faltan datos para firmar" });
-    }
+    console.log(`[signPdfWithStamp] Recibido: page=${page}, x=${x}, y=${y}`);
 
     await signPdfAndReplace(
       id,

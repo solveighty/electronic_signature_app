@@ -72,6 +72,9 @@ export function useSignDocumentLogic() {
         );
       }
 
+      // LOG para depuración
+      console.log('Coordenadas que se envían:', signaturePosition);
+
       if (stampBlob) {
         await signPdfWithStamp(
           selectedDocumentId,

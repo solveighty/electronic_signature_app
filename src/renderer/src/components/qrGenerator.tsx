@@ -9,19 +9,20 @@ type Props = {
   certPassword: string;
 };
 
-const SignatureStamp: React.FC<Props> = ({ text }) => {
+const SignatureStamp: React.FC<Props> = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { userName } = useAuth();
 
   useEffect(() => {
     const drawStamp = async () => {
       const timestamp = new Date().toISOString().substring(0, 10);
-      const qrText = `Firma Electrónica:\n${userName}\n${text}\n${timestamp}\nPUCESE`;
+      // Elimina el nombre del archivo
+      const qrText = `Firma Electrónica:\n${userName}\n${timestamp}\nPUCESE`;
 
       const qrDataUrl = await QRCode.toDataURL(qrText, {
         errorCorrectionLevel: "H",
         margin: 2,
-        width: 200,
+        width: 120, // tamaño reducido
         color: {
           dark: "#000000",
           light: "#FFFFFF",
@@ -36,12 +37,12 @@ const SignatureStamp: React.FC<Props> = ({ text }) => {
       const qrImg = new window.Image();
       qrImg.src = qrDataUrl;
       qrImg.onload = () => {
-        ctx.font = "16px sans-serif";
+        ctx.font = "14px sans-serif";
         const lines = qrText.split("\n");
         const textWidth = Math.max(...lines.map((line) => ctx.measureText(line).width));
-        const padding = 20;
+        const padding = 10;
         const width = qrImg.width + textWidth + padding;
-        const height = Math.max(qrImg.height, lines.length * 22 + 20);
+        const height = Math.max(qrImg.height, lines.length * 18 + 10);
 
         canvas.width = width;
         canvas.height = height;
@@ -49,18 +50,18 @@ const SignatureStamp: React.FC<Props> = ({ text }) => {
         ctx.drawImage(qrImg, 0, 0);
 
         ctx.fillStyle = "#000";
-        ctx.font = "16px sans-serif";
+        ctx.font = "14px sans-serif";
         ctx.textAlign = "left";
         ctx.textBaseline = "top";
 
         lines.forEach((line, i) => {
-          ctx.fillText(line, qrImg.width + 10, 10 + i * 22);
+          ctx.fillText(line, qrImg.width + 8, 8 + i * 18);
         });
       };
     };
 
     drawStamp();
-  }, [text, userName]);
+  }, [userName]);
 
   return (
     <div>

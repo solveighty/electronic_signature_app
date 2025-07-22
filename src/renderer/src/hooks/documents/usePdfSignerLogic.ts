@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { getPdfDocumentUrl } from "../../utils/api";
 
 export function usePdfSignerLogic() {
-  const { token } = useAuth();
+  useAuth();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [selectedPage, setSelectedPage] = useState(1);
   const [signaturePosition, setSignaturePosition] = useState<{ page: number; x: number; y: number } | null>(null);

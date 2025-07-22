@@ -21,30 +21,40 @@ async function addStampToPdf(
   stampText: string,
   stampImageBuffer?: Buffer,
   page: number = 1,
-  x: number = 50,
-  y: number = 50
+  x: number = 50, // porcentaje
+  y: number = 50  // porcentaje
 ): Promise<Buffer> {
   const pdfDoc = await PDFDocument.load(pdfBuffer);
   const pages = pdfDoc.getPages();
-  // Asegura que la página existe
-  const targetPage = pages[Math.max(0, Math.min(page - 1, pages.length - 1))];
+
+  // Log para depuración
+  console.log(`[addStampToPdf] Página solicitada: ${page}, Total páginas: ${pages.length}`);
+
+  // Selecciona la página correcta (índice base 0)
+  const pageIndex = Math.max(0, Math.min(Number(page) - 1, pages.length - 1));
+  const targetPage = pages[pageIndex];
+
+  // Tamaño de la estampa (puedes ajustar)
+  const stampWidth = 120; // tamaño reducido
+  const stampHeight = 120;
+
+  // Convierte porcentaje a píxeles y ajusta el eje Y
+  const pageWidth = targetPage.getWidth();
+  const pageHeight = targetPage.getHeight();
+  const xPx = (x / 100) * pageWidth;
+  const yPx = pageHeight - ((y / 100) * pageHeight) - stampHeight;
 
   if (stampImageBuffer) {
     const pngImage = await pdfDoc.embedPng(stampImageBuffer);
     targetPage.drawImage(pngImage, {
-      x,
-      y,
-      width: 300,
-      height: 150,
+      x: xPx,
+      y: yPx,
+      width: stampWidth,
+      height: stampHeight,
     });
-  } else {
-    console.log('No se recibió imagen de estampa');
   }
 
-  const modifiedPdfBytes = await pdfDoc.save({
-    useObjectStreams: false,
-    addDefaultPage: false,
-  });
+  const modifiedPdfBytes = await pdfDoc.save({ useObjectStreams: false });
   return Buffer.from(modifiedPdfBytes);
 }
 
@@ -52,7 +62,7 @@ export async function signPdfAndReplace(
     documentId: string,
     certId: string,
     certPassword: string,
-    stampImageBuffer?: Buffer, // <-- Nuevo parámetro opcional
+    stampImageBuffer?: Buffer,
     page: number = 1,
     x: number = 50,
     y: number = 50

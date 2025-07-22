@@ -6,10 +6,10 @@ import {
 } from '@tabler/icons-react';
 import { useSignDocumentLogic } from '../hooks/documents/useSignDocumentLogic';
 import { usePdfSignerLogic } from '../hooks/documents/usePdfSignerLogic';
-import { Viewer } from '@react-pdf-viewer/core';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 import { useEffect, useState } from 'react';
 import SignatureStamp from '../components/qrGenerator';
+import PdfPageViewer from '../components/PdfPageViewer';
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${(pdfjsLib as any).version}/pdf.worker.min.js`;
 
@@ -27,6 +27,16 @@ const SignDocument = () => {
       setSecurePdfUrl(null);
     }
   }, [logic.selectedDocument]);
+
+  useEffect(() => {
+    if (pdfSigner.signaturePosition) {
+      logic.setSignaturePosition({
+        page: String(pdfSigner.signaturePosition.page),
+        x: String(pdfSigner.signaturePosition.x),
+        y: String(pdfSigner.signaturePosition.y),
+      });
+    }
+  }, [pdfSigner.signaturePosition]);
 
   return (
     <>
@@ -201,12 +211,32 @@ const SignDocument = () => {
               <Text fw={500} mb="md">Selecciona la posición de la firma en el documento PDF</Text>
               {securePdfUrl && (
                 <div style={{ position: 'relative', border: '1px solid #ddd', borderRadius: 8, overflow: 'hidden', marginBottom: 24 }}>
+                  <Group justify="center" mb="xs">
+                    <Button
+                      size="xs"
+                      variant="light"
+                      disabled={pdfSigner.selectedPage <= 1}
+                      onClick={() => pdfSigner.setSelectedPage(pdfSigner.selectedPage - 1)}
+                    >
+                      Página anterior
+                    </Button>
+                    <Text size="sm" mx="md">Página {pdfSigner.selectedPage}</Text>
+                    <Button
+                      size="xs"
+                      variant="light"
+                      onClick={() => pdfSigner.setSelectedPage(pdfSigner.selectedPage + 1)}
+                    >
+                      Página siguiente
+                    </Button>
+                  </Group>
                   <div
                     style={{ cursor: 'crosshair' }}
                     onClick={pdfSigner.handlePdfClick}
                   >
-                    <Viewer 
-                      fileUrl={securePdfUrl} 
+                    <PdfPageViewer
+                      fileUrl={securePdfUrl}
+                      pageNumber={pdfSigner.selectedPage}
+                      width={600}
                     />
                   </div>
                   {pdfSigner.signaturePosition && (
