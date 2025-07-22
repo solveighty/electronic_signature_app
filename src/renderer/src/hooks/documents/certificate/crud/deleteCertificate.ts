@@ -1,7 +1,7 @@
 import { toast } from 'react-toastify';
 import { deleteCertificate as deleteCertificateApi } from '../../../../utils/api';
 import { fetchUserCertificate } from './fetchUserCertificate';
-import { Document } from '../../useDocumentManager';
+import { Document } from '../../../../types/document';
 
 export const deleteCertificateHandler = async (
   certificateFile: Document | null,

@@ -1,5 +1,5 @@
 import { getUserCertificate } from "../../../../utils/api";
-import { Document } from "../../useDocumentManager";
+import { Document } from '../../../../types/document';
 
 export const fetchUserCertificate = async (
   setCertificateFile: (cert: Document | null) => void,

@@ -1,12 +1,6 @@
 import { TextInput, PasswordInput, Button } from "@mantine/core";
 import { animated } from "@react-spring/web";
-
-interface LoginFormProps {
-  form: any;
-  loginProps: any;
-  loginApi: any;
-  handleSubmit: (values: any) => void;
-}
+import { LoginFormProps } from "./types/loginForm";
 
 const LoginForm = ({ form, loginProps, loginApi, handleSubmit }: LoginFormProps) => (
   <form onSubmit={form.onSubmit(handleSubmit)}>

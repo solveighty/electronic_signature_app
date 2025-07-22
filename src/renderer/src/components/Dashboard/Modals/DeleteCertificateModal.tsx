@@ -1,12 +1,6 @@
 import { Modal, Group, Button, Text } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
-
-interface DeleteCertificateModalProps {
-  opened: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  loading: boolean;
-}
+import { DeleteCertificateModalProps } from './types/deleteCertificateModal';
 
 const DeleteCertificateModal = ({
   opened,

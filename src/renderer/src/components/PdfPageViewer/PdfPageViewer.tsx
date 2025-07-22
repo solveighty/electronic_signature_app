@@ -1,13 +1,8 @@
 import { useEffect, useRef } from "react";
 import * as pdfjsLib from "pdfjs-dist/build/pdf";
+import { PdfPageViewerProps } from "./types/pdfPageViewer";
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${(pdfjsLib as any).version}/pdf.worker.min.js`;
-
-interface PdfPageViewerProps {
-  fileUrl: string;
-  pageNumber: number;
-  width?: number;
-}
 
 const PdfPageViewer = ({ fileUrl, pageNumber, width = 600 }: PdfPageViewerProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);

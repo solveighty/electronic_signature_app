@@ -1,13 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from "react";
-import { setAuthToken } from "../utils/api";
-
-// Tipado del contexto
-type AuthContextType = {
-  token: string | null;
-  userName: string | null;
-  setToken: (token: string | null) => void;
-  setUserName: (name: string | null) => void;
-};
+import { handleSetToken } from "../utils/auth/auth";
+import { AuthContextType } from "../types/auth";
 
 // Crear el contexto
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,8 +11,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userName, setUserName] = useState<string | null>(null);
 
   const setToken = (newToken: string | null) => {
-    setTokenState(newToken);
-    setAuthToken(newToken); // Configurar el token en el interceptor de axios
+    handleSetToken(setTokenState, newToken);
   };
 
   return (

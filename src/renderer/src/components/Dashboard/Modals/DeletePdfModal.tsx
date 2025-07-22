@@ -1,12 +1,6 @@
 import { Modal, Group, Button, Text } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
-
-interface DeletePdfModalProps {
-  opened: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  loading: boolean;
-}
+import { DeletePdfModalProps } from './types/deletePdfModal';
 
 const DeletePdfModal = ({
   opened,

@@ -9,14 +9,7 @@ import { certificateUpload } from "./certificate/crud/certificateUpload";
 import { deleteCertificateHandler } from "./certificate/crud/deleteCertificate";
 import { handleFileChange as handleFileChangeExternal } from "./event/handleFileChange";
 import { loadUserDocuments as loadUserDocumentsExternal } from "./pdf/crud/loadUserDocuments";
-
-export interface Document {
-  id: number | string;
-  name: string;
-  type: "pdf" | "p12";
-  status: string;
-  createdAt?: Date;
-}
+import { Document } from "../../types/document";
 
 export const useDocumentManager = () => {
   const [documents, setDocuments] = useState<Document[]>([]);

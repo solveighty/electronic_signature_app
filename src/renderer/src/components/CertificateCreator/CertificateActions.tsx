@@ -1,10 +1,5 @@
 import { Alert, Button } from "@mantine/core";
-
-interface CertificateActionsProps {
-  error: string | null;
-  loading: boolean;
-  onCreate: () => void;
-}
+import { CertificateActionsProps } from "./types/certificateActions";
 
 const CertificateActions = ({ error, loading, onCreate }: CertificateActionsProps) => (
   <>

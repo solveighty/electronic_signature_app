@@ -1,9 +1,5 @@
 import { TextInput } from "@mantine/core";
-
-interface CertificateFormProps {
-  form: any;
-  handleChange: (field: string, value: string) => void;
-}
+import { CertificateFormProps } from "./types/certificateForm";
 
 const inputClassNames = {
   input:

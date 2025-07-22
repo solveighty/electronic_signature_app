@@ -1,4 +1,4 @@
-import { Document } from "../../../useDocumentManager";
+import { Document } from "../../../../../types/document";
 
 export function getDocumentOptions(pdfDocuments: Document[]) {
   return pdfDocuments

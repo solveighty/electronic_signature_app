@@ -1,12 +1,6 @@
 import { Paper, Group, Box, Text, Button } from '@mantine/core';
 import { IconUser, IconLogout } from '@tabler/icons-react';
-
-interface DashboardHeaderProps {
-  userName: string;
-  darkMode: boolean;
-  onToggleDarkMode: () => void;
-  onLogout: () => void;
-}
+import { DashboardHeaderProps } from './types/dashboardHeader';
 
 const DashboardHeader = ({
   userName,

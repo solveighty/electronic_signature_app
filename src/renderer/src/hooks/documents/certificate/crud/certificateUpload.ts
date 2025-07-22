@@ -4,7 +4,7 @@ import {
   updateCertificate as updateCertificateApi,
 } from "../../../../utils/api";
 import { fetchUserCertificate } from "./fetchUserCertificate";
-import { Document } from "../../useDocumentManager";
+import { Document } from '../../../../types/document';
 
 export const certificateUpload = async (
   file: File,

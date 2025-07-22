@@ -1,15 +1,9 @@
 import React, { useRef, useEffect } from "react";
 import QRCode from "qrcode";
 import { useAuth } from "../../context/AuthContext";
+import { QrGeneratorProps } from "./types/qrGenerator";
 
-type Props = {
-  text: string;
-  documentId: string;
-  certId: string;
-  certPassword: string;
-};
-
-const SignatureStamp: React.FC<Props> = () => {
+const SignatureStamp: React.FC<QrGeneratorProps> = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { userName } = useAuth();
 

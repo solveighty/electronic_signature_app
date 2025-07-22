@@ -1,10 +1,6 @@
 import { Card, Group, Text, Badge } from '@mantine/core';
 import { IconSignature, IconCheck, IconX } from '@tabler/icons-react';
-
-interface SignatureStatusCardProps {
-  hasCertificate: boolean;
-  documentOptionsCount: number;
-}
+import { SignatureStatusCardProps } from './types/signatureStatusCard';
 
 const SignatureStatusCard = ({
   hasCertificate,

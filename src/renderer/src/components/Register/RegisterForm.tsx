@@ -1,12 +1,6 @@
 import { TextInput, PasswordInput, Button } from "@mantine/core";
 import { animated } from "@react-spring/web";
-
-interface RegisterFormProps {
-  form: any;
-  registerProps: any;
-  registerApi: any;
-  handleSubmit: (values: any) => void;
-}
+import { RegisterFormProps } from "./types/registerForm";
 
 const RegisterForm = ({ form, registerProps, registerApi, handleSubmit }: RegisterFormProps) => (
   <form onSubmit={form.onSubmit(handleSubmit)}>

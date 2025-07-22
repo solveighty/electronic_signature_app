@@ -1,14 +1,6 @@
 import { Modal, Group, Button, Text, PasswordInput } from '@mantine/core';
 import { IconLock, IconEye, IconEyeOff } from '@tabler/icons-react';
-
-interface CertificateKeyModalProps {
-  opened: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  value: string;
-  onChange: (value: string) => void;
-  onCancel: () => void;
-}
+import { CertificateKeyModalProps } from './types/certificateKeyModal';
 
 const CertificateKeyModal = ({
   opened,

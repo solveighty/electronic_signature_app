@@ -1,10 +1,5 @@
 import { Modal, Box, Text, Paper, Divider, Group, Button } from '@mantine/core';
-
-interface SignaturePreviewModalProps {
-  opened: boolean;
-  onClose: () => void;
-  signaturePosition: { page: string; x: string; y: string };
-}
+import { SignaturePreviewModalProps } from './types/signaturePreviewModal';
 
 const SignaturePreviewModal = ({
   opened,

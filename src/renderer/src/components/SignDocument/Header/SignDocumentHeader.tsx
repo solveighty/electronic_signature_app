@@ -1,10 +1,6 @@
 import { Group, Title, Button } from '@mantine/core';
 import { IconRefresh } from '@tabler/icons-react';
-
-interface SignDocumentHeaderProps {
-  onRefresh: () => void;
-  loading: boolean;
-}
+import { SignDocumentHeaderProps } from './types/signDocumentHeader';
 
 const SignDocumentHeader = ({
   onRefresh,

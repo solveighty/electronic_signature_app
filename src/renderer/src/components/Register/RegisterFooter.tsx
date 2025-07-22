@@ -1,8 +1,5 @@
 import { Text, Anchor } from "@mantine/core";
-
-interface RegisterFooterProps {
-  onLogin: () => void;
-}
+import { RegisterFooterProps } from "./types/registerFooter";
 
 const RegisterFooter = ({ onLogin }: RegisterFooterProps) => (
   <Text ta="center" mt="md">

@@ -1,18 +1,6 @@
 import { generateCertificate } from "../../../../utils/api";
 import { toast } from "react-toastify";
-
-export interface CertificateForm {
-  country: string;
-  state: string;
-  locality: string;
-  organization: string;
-  orgUnit: string;
-  commonName: string;
-  email: string;
-  challengePassword: string;
-  optionalCompany: string;
-}
-
+import { CertificateForm } from "../../../../types/certificate";
 export const createCertificate = async (
   form: CertificateForm,
   setForm: (form: CertificateForm) => void,
