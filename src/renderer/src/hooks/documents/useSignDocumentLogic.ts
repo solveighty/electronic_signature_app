@@ -2,8 +2,19 @@ import { useState, useEffect } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { useDocumentManager } from './useDocumentManager';
 import { toast } from 'react-toastify';
-import { signPdfWithStamp, signPdfDocument, getPdfDocumentUrl } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
+import {
+  handleSignDocumentLogic,
+  handleDownloadSignedDocumentLogic,
+  handleRefreshLogic,
+  handleResetLogic,
+} from './pdf/signer/signDocumentLogic';
+import { getDocumentOptions } from './pdf/crud/options/getDocumentOptions';
+import {
+  canProceedToPassword,
+  canProceedToPosition,
+  canSignDocument
+} from './pdf/validatorSteps/stepValidation';
 
 export function useSignDocumentLogic() {
   const [active, setActive] = useState(0);
@@ -28,12 +39,7 @@ export function useSignDocumentLogic() {
 
   const selectedDocument = pdfDocuments.find(doc => doc.id === selectedDocumentId);
 
-  const documentOptions = pdfDocuments
-    .filter(doc => doc.status === 'Pendiente de firma')
-    .map(doc => ({
-      value: doc.id.toString(),
-      label: doc.name
-    }));
+  const documentOptions = getDocumentOptions(pdfDocuments);
 
   useEffect(() => {
     if (active === 1 && !hasCertificate) {
@@ -41,91 +47,46 @@ export function useSignDocumentLogic() {
     }
   }, [hasCertificate, active]);
 
-  const handleRefresh = () => {
-    refreshCertificate();
-    refreshDocuments();
-    toast.info('Estado actualizado');
-  };
-
-  const canProceedToPassword = hasCertificate && selectedDocumentId;
-  const canProceedToPosition = canProceedToPassword && certificatePassword.length >= 1;
-  const canSignDocument = canProceedToPosition &&
-    signaturePosition.page &&
-    signaturePosition.x &&
-    signaturePosition.y;
-
   const handleSignDocument = async () => {
-    if (!selectedDocumentId || !certificatePassword || !hasCertificate || !certificateFile?.id) {
-      setError('Falta información requerida para firmar el documento');
-      return;
-    }
-
-    try {
-      setIsSigningInProgress(true);
-      setError(null);
-
-      const canvas = document.querySelector('#signature-stamp-canvas') as HTMLCanvasElement;
-      let stampBlob: Blob | null = null;
-      if (canvas) {
-        stampBlob = await new Promise<Blob | null>((resolve) =>
-          canvas.toBlob((blob) => resolve(blob), 'image/png')
-        );
-      }
-
-      // LOG para depuración
-      console.log('Coordenadas que se envían:', signaturePosition);
-
-      if (stampBlob) {
-        await signPdfWithStamp(
-          selectedDocumentId,
-          certificateFile.id.toString(),
-          certificatePassword,
-          stampBlob,
-          token || '',
-          Number(signaturePosition.page),
-          Number(signaturePosition.x),
-          Number(signaturePosition.y)
-        );
-      } else {
-        await signPdfDocument(
-          selectedDocumentId,
-          certificateFile.id.toString(),
-          certificatePassword,
-          token || ''
-        );
-      }
-
-      // Obtener URL del PDF firmado para descargar/previsualizar
-      const url = await getPdfDocumentUrl(selectedDocumentId);
-      setSignedDocumentUrl(url);
-
-      setActive(3); // Paso final del Stepper: completado
-      toast.success('Documento firmado con éxito');
-      handleDownloadSignedDocument();
-      await refreshDocuments();
-    } catch (error: any) {
-      setError(error.message || 'Error al firmar el documento');
-      toast.error('Error al firmar el documento');
-    } finally {
-      setIsSigningInProgress(false);
-    }
+    await handleSignDocumentLogic({
+      selectedDocumentId,
+      certificatePassword,
+      hasCertificate,
+      certificateFile,
+      signaturePosition,
+      token,
+      setIsSigningInProgress,
+      setError,
+      setSignedDocumentUrl,
+      setActive,
+      refreshDocuments,
+      handleDownloadSignedDocument,
+    });
   };
 
   const handleDownloadSignedDocument = () => {
-    if (signedDocumentUrl) {
-      window.open(signedDocumentUrl, '_blank');
-      toast.info('Descargando documento firmado...');
-    }
+    handleDownloadSignedDocumentLogic(signedDocumentUrl);
+  };
+
+  const handleRefresh = () => {
+    handleRefreshLogic(refreshCertificate, refreshDocuments);
+    toast.info('Estado actualizado');
   };
 
   const handleReset = () => {
-    setActive(0);
-    setSelectedDocumentId(null);
-    setCertificatePassword('');
-    setSignaturePosition({ page: '1', x: '50', y: '50' });
-    setSignedDocumentUrl(null);
-    setError(null);
+    handleResetLogic(
+      setActive,
+      setSelectedDocumentId,
+      setCertificatePassword,
+      setSignaturePosition,
+      setSignedDocumentUrl,
+      setError
+    );
   };
+
+  const canProceedToPasswordValue = canProceedToPassword(hasCertificate, selectedDocumentId);
+  const canProceedToPositionValue = canProceedToPosition(canProceedToPasswordValue, certificatePassword);
+  const canSignDocumentValue = canSignDocument(canProceedToPositionValue, signaturePosition);
 
   return {
     active,
@@ -151,9 +112,9 @@ export function useSignDocumentLogic() {
     selectedDocument,
     documentOptions,
     handleRefresh,
-    canProceedToPassword,
-    canProceedToPosition,
-    canSignDocument,
+    canProceedToPassword: canProceedToPasswordValue,
+    canProceedToPosition: canProceedToPositionValue,
+    canSignDocument: canSignDocumentValue,
     handleSignDocument,
     handleDownloadSignedDocument,
     handleReset,
