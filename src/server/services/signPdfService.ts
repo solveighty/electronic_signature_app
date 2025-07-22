@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,38 +16,46 @@ if (!fs.existsSync(outputDir)) {
 }
 
 // Esta función agrega un texto y una imagen al PDF
-async function addStampToPdf(pdfBuffer: Buffer, stampText: string, stampImageBuffer?: Buffer): Promise<Buffer> {
-    const pdfDoc = await PDFDocument.load(pdfBuffer);
-    const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
+async function addStampToPdf(
+  pdfBuffer: Buffer,
+  stampText: string,
+  stampImageBuffer?: Buffer,
+  page: number = 1,
+  x: number = 50,
+  y: number = 50
+): Promise<Buffer> {
+  const pdfDoc = await PDFDocument.load(pdfBuffer);
+  const pages = pdfDoc.getPages();
+  // Asegura que la página existe
+  const targetPage = pages[Math.max(0, Math.min(page - 1, pages.length - 1))];
 
-    // Debug: guardar la imagen recibida
-    if (stampImageBuffer) {
-        fs.writeFileSync(path.join(outputDir, 'debug_stamp.png'), stampImageBuffer);
-        console.log('Stamp image buffer size:', stampImageBuffer.length);
-        const pngImage = await pdfDoc.embedPng(stampImageBuffer);
-        firstPage.drawImage(pngImage, {
-            x: 50,
-            y: 50,
-            width: 300,
-            height: 150,
-        });
-    } else {
-        console.log('No se recibió imagen de estampa');
-    }
-
-    const modifiedPdfBytes = await pdfDoc.save({
-        useObjectStreams: false,
-        addDefaultPage: false,
+  if (stampImageBuffer) {
+    const pngImage = await pdfDoc.embedPng(stampImageBuffer);
+    targetPage.drawImage(pngImage, {
+      x,
+      y,
+      width: 300,
+      height: 150,
     });
-    return Buffer.from(modifiedPdfBytes);
+  } else {
+    console.log('No se recibió imagen de estampa');
+  }
+
+  const modifiedPdfBytes = await pdfDoc.save({
+    useObjectStreams: false,
+    addDefaultPage: false,
+  });
+  return Buffer.from(modifiedPdfBytes);
 }
 
 export async function signPdfAndReplace(
     documentId: string,
     certId: string,
     certPassword: string,
-    stampImageBuffer?: Buffer // <-- Nuevo parámetro opcional
+    stampImageBuffer?: Buffer, // <-- Nuevo parámetro opcional
+    page: number = 1,
+    x: number = 50,
+    y: number = 50
 ): Promise<void> {
     try {
         console.log('[signPdfAndReplace] Recuperando PDF original...');
@@ -60,7 +68,7 @@ export async function signPdfAndReplace(
         // 3. Agregar estampado visual usando la imagen recibida
         const stampText = 'Firmado electrónicamente por PUCESE'; // Personaliza el texto
         // Si tienes un buffer de imagen (por ejemplo, QR generado), pásalo como segundo argumento
-        pdfBuffer = await addStampToPdf(pdfBuffer, stampText, stampImageBuffer);
+        pdfBuffer = await addStampToPdf(pdfBuffer, stampText, stampImageBuffer, page, x, y);
 
         // 4. Verificar que el PDF termina con %%EOF
         const eofMarker = Buffer.from('%%EOF');

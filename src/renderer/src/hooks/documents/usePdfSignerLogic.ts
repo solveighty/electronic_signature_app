@@ -6,15 +6,17 @@ export function usePdfSignerLogic() {
   const { token } = useAuth();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [selectedPage, setSelectedPage] = useState(1);
-  const [signaturePosition, setSignaturePosition] = useState<{ x: number; y: number } | null>(null);
+  const [signaturePosition, setSignaturePosition] = useState<{ page: number; x: number; y: number } | null>(null);
 
   const handlePdfClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
-    setSignaturePosition({ x, y });
+    setSignaturePosition({ page: selectedPage, x, y });
 
-    console.log(`Coordenadas de firma: x=${x.toFixed(2)}%, y=${y.toFixed(2)}%`);
+    console.log(
+      `Coordenadas de firma: página=${selectedPage}, x=${x.toFixed(2)}%, y=${y.toFixed(2)}%`
+    );
   };
 
   const pdfUrl = pdfFile ? URL.createObjectURL(pdfFile) : null;

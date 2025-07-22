@@ -19,6 +19,7 @@ const SignDocument = () => {
 
   const [securePdfUrl, setSecurePdfUrl] = useState<string | null>(null);
 
+
   useEffect(() => {
     if (logic.selectedDocument) {
       pdfSigner.fetchPdfUrl(String(logic.selectedDocument.id)).then(setSecurePdfUrl);
@@ -204,7 +205,9 @@ const SignDocument = () => {
                     style={{ cursor: 'crosshair' }}
                     onClick={pdfSigner.handlePdfClick}
                   >
-                    <Viewer fileUrl={securePdfUrl} />
+                    <Viewer 
+                      fileUrl={securePdfUrl} 
+                    />
                   </div>
                   {pdfSigner.signaturePosition && (
                     <div

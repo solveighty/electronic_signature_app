@@ -457,7 +457,7 @@ export const signPdfDocument = async (req: Request, res: Response) => {
 export const signPdfWithStamp = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { certId, certPassword } = req.body;
+    const { certId, certPassword, page, x, y } = req.body;
     const stampImageBuffer = req.file?.buffer;
     const userId = extractUserIdFromToken(req);
 
@@ -465,7 +465,15 @@ export const signPdfWithStamp = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Faltan datos para firmar" });
     }
 
-    await signPdfAndReplace(id, certId, certPassword, stampImageBuffer);
+    await signPdfAndReplace(
+      id,
+      certId,
+      certPassword,
+      stampImageBuffer,
+      Number(page),
+      Number(x),
+      Number(y)
+    );
 
     return res.status(200).json({ message: "Documento firmado con estampa" });
   } catch (error: any) {

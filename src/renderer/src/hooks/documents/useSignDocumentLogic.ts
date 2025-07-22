@@ -78,7 +78,10 @@ export function useSignDocumentLogic() {
           certificateFile.id.toString(),
           certificatePassword,
           stampBlob,
-          token || ''
+          token || '',
+          Number(signaturePosition.page),
+          Number(signaturePosition.x),
+          Number(signaturePosition.y)
         );
       } else {
         await signPdfDocument(

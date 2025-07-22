@@ -135,12 +135,18 @@ export async function signPdfWithStamp(
   certId: string,
   certPassword: string,
   stampImage: Blob,
-  token: string
+  token: string,
+  page: number,
+  x: number,
+  y: number
 ) {
   const formData = new FormData();
   formData.append('certId', certId);
   formData.append('certPassword', certPassword);
   formData.append('stampImage', stampImage, 'stamp.png');
+  formData.append('page', String(page));
+  formData.append('x', String(x));
+  formData.append('y', String(y));
 
   return api.post(`/api/pdf/${documentId}/sign-with-stamp`, formData, {
     headers: {
