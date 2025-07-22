@@ -1,6 +1,6 @@
 import { Group, Button, Box, Text, Modal } from '@mantine/core';
 import { IconCertificate, IconAlertCircle } from '@tabler/icons-react';
-import CertificateCreator from '../../../pages/CertificateCreator';
+import CertificateCreator from '../../../pages/documents/CertificateCreator';
 
 const CreateCertificatePanel = ({ logic }: { logic: any }) => (
   <>

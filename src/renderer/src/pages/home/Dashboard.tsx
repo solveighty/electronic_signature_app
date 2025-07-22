@@ -1,14 +1,14 @@
 import { Container, Title, Tabs } from '@mantine/core';
 import { IconUpload, IconFile, IconCertificate, IconSignature } from '@tabler/icons-react';
-import { useDashboardLogic } from '../hooks/index/useDashboardLogic';
-import UploadPanel from '../components/Dashboard/Tabs/UploadPanel';
-import SignPanel from '../components/Dashboard/Tabs/SignPanel';
-import DocumentsPanel from '../components/Dashboard/Tabs/DocumentsPanel';
-import CreateCertificatePanel from '../components/Dashboard/Tabs/CreateCertificatePanel';
-import DeletePdfModal from '../components/Dashboard/Modals/DeletePdfModal';
-import DeleteCertificateModal from '../components/Dashboard/Modals/DeleteCertificateModal';
-import CertificateKeyModal from '../components/Dashboard/Modals/CertificateKeyModal';
-import DashboardHeader from '../components/Dashboard/Header/DashboardHeader';
+import { useDashboardLogic } from '../../hooks/index/useDashboardLogic';
+import UploadPanel from '../../components/Dashboard/Tabs/UploadPanel';
+import SignPanel from '../../components/Dashboard/Tabs/SignPanel';
+import DocumentsPanel from '../../components/Dashboard/Tabs/DocumentsPanel';
+import CreateCertificatePanel from '../../components/Dashboard/Tabs/CreateCertificatePanel';
+import DeletePdfModal from '../../components/Dashboard/Modals/DeletePdfModal';
+import DeleteCertificateModal from '../../components/Dashboard/Modals/DeleteCertificateModal';
+import CertificateKeyModal from '../../components/Dashboard/Modals/CertificateKeyModal';
+import DashboardHeader from '../../components/Dashboard/Header/DashboardHeader';
 
 const Dashboard = () => {
   const logic = useDashboardLogic();

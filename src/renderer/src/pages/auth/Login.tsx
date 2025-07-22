@@ -10,7 +10,7 @@ import {
   Center,
 } from "@mantine/core";
 import { animated } from "@react-spring/web";
-import { useLoginLogic } from "../hooks/auth/useLoginLogic";
+import { useLoginLogic } from "../../hooks/auth/useLoginLogic";
 
 const Login = () => {
   const { form, loginProps, loginApi, handleSubmit, navigate } = useLoginLogic();

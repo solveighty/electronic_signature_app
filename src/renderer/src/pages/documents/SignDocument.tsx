@@ -1,12 +1,12 @@
 import { Container } from '@mantine/core';
-import { useSignDocumentLogic } from '../hooks/documents/useSignDocumentLogic';
-import { usePdfSignerLogic } from '../hooks/documents/usePdfSignerLogic';
+import { useSignDocumentLogic } from '../../hooks/documents/useSignDocumentLogic';
+import { usePdfSignerLogic } from '../../hooks/documents/usePdfSignerLogic';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf';
 import { useEffect, useState } from 'react';
-import SignStepper from '../components/SignDocument/Stepper/SignStepper';
-import SignatureStatusCard from '../components/SignDocument/Card/SignatureStatusCard';
-import SignDocumentHeader from '../components/SignDocument/Header/SignDocumentHeader';
-import SignaturePreviewModal from '../components/SignDocument/Modals/SignaturePreviewModal';
+import SignStepper from '../../components/SignDocument/Stepper/SignStepper';
+import SignatureStatusCard from '../../components/SignDocument/Card/SignatureStatusCard';
+import SignDocumentHeader from '../../components/SignDocument/Header/SignDocumentHeader';
+import SignaturePreviewModal from '../../components/SignDocument/Modals/SignaturePreviewModal';
 
 (pdfjsLib as any).GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${(pdfjsLib as any).version}/pdf.worker.min.js`;
 

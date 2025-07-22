@@ -10,7 +10,7 @@ import {
   Title,
 } from "@mantine/core";
 import { animated } from "@react-spring/web";
-import { useRegisterLogic } from "../hooks/auth/useRegisterLogic";
+import { useRegisterLogic } from "../../hooks/auth/useRegisterLogic";
 
 const Register = () => {
   const { form, registerProps, registerApi, handleSubmit, navigate } =
