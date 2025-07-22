@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "@mantine/form";
 import { useSpring } from "@react-spring/web";
 import { register as RegisterApi } from "../../utils/api/api";
-import { toast } from 'react-toastify';
+import { handleRegister } from "./logic/registerLogic";
 
 export function useRegisterLogic() {
   const navigate = useNavigate();
@@ -30,18 +30,13 @@ export function useRegisterLogic() {
   }));
 
   const handleSubmit = async () => {
-    try {
-      await RegisterApi(
-        form.values.name,
-        form.values.email,
-        form.values.password
-      );
-      toast.success('¡Cuenta creada con éxito!');
-      navigate("/login");
-    } catch (error: any) {
-      console.error("Error al registrarse:", error);
-      toast.error('Error al registrarse. Por favor, intenta de nuevo.');
-    }
+    await handleRegister({
+      name: form.values.name,
+      email: form.values.email,
+      password: form.values.password,
+      registerApi: RegisterApi,
+      navigate,
+    });
   };
 
   return {

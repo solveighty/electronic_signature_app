@@ -3,7 +3,7 @@ import { useForm } from "@mantine/form";
 import { useSpring } from "@react-spring/web";
 import { login as LoginApi } from "../../utils/api/api";
 import { useAuth } from "../../context/AuthContext";
-import { toast } from 'react-toastify';
+import { handleLogin } from "./logic/loginLogic";
 
 export function useLoginLogic() {
   const navigate = useNavigate();
@@ -27,22 +27,14 @@ export function useLoginLogic() {
   }));
 
   const handleSubmit = async () => {
-    try {
-      const response = await LoginApi(form.values.email, form.values.password);
-      setToken(response.data.token);
-
-      if (response.data.user && response.data.user.name) {
-        setUserName(response.data.user.name);
-      } else {
-        setUserName(form.values.email.split('@')[0]);
-      }
-
-      toast.success('¡Inicio de sesión exitoso!');
-      navigate("/main");
-    } catch (error: any) {
-      console.error("Error al iniciar sesión:", error);
-      toast.error('Error al iniciar sesión. Verifica tus credenciales.');
-    }
+    await handleLogin({
+      email: form.values.email,
+      password: form.values.password,
+      loginApi: LoginApi,
+      setToken,
+      setUserName,
+      navigate,
+    });
   };
 
   return {
