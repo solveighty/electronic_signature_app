@@ -1,5 +1,5 @@
-import { getUserCertificate } from '../../../utils/api';
-import { Document } from '../useDocumentManager';
+import { getUserCertificate } from "../../../../utils/api";
+import { Document } from "../../useDocumentManager";
 
 export const fetchUserCertificate = async (
   setCertificateFile: (cert: Document | null) => void,
@@ -15,22 +15,22 @@ export const fetchUserCertificate = async (
       const certDoc: Document = {
         id: cert._id,
         name: cert.fileName,
-        type: 'p12',
+        type: "p12",
         status: "Certificado disponible",
-        createdAt: new Date(cert.createdAt)
+        createdAt: new Date(cert.createdAt),
       };
       setCertificateFile(certDoc);
 
-      setDocuments(prevDocs => {
-        const docsWithoutCerts = prevDocs.filter(doc => doc.type !== 'p12');
+      setDocuments((prevDocs) => {
+        const docsWithoutCerts = prevDocs.filter((doc) => doc.type !== "p12");
         return [...docsWithoutCerts, certDoc];
       });
     } else {
       setCertificateFile(null);
-      setDocuments(prevDocs => prevDocs.filter(doc => doc.type !== 'p12'));
+      setDocuments((prevDocs) => prevDocs.filter((doc) => doc.type !== "p12"));
     }
   } catch (error) {
-    console.error('Error al cargar certificado:', error);
+    console.error("Error al cargar certificado:", error);
     setCertificateFile(null);
   } finally {
     setIsLoadingDocuments(false);
