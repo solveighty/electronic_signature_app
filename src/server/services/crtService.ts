@@ -22,10 +22,10 @@ export const storeCertificate = async (
   password: string
 ): Promise<string> => {
   try {
-    // Verificar primero si el usuario ya tiene un certificado
-    const existingCertificates = await Certificate.find({ userId });
-    if (existingCertificates.length > 0) {
-      await Certificate.deleteOne({ _id: existingCertificates[0]._id });
+    // Verificar si no existe un certificado con el mismo nombre
+    const existingCertificates = await Certificate.findOne({ userId, fileName });
+    if (existingCertificates) {
+      throw new Error (`Ya existe un certificado con el nombre: ${fileName}`);
     }
 
     if (!fs.existsSync(filePath)) {

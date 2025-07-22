@@ -12,6 +12,7 @@ import { generateP12ForUser } from "../services/p12GeneratorService";
 import { getDecryptedPdfBuffer } from "../services/pdfService";
 import PdfDocument from '../models/PdfDocument';
 import { signPdfAndReplace } from "../services/signPdfService";
+import {v4 as uuidv4} from 'uuid';
 
 // Obtener la ruta base del proyecto
 const __filename = fileURLToPath(import.meta.url);
@@ -22,6 +23,8 @@ const rootDir = path.resolve(__dirname, '../../..');
 const filesDir = path.join(rootDir, "files");
 const pdfDir = path.join(filesDir, "pdf");
 const certDir = path.join(filesDir, "certificates");
+
+const uniqueFilename = `cert-${uuidv4()}.p12`;
 
 if (!fs.existsSync(filesDir)) fs.mkdirSync(filesDir, { recursive: true });
 if (!fs.existsSync(pdfDir)) fs.mkdirSync(pdfDir, { recursive: true });
@@ -261,12 +264,13 @@ export const generateCertificate = async (req: Request, res: Response) => {
       commonName,
       email,
       challengePassword,
-      optionalCompany
+      optionalCompany,
+      filename: uniqueFilename
     });
 
     const certificateId = await storeCertificate(
       p12Path,
-      `${userId}-cert.p12`,
+      uniqueFilename,
       userId,
       challengePassword
     );

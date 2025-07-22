@@ -14,6 +14,7 @@ export interface CertificateUserData {
   email: string;
   challengePassword: string;
   optionalCompany?: string;
+  filename?:string;
 }
 
 const __filename = fileURLToPath(import.meta.url);
