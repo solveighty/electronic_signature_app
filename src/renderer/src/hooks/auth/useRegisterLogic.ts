@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "@mantine/form";
 import { useSpring } from "@react-spring/web";
 import { register as RegisterApi } from "../../utils/api/api";
-import { handleRegister } from "./logic/registerLogic";
+import { handleRegister } from "./handle/registerLogic";
 
 export function useRegisterLogic() {
   const navigate = useNavigate();

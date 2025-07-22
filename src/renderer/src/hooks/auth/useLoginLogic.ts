@@ -3,7 +3,7 @@ import { useForm } from "@mantine/form";
 import { useSpring } from "@react-spring/web";
 import { login as LoginApi } from "../../utils/api/api";
 import { useAuth } from "../../context/AuthContext";
-import { handleLogin } from "./logic/loginLogic";
+import { handleLogin } from "./handle/loginLogic";
 
 export function useLoginLogic() {
   const navigate = useNavigate();
