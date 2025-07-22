@@ -1,10 +1,13 @@
-import { Container, Title, Paper, Text, Button, Group, Box, Tabs, Modal, PasswordInput } from '@mantine/core';
-import { IconUpload, IconLogout, IconFile, IconUser, IconCertificate, IconSignature, IconAlertCircle, IconLock, IconEye, IconEyeOff } from '@tabler/icons-react';
+import { Container, Title, Paper, Text, Button, Group, Box, Tabs } from '@mantine/core';
+import { IconUpload, IconLogout, IconFile, IconUser, IconCertificate, IconSignature } from '@tabler/icons-react';
 import { useDashboardLogic } from '../hooks/index/useDashboardLogic';
 import UploadPanel from '../components/Dashboard/Tabs/UploadPanel';
 import SignPanel from '../components/Dashboard/Tabs/SignPanel';
 import DocumentsPanel from '../components/Dashboard/Tabs/DocumentsPanel';
 import CreateCertificatePanel from '../components/Dashboard/Tabs/CreateCertificatePanel';
+import DeletePdfModal from '../components/Dashboard/Modals/DeletePdfModal';
+import DeleteCertificateModal from '../components/Dashboard/Modals/DeleteCertificateModal';
+import CertificateKeyModal from '../components/Dashboard/Modals/CertificateKeyModal';
 
 const Dashboard = () => {
   const logic = useDashboardLogic();
@@ -83,102 +86,34 @@ const Dashboard = () => {
       </Tabs>
 
       {/* Modal de confirmación para eliminar PDF */}
-      <Modal
+      <DeletePdfModal
         opened={logic.deleteModalOpened}
         onClose={logic.closeDeleteModal}
-        title={
-          <Group>
-            <IconAlertCircle size={20} color="red" />
-            <Text fw={700}>Eliminar documento</Text>
-          </Group>
-        }
-        centered
-      >
-        <Text mb="xl">
-          ¿Estás seguro de que deseas eliminar este documento? Esta acción no se puede deshacer.
-        </Text>
-        <Group justify="flex-end">
-          <Button variant="default" onClick={logic.closeDeleteModal}>
-            Cancelar
-          </Button>
-          <Button color="red" onClick={logic.confirmDeletePdf} loading={logic.isLoadingPdf}>
-            Eliminar
-          </Button>
-        </Group>
-      </Modal>
+        onConfirm={logic.confirmDeletePdf}
+        loading={logic.isLoadingPdf}
+      />
 
       {/* Modal de confirmación para eliminar certificado */}
-      <Modal
+      <DeleteCertificateModal
         opened={logic.deleteCertificateModalOpened}
         onClose={logic.closeDeleteCertificateModal}
-        title={
-          <Group>
-            <IconAlertCircle size={20} color="red" />
-            <Text fw={700}>Eliminar certificado</Text>
-          </Group>
-        }
-        centered
-      >
-        <Text mb="xl">
-          ¿Estás seguro de que deseas eliminar tu certificado digital? Esta acción no se puede deshacer y no podrás firmar documentos hasta que subas un nuevo certificado.
-        </Text>
-        <Group justify="flex-end">
-          <Button variant="default" onClick={logic.closeDeleteCertificateModal}>
-            Cancelar
-          </Button>
-          <Button color="red" onClick={logic.confirmDeleteCertificate} loading={logic.isLoadingCertificate}>
-            Eliminar certificado
-          </Button>
-        </Group>
-      </Modal>
+        onConfirm={logic.confirmDeleteCertificate}
+        loading={logic.isLoadingCertificate}
+      />
 
       {/* Modal para solicitar clave personal */}
-      <Modal
+      <CertificateKeyModal
         opened={logic.certificateKeyModalOpened}
         onClose={logic.closeCertificateKeyModal}
-        title={
-          <Group>
-            <IconLock size={20} color="teal" />
-            <Text fw={700}>Clave personal</Text>
-          </Group>
-        }
-        centered
-      >
-        <Text mb="md">
-          Ingresa una clave personal para proteger tu certificado digital. Esta clave será
-          utilizada como segunda capa de seguridad y deberás recordarla para futuras operaciones.
-        </Text>
-
-        <PasswordInput
-          label="Clave personal"
-          placeholder="Ingresa una clave personal segura"
-          value={logic.certificateKey}
-          onChange={(e) => logic.setCertificateKey(e.target.value)}
-          required
-          mb="xl"
-          leftSection={<IconLock size={16} />}
-          visibilityToggleIcon={({ reveal }) =>
-            reveal ? <IconEyeOff size={16} /> : <IconEye size={16} />
-          }
-        />
-
-        <Group justify="flex-end">
-          <Button variant="default" onClick={() => {
-            logic.closeCertificateKeyModal();
-            logic.setTempCertificateFile(null);
-            logic.setCertificateKey('');
-          }}>
-            Cancelar
-          </Button>
-          <Button
-            color="teal"
-            onClick={logic.confirmCertificateUpload}
-            disabled={logic.certificateKey.trim() === ''}
-          >
-            Confirmar
-          </Button>
-        </Group>
-      </Modal>
+        onConfirm={logic.confirmCertificateUpload}
+        value={logic.certificateKey}
+        onChange={logic.setCertificateKey}
+        onCancel={() => {
+          logic.closeCertificateKeyModal();
+          logic.setTempCertificateFile(null);
+          logic.setCertificateKey('');
+        }}
+      />
     </Container>
   );
 };
