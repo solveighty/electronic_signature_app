@@ -34,9 +34,9 @@ async function addStampToPdf(
   const pageIndex = Math.max(0, Math.min(Number(page) - 1, pages.length - 1));
   const targetPage = pages[pageIndex];
 
-  // Tamaño de la estampa (puedes ajustar)
-  const stampWidth = 120; // tamaño reducido
-  const stampHeight = 120;
+  // Tamaño de la estampa (ajusta aquí)
+  const stampWidth = 300; 
+  const stampHeight = 150;
 
   // Convierte porcentaje a píxeles y ajusta el eje Y
   const pageWidth = targetPage.getWidth();
