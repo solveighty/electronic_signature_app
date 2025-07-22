@@ -25,7 +25,10 @@ export const useDocumentManager = () => {
   // Cargar documentos existentes cuando se monta el componente
   useEffect(() => {
     if (token) {
-      fetchUserDocuments();
+      fetchUserDocuments().then((docs) => {
+        setDocuments(docs);
+        setPdfDocuments(docs.filter(doc => doc.type === 'pdf'));
+      });
       fetchUserCertificateHandler();
     }
   }, [token]);
