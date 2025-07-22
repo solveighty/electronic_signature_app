@@ -4,9 +4,9 @@ import { useAuth } from "../../context/AuthContext";
 import { fetchUserDocuments } from "./pdf/fetchUserDocuments";
 import { uploadPdf } from "./pdf/uploadPdf";
 import { deletePdf } from "./pdf/deletePdf";
-import { fetchUserCertificate } from "./certificate/fetchUserCertificate";
-import { certificateUpload } from "./certificate/certificateUpload";
-import { deleteCertificateHandler } from "./certificate/deleteCertificate";
+import { fetchUserCertificate } from "./certificate/crud/fetchUserCertificate";
+import { certificateUpload } from "./certificate/crud/certificateUpload";
+import { deleteCertificateHandler } from "./certificate/crud/deleteCertificate";
 import { handleFileChange as handleFileChangeExternal } from "./event/handleFileChange";
 import { loadUserDocuments as loadUserDocumentsExternal } from "./pdf/loadUserDocuments";
 
