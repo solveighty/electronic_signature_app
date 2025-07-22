@@ -1,6 +1,6 @@
-import { uploadPdfDocument as uploadPdfApi, getUserDocuments } from '../../../utils/api';
+import { uploadPdfDocument as uploadPdfApi, getUserDocuments } from '../../../../utils/api';
 import { toast } from 'react-toastify';
-import { Document } from '../useDocumentManager';
+import { Document } from '../../useDocumentManager';
 
 export const uploadPdf = async (
   file: File,

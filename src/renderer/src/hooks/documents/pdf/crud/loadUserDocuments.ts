@@ -1,6 +1,6 @@
 import { toast } from "react-toastify";
 import { fetchUserDocuments } from "./fetchUserDocuments";
-import { Document } from "../useDocumentManager";
+import { Document } from "../../useDocumentManager";
 
 export const loadUserDocuments = async (
   setPdfDocuments: (docs: Document[]) => void,

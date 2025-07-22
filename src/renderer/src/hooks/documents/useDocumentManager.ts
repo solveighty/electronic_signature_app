@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { getPdfDocumentUrl } from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
-import { fetchUserDocuments } from "./pdf/fetchUserDocuments";
-import { uploadPdf } from "./pdf/uploadPdf";
-import { deletePdf } from "./pdf/deletePdf";
+import { fetchUserDocuments } from "./pdf/crud/fetchUserDocuments";
+import { uploadPdf } from "./pdf/crud/uploadPdf";
+import { deletePdf } from "./pdf/crud/deletePdf";
 import { fetchUserCertificate } from "./certificate/crud/fetchUserCertificate";
 import { certificateUpload } from "./certificate/crud/certificateUpload";
 import { deleteCertificateHandler } from "./certificate/crud/deleteCertificate";
 import { handleFileChange as handleFileChangeExternal } from "./event/handleFileChange";
-import { loadUserDocuments as loadUserDocumentsExternal } from "./pdf/loadUserDocuments";
+import { loadUserDocuments as loadUserDocumentsExternal } from "./pdf/crud/loadUserDocuments";
 
 export interface Document {
   id: number | string;
