@@ -1,5 +1,5 @@
-import { Container, Title, Paper, Text, Button, Group, Box, Tabs } from '@mantine/core';
-import { IconUpload, IconLogout, IconFile, IconUser, IconCertificate, IconSignature } from '@tabler/icons-react';
+import { Container, Title, Tabs } from '@mantine/core';
+import { IconUpload, IconFile, IconCertificate, IconSignature } from '@tabler/icons-react';
 import { useDashboardLogic } from '../hooks/index/useDashboardLogic';
 import UploadPanel from '../components/Dashboard/Tabs/UploadPanel';
 import SignPanel from '../components/Dashboard/Tabs/SignPanel';
@@ -8,6 +8,7 @@ import CreateCertificatePanel from '../components/Dashboard/Tabs/CreateCertifica
 import DeletePdfModal from '../components/Dashboard/Modals/DeletePdfModal';
 import DeleteCertificateModal from '../components/Dashboard/Modals/DeleteCertificateModal';
 import CertificateKeyModal from '../components/Dashboard/Modals/CertificateKeyModal';
+import DashboardHeader from '../components/Dashboard/Header/DashboardHeader';
 
 const Dashboard = () => {
   const logic = useDashboardLogic();
@@ -16,33 +17,12 @@ const Dashboard = () => {
     <Container size="lg" py={40}
       className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Header con saludo personalizado */}
-      <Paper radius="md" p="md" withBorder mb="lg"
-        className='bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'
-      >
-        <Group justify="space-between" align="center">
-          <Group>
-            <IconUser size={24} />
-            <Box>
-              <Text size="sm" c="dimmed">Bienvenido</Text>
-              <Text fw={700}>Hola, {logic.userName || 'Usuario'}</Text>
-            </Box>
-          </Group>
-          <Button
-            onClick={logic.toggleDarkMode}
-            className='px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded'
-          >
-            Cambiar a modo {logic.darkMode ? 'claro' : 'oscuro'}
-          </Button>
-          <Button
-            variant="subtle"
-            color="gray"
-            onClick={logic.handleLogout}
-            leftSection={<IconLogout size={18} />}
-          >
-            Cerrar sesión
-          </Button>
-        </Group>
-      </Paper>
+      <DashboardHeader
+        userName={logic.userName ?? ''}
+        darkMode={logic.darkMode}
+        onToggleDarkMode={logic.toggleDarkMode}
+        onLogout={logic.handleLogout}
+      />
 
       <Title order={2} mb="lg" ta="center">Firma Electrónica</Title>
 
