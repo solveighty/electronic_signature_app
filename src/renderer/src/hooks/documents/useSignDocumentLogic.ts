@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { useDocumentManager } from './useDocumentManager';
 import { toast } from 'react-toastify';
-import { signPdfDocument, getPdfDocumentUrl } from '../../utils/api';
+import { signPdfWithStamp, signPdfDocument, getPdfDocumentUrl } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 
 export function useSignDocumentLogic() {
@@ -64,13 +64,30 @@ export function useSignDocumentLogic() {
       setIsSigningInProgress(true);
       setError(null);
 
-      // Llama a la API pasando certId y certPassword
-      await signPdfDocument(
-        selectedDocumentId,
-        certificateFile.id.toString(),    
-        certificatePassword,
-        token || ""
-      );
+      const canvas = document.querySelector('#signature-stamp-canvas') as HTMLCanvasElement;
+      let stampBlob: Blob | null = null;
+      if (canvas) {
+        stampBlob = await new Promise<Blob | null>((resolve) =>
+          canvas.toBlob((blob) => resolve(blob), 'image/png')
+        );
+      }
+
+      if (stampBlob) {
+        await signPdfWithStamp(
+          selectedDocumentId,
+          certificateFile.id.toString(),
+          certificatePassword,
+          stampBlob,
+          token || ''
+        );
+      } else {
+        await signPdfDocument(
+          selectedDocumentId,
+          certificateFile.id.toString(),
+          certificatePassword,
+          token || ''
+        );
+      }
 
       // Obtener URL del PDF firmado para descargar/previsualizar
       const url = await getPdfDocumentUrl(selectedDocumentId);

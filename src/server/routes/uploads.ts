@@ -12,7 +12,8 @@ import {
   generateCertificate,
   signPdfDocument,
   downloadPdfDocument,
-  downloadCertificate
+  downloadCertificate,
+  signPdfWithStamp
 } from "../controllers/uploadsController";
 import multer from 'multer';
 
@@ -53,16 +54,8 @@ router.get('/certificates/:id/download', (req, res, next) => {
   downloadCertificate(req, res).catch(next);
 });
 
-router.post('/pdf/sign-with-stamp', stampUpload.single('stampImage'), async (req, res, next) => {
-  try {
-    // Extrae datos del formulario
-    const stampImageBuffer = req.file?.buffer;
-
-    // Llama a tu controlador/función de firma con estampa
-    await signPdfDocument(req, res);
-  } catch (error) {
-    next(error);
-  }
+router.post('/pdf/:id/sign-with-stamp', stampUpload.single('stampImage'), (req, res, next) => {
+  signPdfWithStamp(req, res).catch(next);
 });
 
 export default router;

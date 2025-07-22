@@ -9,7 +9,7 @@ type Props = {
   certPassword: string;
 };
 
-const SignatureStamp: React.FC<Props> = ({ text, documentId, certId, certPassword }) => {
+const SignatureStamp: React.FC<Props> = ({ text }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { userName } = useAuth();
 
@@ -18,7 +18,6 @@ const SignatureStamp: React.FC<Props> = ({ text, documentId, certId, certPasswor
       const timestamp = new Date().toISOString().substring(0, 10);
       const qrText = `Firma Electrónica:\n${userName}\n${text}\n${timestamp}\nPUCESE`;
 
-      // Generar QR como dataURL
       const qrDataUrl = await QRCode.toDataURL(qrText, {
         errorCorrectionLevel: "H",
         margin: 2,
@@ -34,7 +33,6 @@ const SignatureStamp: React.FC<Props> = ({ text, documentId, certId, certPasswor
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      // Cargar la imagen QR
       const qrImg = new window.Image();
       qrImg.src = qrDataUrl;
       qrImg.onload = () => {
@@ -48,10 +46,8 @@ const SignatureStamp: React.FC<Props> = ({ text, documentId, certId, certPasswor
         canvas.width = width;
         canvas.height = height;
 
-        // Dibujar QR
         ctx.drawImage(qrImg, 0, 0);
 
-        // Dibujar texto a la derecha
         ctx.fillStyle = "#000";
         ctx.font = "16px sans-serif";
         ctx.textAlign = "left";
@@ -66,31 +62,9 @@ const SignatureStamp: React.FC<Props> = ({ text, documentId, certId, certPasswor
     drawStamp();
   }, [text, userName]);
 
-  // Nueva función para enviar el PNG al backend
-  const sendStampToBackend = async () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
-      const formData = new FormData();
-      formData.append("stampImage", blob, "stamp.png");
-      formData.append("documentId", documentId);
-      formData.append("certId", certId);
-      formData.append("certPassword", certPassword);
-
-      await fetch("/api/firmar-con-estampa", {
-        method: "POST",
-        body: formData,
-        // Si usas autenticación, agrega los headers necesarios
-      });
-      alert("Estampa enviada y PDF firmado.");
-    }, "image/png");
-  };
-
   return (
     <div>
-      <canvas ref={canvasRef} style={{ border: "1px solid #ccc", background: "#fff" }} />
-      <button onClick={sendStampToBackend}>Firmar PDF con esta estampa</button>
+      <canvas ref={canvasRef} id="signature-stamp-canvas" style={{ border: "1px solid #ccc", background: "#fff" }} />
     </div>
   );
 };

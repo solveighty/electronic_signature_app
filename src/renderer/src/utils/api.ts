@@ -130,6 +130,24 @@ export async function signPdfDocument(
   });
 }
 
+export async function signPdfWithStamp(
+  documentId: string,
+  certId: string,
+  certPassword: string,
+  stampImage: Blob,
+  token: string
+) {
+  const formData = new FormData();
+  formData.append('certId', certId);
+  formData.append('certPassword', certPassword);
+  formData.append('stampImage', stampImage, 'stamp.png');
+
+  return api.post(`/api/pdf/${documentId}/sign-with-stamp`, formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  });
+}
 
 export async function getCertificateUrl(certificateId: string): Promise<string | null> {
   try {

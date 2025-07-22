@@ -453,3 +453,23 @@ export const signPdfDocument = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const signPdfWithStamp = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { certId, certPassword } = req.body;
+    const stampImageBuffer = req.file?.buffer;
+    const userId = extractUserIdFromToken(req);
+
+    if (!id || !certId || !certPassword || !userId) {
+      return res.status(400).json({ error: "Faltan datos para firmar" });
+    }
+
+    await signPdfAndReplace(id, certId, certPassword, stampImageBuffer);
+
+    return res.status(200).json({ message: "Documento firmado con estampa" });
+  } catch (error: any) {
+    console.error('Error al firmar con estampa:', error);
+    return res.status(500).json({ error: error.message || "Error al firmar el documento" });
+  }
+};
