@@ -1,9 +1,12 @@
 import { Group, Title, Button, Center, Loader, Card, Box, Badge, Paper, Text, ActionIcon } from '@mantine/core';
 import { IconCertificate, IconTrash, IconFile, IconDownload, IconRefresh } from '@tabler/icons-react';
 import { useState } from 'react';
+import DeletePdfModal from '../Modals/DeletePdfModal';
 
 const DocumentsPanel = ({ logic }: { logic: any }) => {
   const [deletingDocs, setDeletingDocs] = useState<{ [id: string]: boolean }>({});
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [docToDelete, setDocToDelete] = useState<string | null>(null);
 
   const handleDeletePdf = async (documentId: string) => {
     setDeletingDocs(prev => ({ ...prev, [documentId]: true }));
@@ -109,7 +112,10 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                       <ActionIcon
                         color="red"
                         variant="subtle"
-                        onClick={() => handleDeletePdf(doc.id.toString())}
+                        onClick={() => {
+                          setDocToDelete(doc.id.toString());
+                          setDeleteModalOpen(true);
+                        }}
                         disabled={!!deletingDocs[doc.id]}
                         loading={!!deletingDocs[doc.id]}
                         mx="auto"
@@ -128,6 +134,19 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
           <Text c="dimmed">Aún no has subido ningún archivo</Text>
         </Center>
       )}
+
+      <DeletePdfModal
+        opened={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={async () => {
+          if (docToDelete) {
+            await handleDeletePdf(docToDelete);
+            setDeleteModalOpen(false);
+            setDocToDelete(null);
+          }
+        }}
+        loading={!!deletingDocs[docToDelete ?? ""]}
+      />
     </>
   );
 };
