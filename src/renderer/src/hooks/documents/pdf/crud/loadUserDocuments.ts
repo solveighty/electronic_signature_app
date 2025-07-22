@@ -13,12 +13,7 @@ export const loadUserDocuments = async (
     setPdfDocuments(fetchedDocuments);
     setDocuments([...fetchedDocuments]);
   } catch (error: any) {
-    console.error("Error al cargar documentos:", error);
-    const errorMessage =
-      error.response?.data?.error ||
-      error.message ||
-      "Error al cargar documentos";
-    toast.error(errorMessage);
+    toast.error(error.response?.data?.error || error.message || "Error al cargar documentos");
   } finally {
     setIsLoadingDocuments(false);
   }

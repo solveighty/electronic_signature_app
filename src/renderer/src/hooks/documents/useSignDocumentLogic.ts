@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { useDocumentManager } from './useDocumentManager';
-import { toast } from 'react-toastify';
 import { useAuth } from '../../context/AuthContext';
 import {
   handleSignDocumentLogic,
@@ -70,7 +69,6 @@ export function useSignDocumentLogic() {
 
   const handleRefresh = () => {
     handleRefreshLogic(refreshCertificate, refreshDocuments);
-    toast.info('Estado actualizado');
   };
 
   const handleReset = () => {
