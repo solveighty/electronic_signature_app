@@ -11,8 +11,8 @@ import {
   IconDownload,
   IconCheck
 } from '@tabler/icons-react';
-import PdfPageViewer from '../PdfPageViewer';
-import SignatureStamp from '../qrGenerator';
+import PdfPageViewer from '../../PdfPageViewer';
+import SignatureStamp from '../../qrGenerator';
 
 const SignStepper = ({
   logic,
