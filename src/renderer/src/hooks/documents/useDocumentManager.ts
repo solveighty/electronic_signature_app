@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
 import { getPdfDocumentUrl } from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 import { fetchUserDocuments } from "./pdf/fetchUserDocuments";
@@ -8,6 +7,8 @@ import { deletePdf } from "./pdf/deletePdf";
 import { fetchUserCertificate } from "./certificate/fetchUserCertificate";
 import { certificateUpload } from "./certificate/certificateUpload";
 import { deleteCertificateHandler } from "./certificate/deleteCertificate";
+import { handleFileChange as handleFileChangeExternal } from "./event/handleFileChange";
+import { loadUserDocuments as loadUserDocumentsExternal } from "./pdf/loadUserDocuments";
 
 export interface Document {
   id: number | string;
@@ -38,21 +39,11 @@ export const useDocumentManager = () => {
 
   // Función para cargar documentos del usuario
   const loadUserDocuments = async () => {
-    setIsLoadingDocuments(true);
-    try {
-      const fetchedDocuments = await fetchUserDocuments();
-      setPdfDocuments(fetchedDocuments);
-      setDocuments([...fetchedDocuments]);
-    } catch (error: any) {
-      console.error("Error al cargar documentos:", error);
-      const errorMessage =
-        error.response?.data?.error ||
-        error.message ||
-        "Error al cargar documentos";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoadingDocuments(false);
-    }
+    await loadUserDocumentsExternal(
+      setPdfDocuments,
+      setDocuments,
+      setIsLoadingDocuments
+    );
   };
 
   const fetchUserCertificateHandler = async () => {
@@ -96,20 +87,13 @@ export const useDocumentManager = () => {
     fileType: "pdf" | "p12",
     password?: string
   ): Promise<boolean> => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-
-      if (fileType === "pdf") {
-        return await uploadPdfHandler(file);
-      } else if (fileType === "p12") {
-        if (!password) {
-          toast.error("Se requiere una contraseña para el certificado P12");
-          return false;
-        }
-        return await handleCertificateUpload(file, password);
-      }
-    }
-    return false;
+    return await handleFileChangeExternal(
+      e,
+      fileType,
+      uploadPdfHandler,
+      handleCertificateUpload,
+      password
+    );
   };
 
   // Función para eliminar un certificado
