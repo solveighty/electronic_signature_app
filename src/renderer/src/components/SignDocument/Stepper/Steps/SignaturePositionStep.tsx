@@ -1,7 +1,7 @@
 import { Paper, Text, Group, Button, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
-import PdfPageViewer from '../../../PdfPageViewer';
-import SignatureStamp from '../../../qrGenerator';
+import PdfPageViewer from '../../../PdfPageViewer/PdfPageViewer';
+import SignatureStamp from '../../../QrGenerator/qrGenerator';
 
 const SignaturePositionStep = ({
   logic,

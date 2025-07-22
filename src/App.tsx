@@ -4,7 +4,7 @@ import Register from "./renderer/src/pages/auth/Register";
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import Dashboard from "./renderer/src/pages/home/Dashboard";
 import { AuthProvider } from "./renderer/src/context/AuthContext";
-import PrivateRoute from "./renderer/src/components/PrivateRoute";
+import PrivateRoute from "./renderer/src/components/PrivateRoute/PrivateRoute";
 import { ToastContainer } from "react-toastify";
 import { DarkModeProvider } from "./renderer/src/context/DarkMode";
 
