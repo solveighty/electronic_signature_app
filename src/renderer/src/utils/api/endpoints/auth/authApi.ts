@@ -29,6 +29,24 @@ export function resendOTP(email: string): Promise<{ data: OTPResendResponse }> {
   return api.post("/api/auth/register/resend", { email });
 }
 
+// Request Password Reset
+export function requestPasswordReset(email: string) {
+  return api.post("/api/auth/password/request-reset", { email });
+}
+
+// Reset Password
+export function resetPassword(
+  email: string,
+  resetCode: string,
+  newPassword: string
+) {
+  return api.post("/api/auth/password/reset", {
+    email,
+    resetCode,
+    newPassword,
+  });
+}
+
 // Token interceptor
 export const setAuthToken = (token: string | null) => {
   if (token) {

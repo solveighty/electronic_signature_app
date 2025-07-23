@@ -5,11 +5,16 @@ import jwt from "jsonwebtoken";
 import supabase from "../utils/supabase";
 import { Request, Response } from "express";
 import { generateVerificationCode } from "../utils/codeGenerator";
-import { sendVerificationEmail } from "../utils/emailService";
+import {
+  sendVerificationEmail,
+  sendPasswordResetEmail,
+} from "../utils/emailService";
 import {
   storeVerificationCode,
   verifyCode,
   getVerificationData,
+  storePasswordResetCode,
+  verifyPasswordResetCode,
 } from "../utils/verificationStore";
 import "dotenv/config";
 
@@ -219,6 +224,113 @@ export const resendVerificationCode = async (req: Request, res: Response) => {
     res.status(200).json({
       message: "New verification code sent to your email.",
       email,
+    });
+  } catch (error: unknown) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: (error as Error).message || "Server error" });
+  }
+};
+
+export const requestPasswordReset = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    // Validate required fields
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    // Check if user exists
+    const { data: user, error: fetchError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .single();
+
+    if (fetchError || !user) {
+      // Don't reveal if email exists or not for security
+      return res.status(200).json({
+        message: "If the email exists, a password reset code has been sent.",
+      });
+    }
+
+    // Generate password reset code
+    const resetCode = generateVerificationCode();
+
+    // Store password reset code
+    storePasswordResetCode(email, resetCode);
+
+    // Send password reset email
+    await sendPasswordResetEmail({
+      email,
+      resetCode,
+    });
+
+    res.status(200).json({
+      message: "If the email exists, a password reset code has been sent.",
+    });
+  } catch (error: unknown) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ message: (error as Error).message || "Server error" });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { email, resetCode, newPassword } = req.body;
+
+    // Validate required fields
+    if (!email || !resetCode || !newPassword) {
+      return res.status(400).json({
+        message: "Email, reset code, and new password are required",
+      });
+    }
+
+    // Validate password length
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
+    // Verify the reset code
+    const isCodeValid = verifyPasswordResetCode(email, resetCode);
+    if (!isCodeValid) {
+      return res.status(400).json({ message: "Invalid or expired reset code" });
+    }
+
+    // Check if user exists
+    const { data: user, error: fetchError } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .single();
+
+    if (fetchError || !user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(String(newPassword), salt);
+
+    // Update user password
+    const { error: updateError } = await supabase
+      .from("users")
+      .update({ password: hashedPassword })
+      .eq("email", email);
+
+    if (updateError) {
+      console.error("Error updating password:", updateError);
+      return res.status(500).json({ message: "Error updating password" });
+    }
+
+    res.status(200).json({
+      message: "Password has been reset successfully",
     });
   } catch (error: unknown) {
     console.error(error);

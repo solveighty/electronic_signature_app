@@ -22,7 +22,10 @@ const Login = () => {
           handleSubmit={handleSubmit}
         />
         {/* Pie de página con enlace a Registro */}
-        <LoginFooter onRegister={() => navigate("/register")} />
+        <LoginFooter
+          onRegister={() => navigate("/register")}
+          onRecoverPass={() => navigate("/recover-password")}
+        />
       </Paper>
     </Container>
   );

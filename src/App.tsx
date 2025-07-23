@@ -8,6 +8,7 @@ import PrivateRoute from "./renderer/src/components/PrivateRoute/PrivateRoute";
 import { ToastContainer } from "react-toastify";
 import { DarkModeProvider } from "./renderer/src/context/DarkMode";
 import VerifyOTP from "./renderer/src/components/VerifyOTP/VerifyOTP";
+import RecoverPassword from "./renderer/src/components/RecoverPassword/RecoverPassword";
 
 function App() {
   return (
@@ -18,10 +19,8 @@ function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
-              <Route
-                path="/verify"
-                element={<VerifyOTP />}
-              />
+              <Route path="/recover-password" element={<RecoverPassword />} />
+              <Route path="/verify" element={<VerifyOTP />} />
               <Route path="/register" element={<Register />} />
               <Route
                 path="/main"
