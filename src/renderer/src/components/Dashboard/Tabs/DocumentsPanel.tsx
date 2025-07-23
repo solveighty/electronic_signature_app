@@ -93,41 +93,57 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
 
           {logic.pdfDocuments.length > 0 && (
             <>
-              <Title order={5} mb="sm">Mis Documentos PDF</Title>
-              <Paper withBorder p="xs" mb="xs" radius="md">
-                <Group grow gap={0} justify="space-between">
-                  <Text fw={700} size="sm" pl={8}>Nombre del documento</Text>
-                  <Text fw={700} size="sm" style={{ maxWidth: '180px' }}>Fecha de subida</Text>
-                  <Text fw={700} size="sm" ta="center">Estado</Text>
-                  <Text fw={700} size="sm" ta="center" style={{ maxWidth: '80px' }}>Acción</Text>
+              <Title order={5} mb="sm" ta="center">Mis Documentos PDF</Title>
+              <Paper withBorder p="xs" mb="xs" radius="lg" shadow="md" style={{ overflow: 'hidden' }}>
+                <Group gap={0} justify="space-between" align="center" style={{ padding: '12px 24px', background: '#f7fafc', borderBottom: '1px solid #e0e0e0' }}>
+                  <Text fw={700} size="sm" style={{ flex: 2 }}>Nombre del documento</Text>
+                  <Text fw={700} size="sm" style={{ flex: 1 }}>Fecha de subida</Text>
+                  <Text fw={700} size="sm" style={{ flex: 1 }}>Estado</Text>
+                  <Text fw={700} size="sm" style={{ flex: 1, textAlign: 'center' }}>Acción</Text>
                 </Group>
-              </Paper>
-              {logic.pdfDocuments.map((doc: any) => (
-                <Paper key={doc.id} withBorder p="xs" mb="xs" radius="md">
-                  <Group grow gap={0} justify="space-between" align="center">
-                    <Group wrap="nowrap" gap="xs">
-                      <IconFile size={20} />
-                      <Text lineClamp={1}>
-                        {doc.name}
-                      </Text>
+                {logic.pdfDocuments.map((doc: any) => (
+                  <Group
+                    key={doc.id}
+                    gap={0}
+                    justify="space-between"
+                    align="center"
+                    style={{
+                      padding: '16px 24px',
+                      borderBottom: '1px solid #f0f0f0',
+                      background: '#fff',
+                      borderRadius: 12,
+                      marginBottom: 8,
+                      transition: 'box-shadow 0.2s, background 0.2s',
+                      boxShadow: '0 2px 8px rgba(33,150,243,0.04)',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = '#e3f0ff')}
+                    onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
+                  >
+                    <Group gap="xs" style={{ flex: 2 }}>
+                      <IconFile size={20} color="#2196F3" />
+                      <Text fw={500} style={{ wordBreak: 'break-all' }}>{doc.name}</Text>
                     </Group>
-                    <Text size="sm" c="dimmed" style={{ maxWidth: '180px' }}>
+                    <Text size="sm" c="dimmed" style={{ flex: 1 }}>
                       {doc.createdAt && logic.formatDate(doc.createdAt)}
                     </Text>
-                    <Box ta="center">
+                    <Box ta="center" style={{ flex: 1 }}>
                       <Badge
                         color={doc.status === "Firmado" ? "green" : "yellow"}
                         variant="filled"
+                        size="md"
+                        radius="sm"
+                        style={{ fontWeight: 600, letterSpacing: 0.5 }}
                       >
-                        {doc.status}
+                        {doc.status === "Firmado" ? "FIRMADO" : "PENDIENTE DE FIRMA"}
                       </Badge>
                     </Box>
-                    <Box ta="center" style={{ maxWidth: '80px' }}>
+                    <Group gap="xs" style={{ flex: 1, justifyContent: 'center' }}>
                       <ActionIcon
                         color="blue"
                         variant="subtle"
                         onClick={() => logic.handleDownloadPdf(doc.id.toString())}
-                        mx="auto"
+                        title="Descargar"
                       >
                         <IconDownload size={18} />
                       </ActionIcon>
@@ -138,16 +154,14 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                           setDocToDelete(doc.id.toString());
                           setDeleteModalOpen(true);
                         }}
-                        disabled={!!deletingDocs[doc.id]}
-                        loading={!!deletingDocs[doc.id]}
-                        mx="auto"
+                        title="Eliminar"
                       >
                         <IconTrash size={18} />
                       </ActionIcon>
-                    </Box>
+                    </Group>
                   </Group>
-                </Paper>
-              ))}
+                ))}
+              </Paper>
             </>
           )}
         </>
