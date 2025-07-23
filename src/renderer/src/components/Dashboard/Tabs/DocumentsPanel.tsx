@@ -1,4 +1,4 @@
-import { Group, Title, Button, Center, Loader, Card, Box, Badge, Paper, Text, ActionIcon, Stack } from '@mantine/core';
+import { Group, Title, Button, Center, Loader, Card, Box, Badge, Paper, Text, ActionIcon, SimpleGrid } from '@mantine/core';
 import { IconCertificate, IconTrash, IconFile, IconDownload, IconRefresh } from '@tabler/icons-react';
 import { useState } from 'react';
 import DeletePdfModal from '../Modals/DeletePdfModal';
@@ -37,48 +37,57 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
           {(logic.certificateFiles && logic.certificateFiles.length > 0) && (
             <>
               <Title order={5} mb="sm">Mis Certificados Digitales</Title>
-              <Stack gap={16}>
+              <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg">
                 {logic.certificateFiles.map((cert: any) => (
                   <Card
                     key={cert.id}
                     withBorder
-                    radius="md"
-                    mb="lg"
-                    padding="md"
-                    className='dark:bg-gray-800 dark:shadow-lg dark:rounded-lg dark:text-gray-100'
+                    radius="xl"
+                    shadow="lg"
+                    padding="xl"
+                    style={{
+                      background: "linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%)",
+                      transition: "transform 0.2s, box-shadow 0.2s",
+                      cursor: "pointer",
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.03)")}
+                    onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
                   >
-                    <Group justify="space-between" align="flex-start">
-                      <Group align="flex-start" wrap="nowrap">
-                        <IconCertificate size={20} style={{ marginTop: 4 }} />
-                        <Box>
-                          <Text fw={500}>{cert.name}</Text>
-                          {cert.createdAt && (
-                            <Text size="xs" c="dimmed">
-                              Subido el {logic.formatDate(cert.createdAt)}
-                            </Text>
-                          )}
-                        </Box>
-                      </Group>
-                      <Group>
-                        <Badge color="teal" variant="filled">
-                          {cert.status || "CERTIFICADO DISPONIBLE"}
-                        </Badge>
-                        <ActionIcon
-                          color="red"
-                          variant="subtle"
-                          onClick={() => {
-                            logic.setSelectedCertId(cert.id);
-                            logic.openDeleteCertificateModal();
-                          }}
-                          disabled={logic.isLoadingCertificate}
-                        >
-                          <IconTrash size={18} />
-                        </ActionIcon>
-                      </Group>
-                    </Group>
+                    <Center mb="md">
+                      <IconCertificate size={48} color="#26A69A" />
+                    </Center>
+                    <Text fw={700} size="lg" ta="center" mb={4} style={{ wordBreak: "break-all" }}>
+                      {cert.name}
+                    </Text>
+                    {cert.createdAt && (
+                      <Text size="xs" c="dimmed" ta="center" mb={8}>
+                        Subido el {logic.formatDate(cert.createdAt)}
+                      </Text>
+                    )}
+                    <Center mb="md">
+                      <Badge color="teal" variant="filled" size="md">
+                        {cert.status || "CERTIFICADO DISPONIBLE"}
+                      </Badge>
+                    </Center>
+                    <Center>
+                      <ActionIcon
+                        color="red"
+                        variant="light"
+                        onClick={() => {
+                          logic.setSelectedCertId(cert.id);
+                          logic.openDeleteCertificateModal();
+                        }}
+                        disabled={logic.isLoadingCertificate}
+                        size="lg"
+                        title="Eliminar certificado"
+                      >
+                        <IconTrash size={22} />
+                      </ActionIcon>
+                    </Center>
                   </Card>
                 ))}
-              </Stack>
+              </SimpleGrid>
             </>
           )}
 
