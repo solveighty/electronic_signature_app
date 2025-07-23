@@ -1,9 +1,5 @@
 import { toast } from "react-toastify";
-
-interface RegisterApiResponse {
-  message?: string;
-  user?: object;
-}
+import { RegisterApiResponse } from "./types/registerApiResponse";
 
 export async function handleRegister({
   name,

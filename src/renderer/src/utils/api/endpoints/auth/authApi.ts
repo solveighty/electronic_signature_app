@@ -1,18 +1,5 @@
 import api from "../../config/axiosConfig";
-
-interface OTPVerificationResponse {
-  message: string;
-  user?: {
-    id: string;
-    email: string;
-    name: string;
-    verified: boolean;
-  };
-}
-
-interface OTPResendResponse {
-  message: string;
-}
+import { OTPVerificationResponse, OTPResendResponse} from "./types/otpInterace";
 
 // Login
 export function login(email: string, password: string) {
