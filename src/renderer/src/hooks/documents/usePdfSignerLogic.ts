@@ -9,7 +9,7 @@ export function usePdfSignerLogic() {
   const [signaturePosition, setSignaturePosition] = useState<{ page: number; x: number; y: number } | null>(null);
   const [totalPages, setTotalPages] = useState(1);
 
-  const handlePdfClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handlePdfClick = (event: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
     handlePdfClickExternal(event, selectedPage, setSignaturePosition);
   };
 

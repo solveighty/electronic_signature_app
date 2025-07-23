@@ -34,7 +34,7 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
         </Center>
       ) : logic.documents.length > 0 ? (
         <>
-          {logic.certificateFiles.length > 0 && (
+          {(logic.certificateFiles && logic.certificateFiles.length > 0) && (
             <>
               <Title order={5} mb="sm">Mis Certificados Digitales</Title>
               {logic.certificateFiles.map((cert: any) => (

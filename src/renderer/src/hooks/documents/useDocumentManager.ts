@@ -14,7 +14,7 @@ import { Document } from "../../types/document";
 export const useDocumentManager = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [pdfDocuments, setPdfDocuments] = useState<Document[]>([]);
-  const [certificateFile, setCertificateFile] = useState<Document | null>(null);
+  const [certificateFiles, setCertificateFiles] = useState<Document[]>([]);
   const [isLoadingPdf, setIsLoadingPdf] = useState<boolean>(false);
   const [isLoadingCertificate, setIsLoadingCertificate] =
     useState<boolean>(false);
@@ -44,7 +44,7 @@ export const useDocumentManager = () => {
 
   const fetchUserCertificateHandler = async () => {
     await fetchUserCertificate(
-      setCertificateFile,
+      (cert: Document | null) => setCertificateFiles(cert ? [cert] : []),
       setDocuments,
       setIsLoadingDocuments
     );
@@ -69,8 +69,8 @@ export const useDocumentManager = () => {
     return await certificateUpload(
       file,
       password,
-      certificateFile,
-      setCertificateFile,
+      certificateFiles[0] ?? null,
+      (cert: Document | null) => setCertificateFiles(cert ? [cert] : []),
       setDocuments,
       setIsLoadingCertificate,
       setIsLoadingDocuments,
@@ -95,8 +95,8 @@ export const useDocumentManager = () => {
   // Función para eliminar un certificado
   const deleteCertificate = async (): Promise<boolean> => {
     return await deleteCertificateHandler(
-      certificateFile,
-      setCertificateFile,
+      certificateFiles[0] ?? null,
+      (cert: Document | null) => setCertificateFiles(cert ? [cert] : []),
       setDocuments,
       setIsLoadingCertificate,
       setIsLoadingDocuments,
@@ -119,7 +119,7 @@ export const useDocumentManager = () => {
   return {
     documents,
     pdfDocuments,
-    certificateFile,
+    certificateFiles,
     isLoadingPdf,
     isLoadingCertificate,
     isLoadingDocuments,
@@ -129,7 +129,7 @@ export const useDocumentManager = () => {
     handleFileChange,
     refreshDocuments: loadUserDocuments,
     refreshCertificate: fetchUserCertificateHandler,
-    hasCertificate: !!certificateFile,
+    hasCertificate: certificateFiles.length > 0,
     deleteCertificate,
     deletePdf: deletePdfHandler,
     getPdfDocumentUrl,

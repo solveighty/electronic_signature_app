@@ -26,7 +26,7 @@ export function updateCertificate(file: File, password: string) {
 }
 
 export function getUserCertificate() {
-  return api.get("/api/certificate");
+  return api.get("/api/certificates");
 }
 
 export function deleteCertificate() {
