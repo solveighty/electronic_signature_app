@@ -1,5 +1,6 @@
 import api from "../../config/axiosConfig";
 import { OTPVerificationResponse, OTPResendResponse} from "./types/otpInterace";
+import { RegisterApiResponse } from "../../../../hooks/auth/handle/types/registerApiResponse";// Ajusta la ruta si es necesario
 
 // Login
 export function login(email: string, password: string) {
@@ -7,8 +8,9 @@ export function login(email: string, password: string) {
 }
 
 // Register
-export function register(name: string, email: string, password: string) {
-  return api.post("/api/auth/register", { name, email, password });
+export async function register(name: string, email: string, password: string): Promise<RegisterApiResponse> {
+  const response = await api.post("/api/auth/register", { name, email, password });
+  return response.data as RegisterApiResponse;
 }
 
 // Verify OTP
