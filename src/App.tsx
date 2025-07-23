@@ -7,6 +7,7 @@ import { AuthProvider } from "./renderer/src/context/AuthContext";
 import PrivateRoute from "./renderer/src/components/PrivateRoute/PrivateRoute";
 import { ToastContainer } from "react-toastify";
 import { DarkModeProvider } from "./renderer/src/context/DarkMode";
+import VerifyOTP from "./renderer/src/components/VerifyOTP/VerifyOTP";
 
 function App() {
   return (
@@ -17,6 +18,10 @@ function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
+              <Route
+                path="/verify"
+                element={<VerifyOTP />}
+              />
               <Route path="/register" element={<Register />} />
               <Route
                 path="/main"
