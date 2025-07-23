@@ -1,12 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Group, TextInput } from "@mantine/core";
-
-interface OTPInputProps {
-  length: number;
-  value: string;
-  onChange: (value: string) => void;
-  error?: string;
-}
+import { OTPInputProps } from "./types/OTPInputProps";
 
 const OTPInput = ({ length, value, onChange, error }: OTPInputProps) => {
   const [otp, setOtp] = useState<string[]>(new Array(length).fill(""));
