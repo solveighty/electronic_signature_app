@@ -1,79 +1,58 @@
-import { Grid, Paper, Center, Title, Text, Group, Button, Loader, Box, Badge } from '@mantine/core';
-import { IconCertificate, IconKey, IconTrash, IconFileText, IconFileUpload } from '@tabler/icons-react';
+import { Grid, Paper, Center, Title, Text, Button, Box, Badge } from '@mantine/core';
+import { IconCertificate, IconKey, IconFileText, IconFileUpload } from '@tabler/icons-react';
 
 const UploadPanel = ({ logic }: { logic: any }) => (
-  <Grid>
+  <Grid gutter="xl" justify="center">
     {/* Certificado Digital */}
     <Grid.Col span={{ base: 12, md: 6 }}>
-      <Paper radius="md" p="xl" withBorder h="100%"
-        className='bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'>
+      <Paper
+        radius="xl"
+        p="xl"
+        withBorder
+        h="100%"
+        shadow="lg"
+        style={{
+          background: "linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%)",
+          transition: "transform 0.2s, box-shadow 0.2s",
+          cursor: "pointer",
+          boxShadow: "0 4px 24px rgba(38,166,154,0.08)",
+        }}
+        onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.03)")}
+        onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+      >
         <Center style={{ flexDirection: 'column' }} py="lg">
-          <IconCertificate size={48} color="teal" />
+          <IconCertificate size={64} color="#26A69A" />
           <Title order={3} mt="md">Certificado Digital</Title>
-          <Text c="dimmed" mt="xs" mb="lg" ta="center">
-            {logic.certificateFile
-              ? "Ya tienes un certificado. Puedes reemplazarlo si lo necesitas."
-              : "Sube tu archivo .p12 para firmar documentos"}
+          <Text c="dimmed" mt="xs" mb="lg" ta="center" size="md">
+            Sube tu archivo <b>.p12</b> para firmar documentos digitalmente.
           </Text>
-
-          <Group>
-            <label htmlFor="certificate-upload">
-              <Button
-                component="span"
-                leftSection={<IconKey size={18} />}
-                style={{ cursor: 'pointer' }}
-                loading={logic.isLoadingCertificate}
-                color="teal"
-              >
-                {logic.isLoadingCertificate
-                  ? 'Procesando...'
-                  : logic.certificateFile
-                    ? 'Reemplazar certificado'
-                    : 'Seleccionar certificado'}
-                <input
-                  id="certificate-upload"
-                  name="certificate-upload"
-                  type="file"
-                  style={{ display: 'none' }}
-                  onChange={logic.handleCertificateUploadWithKey}
-                  accept=".p12"
-                  disabled={logic.isLoadingCertificate}
-                />
-              </Button>
-            </label>
-
-            {/* Botón para eliminar certificado */}
-            {logic.certificateFile && (
-              <Button
-                color="red"
-                variant="outline"
-                onClick={logic.openDeleteCertificateModal}
-                leftSection={<IconTrash size={18} />}
-                disabled={logic.isLoadingCertificate}
-              >
-                Eliminar
-              </Button>
-            )}
-          </Group>
-
-          {logic.isLoadingDocuments ? (
-            <Center>
-              <Loader size="sm" />
-            </Center>
-          ) : (
-            logic.certificateFile && (
-              <Box mt="md">
-                <Text size="sm" c="dimmed" mb="xs">Certificado actual:</Text>
-                <Badge color="teal" size="lg" variant="light">
-                  {logic.certificateFile.name}
-                </Badge>
-                {logic.certificateFile.createdAt && (
-                  <Text size="xs" c="dimmed" mt={5}>
-                    Subido el {logic.formatDate(logic.certificateFile.createdAt)}
-                  </Text>
-                )}
-              </Box>
-            )
+          <Button
+            leftSection={<IconKey size={20} />}
+            color="teal"
+            size="md"
+            style={{ minWidth: 200 }}
+            loading={logic.isLoadingCertificate}
+            onClick={() => document.getElementById('certificate-upload')?.click()}
+          >
+            {logic.certificateFile ? 'Reemplazar certificado' : 'Seleccionar certificado'}
+          </Button>
+          <input
+            id="certificate-upload"
+            type="file"
+            style={{ display: 'none' }}
+            onChange={logic.handleCertificateUploadWithKey}
+            accept=".p12"
+            disabled={logic.isLoadingCertificate}
+          />
+          {logic.certificateFile && (
+            <Box mt="md">
+              <Badge color="teal" size="lg" variant="light">
+                {logic.certificateFile.name}
+              </Badge>
+              <Text size="xs" c="dimmed" mt={5}>
+                Subido el {logic.formatDate(logic.certificateFile.createdAt)}
+              </Text>
+            </Box>
           )}
         </Center>
       </Paper>
@@ -81,35 +60,45 @@ const UploadPanel = ({ logic }: { logic: any }) => (
 
     {/* Documento PDF */}
     <Grid.Col span={{ base: 12, md: 6 }}>
-      <Paper radius="md" p="xl" withBorder h="100%"
-        className='bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100'>
+      <Paper
+        radius="xl"
+        p="xl"
+        withBorder
+        h="100%"
+        shadow="lg"
+        style={{
+          background: "linear-gradient(135deg, #e3f0ff 0%, #ffffff 100%)",
+          transition: "transform 0.2s, box-shadow 0.2s",
+          cursor: "pointer",
+          boxShadow: "0 4px 24px rgba(33,150,243,0.08)",
+        }}
+        onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.03)")}
+        onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
+      >
         <Center style={{ flexDirection: 'column' }} py="lg">
-          <IconFileText size={48} color="blue" />
+          <IconFileText size={64} color="#2196F3" />
           <Title order={3} mt="md">Documento PDF</Title>
-          <Text c="dimmed" mt="xs" mb="lg" ta="center">
-            Sube el documento PDF que quieres firmar
+          <Text c="dimmed" mt="xs" mb="lg" ta="center" size="md">
+            Sube el documento PDF que quieres firmar electrónicamente.
           </Text>
-
-          <label htmlFor="pdf-upload">
-            <Button
-              component="span"
-              leftSection={<IconFileUpload size={18} />}
-              style={{ cursor: 'pointer' }}
-              loading={logic.isLoadingPdf}
-              color="blue"
-            >
-              {logic.isLoadingPdf ? 'Subiendo...' : 'Seleccionar PDF'}
-              <input
-                id="pdf-upload"
-                name="pdf-upload"
-                type="file"
-                style={{ display: 'none' }}
-                onChange={(e) => logic.handleFileChange(e, 'pdf')}
-                accept=".pdf"
-                disabled={logic.isLoadingPdf}
-              />
-            </Button>
-          </label>
+          <Button
+            leftSection={<IconFileUpload size={20} />}
+            color="blue"
+            size="md"
+            style={{ minWidth: 200 }}
+            loading={logic.isLoadingPdf}
+            onClick={() => document.getElementById('pdf-upload')?.click()}
+          >
+            {logic.isLoadingPdf ? 'Subiendo...' : 'Seleccionar PDF'}
+          </Button>
+          <input
+            id="pdf-upload"
+            type="file"
+            style={{ display: 'none' }}
+            onChange={e => logic.handleFileChange(e, 'pdf')}
+            accept=".pdf"
+            disabled={logic.isLoadingPdf}
+          />
         </Center>
       </Paper>
     </Grid.Col>
