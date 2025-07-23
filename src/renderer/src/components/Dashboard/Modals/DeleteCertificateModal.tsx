@@ -5,8 +5,9 @@ import { DeleteCertificateModalProps } from './types/deleteCertificateModal';
 const DeleteCertificateModal = ({
   opened,
   onClose,
-  onConfirm,
-  loading
+  loading,
+  logic,
+  selectedCertId
 }: DeleteCertificateModalProps) => (
   <Modal
     opened={opened}
@@ -26,7 +27,14 @@ const DeleteCertificateModal = ({
       <Button variant="default" onClick={onClose}>
         Cancelar
       </Button>
-      <Button color="red" onClick={onConfirm} loading={loading}>
+      <Button
+        color="red"
+        onClick={() => {
+          console.log('Eliminar certificado', selectedCertId);
+          logic.confirmDeleteCertificate(selectedCertId);
+        }}
+        loading={loading}
+      >
         Eliminar certificado
       </Button>
     </Group>

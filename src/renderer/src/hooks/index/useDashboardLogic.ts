@@ -5,6 +5,7 @@ import { useDarkMode } from '../../context/DarkMode';
 import { useDocumentManager } from '../documents/useDocumentManager';
 import { useDisclosure } from '@mantine/hooks';
 import { toast } from 'react-toastify';
+import { deleteCertificateById } from '../../utils/api/api';
 
 export function useDashboardLogic() {
   const {
@@ -12,7 +13,6 @@ export function useDashboardLogic() {
     pdfDocuments,
     certificateFiles,
     isLoadingPdf,
-    isLoadingCertificate,
     isLoadingDocuments,
     refreshCertificate,
     handleFileChange,
@@ -35,6 +35,9 @@ export function useDashboardLogic() {
   const [certificateKey, setCertificateKey] = useState('');
   const [tempCertificateFile, setTempCertificateFile] = useState<File | null>(null);
   const [showCreator, setShowCreator] = useState(false);
+
+  const [selectedCertId, setSelectedCertId] = useState<string | null>(null);
+  const [isLoadingCertificateLocal, setIsLoadingCertificateLocal] = useState(false);
 
   const handleLogout = () => {
     setToken(null);
@@ -68,13 +71,20 @@ export function useDashboardLogic() {
     }
   };
 
-  const confirmDeleteCertificate = async () => {
-    const success = await deleteCertificate();
-    if (success) {
-      setTempCertificateFile(null);
-      setCertificateKey('');
+  const confirmDeleteCertificate = async (certId: string | null) => {
+    if (!certId) return;
+    setIsLoadingCertificateLocal(true);
+    try {
+      await deleteCertificateById(certId);
+      setIsLoadingCertificateLocal(false);
+      setSelectedCertId(null);
       closeDeleteCertificateModal();
+      refreshCertificate();
       refreshDocuments();
+      toast.success('Certificado eliminado correctamente');
+    } catch (error) {
+      setIsLoadingCertificateLocal(false);
+      toast.error('No se pudo eliminar el certificado');
     }
   };
 
@@ -137,7 +147,7 @@ export function useDashboardLogic() {
     pdfDocuments,
     certificateFiles,
     isLoadingPdf,
-    isLoadingCertificate,
+    isLoadingCertificate: isLoadingCertificateLocal,
     isLoadingDocuments,
     refreshCertificate,
     handleFileChange,
@@ -178,6 +188,8 @@ export function useDashboardLogic() {
     handleTabChange,
     handleCertificateUploadWithKey,
     confirmCertificateUpload,
-    handleDownloadPdf
+    handleDownloadPdf,
+    selectedCertId,
+    setSelectedCertId
   };
 }

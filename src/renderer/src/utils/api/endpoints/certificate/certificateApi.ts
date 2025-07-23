@@ -33,6 +33,10 @@ export function deleteCertificate() {
   return api.delete("/api/certificate");
 }
 
+export function deleteCertificateById(certificateId: string) {
+  return api.delete(`/api/certificates/${certificateId}`);
+}
+
 export function generateCertificate(data: GenerateCertificateData) {
   return api.post("/api/uploads/certificates/generate", data);
 }

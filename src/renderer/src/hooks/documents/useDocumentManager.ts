@@ -6,10 +6,10 @@ import { uploadPdf } from "./pdf/crud/uploadPdf";
 import { deletePdf } from "./pdf/crud/deletePdf";
 import { fetchUserCertificate } from "./certificate/crud/fetchUserCertificate";
 import { certificateUpload } from "./certificate/crud/certificateUpload";
-import { deleteCertificateHandler } from "./certificate/crud/deleteCertificate";
 import { handleFileChange as handleFileChangeExternal } from "./event/handleFileChange";
 import { loadUserDocuments as loadUserDocumentsExternal } from "./pdf/crud/loadUserDocuments";
 import { Document } from "../../types/document";
+import { deleteCertificateById } from "../../utils/api/endpoints/certificate/certificateApi";
 
 export const useDocumentManager = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -93,16 +93,16 @@ export const useDocumentManager = () => {
     );
   };
 
-  // Función para eliminar un certificado
-  const deleteCertificate = async (): Promise<boolean> => {
-    return await deleteCertificateHandler(
-      certificateFiles[0] ?? null,
-      (cert: Document | null) => setCertificateFiles(cert ? [cert] : []),
-      setDocuments,
-      setIsLoadingCertificate,
-      setIsLoadingDocuments,
-      setError
-    );
+  // Función para eliminar un certificado por ID
+  const deleteCertificate = async (certificateId: string): Promise<boolean> => {
+    try {
+      await deleteCertificateById(certificateId);
+      setCertificateFiles(prev => prev.filter(cert => cert.id !== certificateId));
+      return true;
+    } catch (error: any) {
+      setError(error.response?.data?.error || error.message || "Error al eliminar el certificado");
+      return false;
+    }
   };
 
   // Función para eliminar un documento PDF

@@ -3,4 +3,6 @@ export interface DeleteCertificateModalProps {
   onClose: () => void;
   onConfirm: () => void;
   loading: boolean;
+  logic: any;
+  selectedCertId: string | null;
 }

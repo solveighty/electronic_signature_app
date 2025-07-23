@@ -8,7 +8,7 @@ import {
   updateCertificate, 
   getUserCertificate,
   deletePdfDocument,
-  deleteCertificateHandler,
+  deleteCertificateByIdHandler,
   generateCertificate,
   signPdfDocument,
   downloadPdfDocument,
@@ -36,8 +36,8 @@ router.get("/certificates", (req, res, next) => {
 router.delete("/documents/:id", (req, res, next) => {
   deletePdfDocument(req, res).catch(next);
 });
-router.delete("/certificate", (req, res, next) => {
-  deleteCertificateHandler(req, res).catch(next);
+router.delete("/certificates/:id", (req, res, next) => {
+  deleteCertificateByIdHandler(req, res).catch(next);
 });
 router.post("/uploads/certificates/generate", (req, res, next) => {
   generateCertificate(req, res).catch(next);

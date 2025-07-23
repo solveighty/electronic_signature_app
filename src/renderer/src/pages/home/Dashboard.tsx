@@ -94,8 +94,10 @@ const Dashboard = () => {
       <DeleteCertificateModal
         opened={logic.deleteCertificateModalOpened}
         onClose={logic.closeDeleteCertificateModal}
-        onConfirm={logic.confirmDeleteCertificate}
+        onConfirm={() => logic.confirmDeleteCertificate(logic.selectedCertId)}
         loading={logic.isLoadingCertificate}
+        logic={logic}
+        selectedCertId={logic.selectedCertId}
       />
 
       {/* Modal para solicitar clave personal */}

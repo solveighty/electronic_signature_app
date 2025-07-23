@@ -103,3 +103,51 @@ export const deleteCertificateFromDB = async (
     };
   }
 };
+
+/**
+ * Elimina un certificado por su ID
+ * @param certificateId ID del certificado a eliminar
+ * @param userId ID del usuario para verificación de propiedad
+ */
+export const deleteCertificateById = async (
+  certificateId: string,
+  userId: string
+): Promise<{
+  success: boolean;
+  message?: string;
+  code?: number;
+}> => {
+  try {
+    // Validar que el ID del certificado sea válido
+    if (!mongoose.Types.ObjectId.isValid(certificateId)) {
+      return {
+        success: false,
+        message: 'ID de certificado inválido',
+        code: 400
+      };
+    }
+
+    // Buscar el certificado por ID y usuario
+    const cert = await Certificate.findOne({ _id: certificateId, userId });
+    if (!cert) {
+      return {
+        success: false,
+        message: 'Certificado no encontrado',
+        code: 404
+      };
+    }
+
+    await Certificate.deleteOne({ _id: certificateId, userId });
+
+    return {
+      success: true
+    };
+  } catch (error) {
+    console.error('Error al eliminar certificado:', error);
+    return {
+      success: false,
+      message: 'Error interno al eliminar el certificado',
+      code: 500
+    };
+  }
+};

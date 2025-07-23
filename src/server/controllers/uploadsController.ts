@@ -7,7 +7,7 @@ import { storePdfDocument, getUserPdfDocuments } from "../services/pdfService";
 import { storeCertificate, getUserCertificates, decryptandretrieveCertificate } from "../services/crtService";
 import jwt from "jsonwebtoken";
 import 'dotenv/config';
-import { deleteCertificateFromDB, deletePdfDocumentFromDB } from "../services/deleteService";
+import { deleteCertificateFromDB, deletePdfDocumentFromDB, deleteCertificateById } from "../services/deleteService";
 import { generateP12ForUser } from "../services/p12GeneratorService";
 import { getDecryptedPdfBuffer } from "../services/pdfService";
 import PdfDocument from '../models/PdfDocument';
@@ -348,7 +348,7 @@ export const deletePdfDocument = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteCertificateHandler = async (req: Request, res: Response) => {
+export const deleteCertificateFromDBHandler = async (req: Request, res: Response) => {
   try {
     // Extraer el ID del usuario del token
     const userId = extractUserIdFromToken(req);
@@ -367,6 +367,30 @@ export const deleteCertificateHandler = async (req: Request, res: Response) => {
     }
   } catch (error: any) {
     console.error('Error al eliminar certificado:', error);
+    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
+      error: error.message || "Error al eliminar el certificado"
+    });
+  }
+};
+
+export const deleteCertificateByIdHandler = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = extractUserIdFromToken(req);
+
+    if (!id) {
+      return res.status(400).json({ error: "ID de certificado no proporcionado" });
+    }
+
+    const result = await deleteCertificateById(id, userId);
+
+    if (result.success) {
+      return res.status(200).json({ message: "Certificado eliminado correctamente", certificateId: id });
+    } else {
+      return res.status(result.code || 400).json({ error: result.message });
+    }
+  } catch (error: any) {
+    console.error('Error al eliminar certificado por ID:', error);
     return res.status(error.message === 'No autorizado' ? 401 : 500).json({
       error: error.message || "Error al eliminar el certificado"
     });

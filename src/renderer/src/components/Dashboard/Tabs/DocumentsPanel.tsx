@@ -66,7 +66,10 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                         <ActionIcon
                           color="red"
                           variant="subtle"
-                          onClick={() => logic.openDeleteCertificateModal(cert.id)}
+                          onClick={() => {
+                            logic.setSelectedCertId(cert.id);
+                            logic.openDeleteCertificateModal();
+                          }}
                           disabled={logic.isLoadingCertificate}
                         >
                           <IconTrash size={18} />
