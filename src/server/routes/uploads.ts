@@ -30,7 +30,7 @@ router.post("/uploads/certificates", uploadP12.single("certificate"), (req, res,
 router.put("/uploads/certificates", uploadP12.single("certificate"), (req, res, next) => {
   updateCertificate(req, res).catch(next);
 });
-router.get("/certificate", (req, res, next) => {
+router.get("/certificates", (req, res, next) => {
   getUserCertificate(req, res).catch(next);
 });
 router.delete("/documents/:id", (req, res, next) => {

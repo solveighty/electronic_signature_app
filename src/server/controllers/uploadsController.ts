@@ -12,7 +12,7 @@ import { generateP12ForUser } from "../services/p12GeneratorService";
 import { getDecryptedPdfBuffer } from "../services/pdfService";
 import PdfDocument from '../models/PdfDocument';
 import { signPdfAndReplace } from "../services/signPdfService";
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 // Obtener la ruta base del proyecto
 const __filename = fileURLToPath(import.meta.url);
@@ -24,6 +24,7 @@ const filesDir = path.join(rootDir, "files");
 const pdfDir = path.join(filesDir, "pdf");
 const certDir = path.join(filesDir, "certificates");
 
+// Generar un nombre único para el archivo P12
 const uniqueFilename = `cert-${uuidv4()}.p12`;
 
 if (!fs.existsSync(filesDir)) fs.mkdirSync(filesDir, { recursive: true });
@@ -300,17 +301,17 @@ export const getUserCertificate = async (req: Request, res: Response) => {
     // Extraer el ID del usuario del token
     const userId = extractUserIdFromToken(req);
 
-    // Obtener el certificado del usuario (solo el más reciente)
+    // Obtener todos los certificados del usuario
     const certificates = await getUserCertificates(userId);
 
-    // Devolver solo el más reciente (o null si no hay ninguno)
+    // Devolver todos los certificados 
     res.status(200).json({
-      certificate: certificates.length > 0 ? certificates[0] : null
+      certificates: certificates
     });
   } catch (error: any) {
     console.error('Error en getUserCertificate:', error);
     res.status(error.message === 'No autorizado' ? 401 : 500).json({
-      error: error.message || "Error al obtener certificado"
+      error: error.message || "Error al obtener certificados"
     });
   }
 };

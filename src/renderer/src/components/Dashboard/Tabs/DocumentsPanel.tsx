@@ -34,38 +34,46 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
         </Center>
       ) : logic.documents.length > 0 ? (
         <>
-          {logic.certificateFile && (
+          {logic.certificateFiles.length > 0 && (
             <>
-              <Title order={5} mb="sm">Mi Certificado Digital</Title>
-              <Card withBorder radius="md" mb="lg" padding="md"
-                className='dark:bg-gray-800 dark:shadow-lg dark:rounded-lg dark:text-gray-100'>
-                <Group justify="space-between" align="flex-start">
-                  <Group align="flex-start" wrap="nowrap">
-                    <IconCertificate size={20} style={{ marginTop: 4 }} />
-                    <Box>
-                      <Text fw={500}>{logic.certificateFile.name}</Text>
-                      {logic.certificateFile.createdAt && (
-                        <Text size="xs" c="dimmed">
-                          Subido el {logic.formatDate(logic.certificateFile.createdAt)}
-                        </Text>
-                      )}
-                    </Box>
+              <Title order={5} mb="sm">Mis Certificados Digitales</Title>
+              {logic.certificateFiles.map((cert: any) => (
+                <Card
+                  key={cert.id}
+                  withBorder
+                  radius="md"
+                  mb="lg"
+                  padding="md"
+                  className='dark:bg-gray-800 dark:shadow-lg dark:rounded-lg dark:text-gray-100'
+                >
+                  <Group justify="space-between" align="flex-start">
+                    <Group align="flex-start" wrap="nowrap">
+                      <IconCertificate size={20} style={{ marginTop: 4 }} />
+                      <Box>
+                        <Text fw={500}>{cert.name}</Text>
+                        {cert.createdAt && (
+                          <Text size="xs" c="dimmed">
+                            Subido el {logic.formatDate(cert.createdAt)}
+                          </Text>
+                        )}
+                      </Box>
+                    </Group>
+                    <Group>
+                      <Badge color="teal" variant="filled">
+                        {cert.status || "CERTIFICADO DISPONIBLE"}
+                      </Badge>
+                      <ActionIcon
+                        color="red"
+                        variant="subtle"
+                        onClick={() => logic.openDeleteCertificateModal(cert.id)}
+                        disabled={logic.isLoadingCertificate}
+                      >
+                        <IconTrash size={18} />
+                      </ActionIcon>
+                    </Group>
                   </Group>
-                  <Group>
-                    <Badge color="teal" variant="filled">
-                      {logic.certificateFile.status || "CERTIFICADO DISPONIBLE"}
-                    </Badge>
-                    <ActionIcon
-                      color="red"
-                      variant="subtle"
-                      onClick={logic.openDeleteCertificateModal}
-                      disabled={logic.isLoadingCertificate}
-                    >
-                      <IconTrash size={18} />
-                    </ActionIcon>
-                  </Group>
-                </Group>
-              </Card>
+                </Card>
+              ))}
             </>
           )}
 

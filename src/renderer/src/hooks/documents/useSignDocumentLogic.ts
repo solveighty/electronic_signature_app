@@ -15,9 +15,19 @@ import {
   canSignDocument
 } from './pdf/validatorSteps/stepValidation';
 
+// Ajusta si tu tipo CertificateFileType cambia
+type CertificateFileType = {
+  id: string;
+  name: string;
+  createdAt?: string;
+  status?: string;
+  // otras propiedades que uses
+};
+
 export function useSignDocumentLogic() {
   const [active, setActive] = useState(0);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
+  const [selectedCertificateId, setSelectedCertificateId] = useState<string | null>(null);
   const [certificatePassword, setCertificatePassword] = useState('');
   const [signaturePosition, setSignaturePosition] = useState({ page: '1', x: '50', y: '50' });
   const [isSigningInProgress, setIsSigningInProgress] = useState(false);
@@ -37,6 +47,7 @@ export function useSignDocumentLogic() {
   const { token } = useAuth();
 
   const selectedDocument = pdfDocuments.find(doc => doc.id === selectedDocumentId);
+  const selectedCertificateFile = certificateFile?.id === selectedCertificateId ? certificateFile : null;
 
   const documentOptions = getDocumentOptions(pdfDocuments);
 
@@ -51,7 +62,7 @@ export function useSignDocumentLogic() {
       selectedDocumentId,
       certificatePassword,
       hasCertificate,
-      certificateFile,
+      certificateFile: selectedCertificateFile,
       signaturePosition,
       token,
       setIsSigningInProgress,
@@ -91,6 +102,8 @@ export function useSignDocumentLogic() {
     setActive,
     selectedDocumentId,
     setSelectedDocumentId,
+    selectedCertificateId,
+    setSelectedCertificateId,
     certificatePassword,
     setCertificatePassword,
     signaturePosition,
@@ -103,6 +116,7 @@ export function useSignDocumentLogic() {
     close,
     pdfDocuments,
     certificateFile,
+    selectedCertificateFile,
     isLoadingDocuments,
     refreshDocuments,
     refreshCertificate,

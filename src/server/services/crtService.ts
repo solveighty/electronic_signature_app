@@ -170,8 +170,7 @@ export const getUserCertificates = async (userId: string) => {
     }
 
     const certificates = await Certificate.find({ userId })
-      .sort({ createdAt: -1 })
-      .limit(1);
+      .sort({ createdAt: -1 });
     return certificates;
   } catch (error) {
     console.error('Error al obtener certificados del usuario:', error);
