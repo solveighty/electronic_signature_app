@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "@mantine/form";
 import { useSpring } from "@react-spring/web";
-import { verifyOTP, resendOTP } from "../../utils/api/api";
-import { toast } from "react-toastify";
+import { handleSubmitOTP, handleResendOTP } from "./handle/verifyOTPHandlers";
 
 export function useVerifyOTPLogic() {
   const navigate = useNavigate();
@@ -61,37 +60,22 @@ export function useVerifyOTPLogic() {
     }
   }, [email, password, navigate]);
 
-  const handleSubmit = async (values: { code: string }) => {
-    if (!email || !password) return;
+  const handleSubmit = (values: { code: string }) =>
+    handleSubmitOTP({
+      email,
+      password,
+      values,
+      navigate,
+      setIsLoading,
+    });
 
-    setIsLoading(true);
-    try {
-      await verifyOTP(email, values.code, password);
-      toast.success("¡Cuenta verificada con éxito!");
-      navigate("/login");
-    } catch (error: unknown) {
-      console.error("Error al verificar código:", error);
-      toast.error("Código inválido. Por favor, intenta de nuevo.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleResendCode = async () => {
-    if (!email || countdown > 0) return;
-
-    setIsResending(true);
-    try {
-      await resendOTP(email);
-      toast.success("¡Nuevo código enviado a tu correo!");
-      setCountdown(60); // Reset countdown
-    } catch (error: unknown) {
-      console.error("Error al reenviar código:", error);
-      toast.error("Error al reenviar código. Por favor, intenta de nuevo.");
-    } finally {
-      setIsResending(false);
-    }
-  };
+  const handleResendCode = () =>
+    handleResendOTP({
+      email,
+      countdown,
+      setIsResending,
+      setCountdown,
+    });
 
   return {
     form,
