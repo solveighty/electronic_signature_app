@@ -44,7 +44,7 @@ export const useDocumentManager = () => {
 
   const fetchUserCertificateHandler = async () => {
     await fetchUserCertificate(
-      (cert: Document | null) => setCertificateFiles(cert ? [cert] : []),
+      setCertificateFiles,
       setDocuments,
       setIsLoadingDocuments
     );
@@ -71,6 +71,7 @@ export const useDocumentManager = () => {
       password,
       certificateFiles[0] ?? null,
       (cert: Document | null) => setCertificateFiles(cert ? [cert] : []),
+      setCertificateFiles,
       setDocuments,
       setIsLoadingCertificate,
       setIsLoadingDocuments,

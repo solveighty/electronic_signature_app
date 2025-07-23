@@ -10,7 +10,7 @@ export function useDashboardLogic() {
   const {
     documents,
     pdfDocuments,
-    certificateFile,
+    certificateFiles,
     isLoadingPdf,
     isLoadingCertificate,
     isLoadingDocuments,
@@ -135,7 +135,7 @@ export function useDashboardLogic() {
   return {
     documents,
     pdfDocuments,
-    certificateFile,
+    certificateFiles,
     isLoadingPdf,
     isLoadingCertificate,
     isLoadingDocuments,

@@ -11,6 +11,7 @@ export const certificateUpload = async (
   password: string,
   certificateFile: Document | null,
   setCertificateFile: (cert: Document | null) => void,
+  setCertificateFiles: (certs: Document[]) => void, 
   setDocuments: (fn: (docs: Document[]) => Document[]) => void,
   setIsLoadingCertificate: (loading: boolean) => void,
   setIsLoadingDocuments: (loading: boolean) => void,
@@ -55,7 +56,7 @@ export const certificateUpload = async (
 
     // Hacer una actualización completa después de subir
     await fetchUserCertificate(
-      setCertificateFile,
+      setCertificateFiles,
       setDocuments,
       setIsLoadingDocuments
     );

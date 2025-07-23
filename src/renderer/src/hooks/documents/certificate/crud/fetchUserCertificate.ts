@@ -2,7 +2,7 @@ import { getUserCertificate } from "../../../../utils/api/api";
 import { Document } from '../../../../types/document';
 
 export const fetchUserCertificate = async (
-  setCertificateFile: (cert: Document | null) => void,
+  setCertificateFiles: (certs: Document[]) => void,
   setDocuments: (fn: (docs: Document[]) => Document[]) => void,
   setIsLoadingDocuments: (loading: boolean) => void
 ) => {
@@ -10,28 +10,27 @@ export const fetchUserCertificate = async (
     setIsLoadingDocuments(true);
     const response = await getUserCertificate();
 
-    if (response.data && response.data.certificate) {
-      const cert = response.data.certificate;
-      const certDoc: Document = {
+    if (response.data && Array.isArray(response.data.certificates)) {
+      const certs = response.data.certificates.map((cert: any) => ({
         id: cert._id,
         name: cert.fileName,
         type: "p12",
         status: "Certificado disponible",
-        createdAt: new Date(cert.createdAt),
-      };
-      setCertificateFile(certDoc);
+        createdAt: cert.createdAt ? new Date(cert.createdAt) : undefined,
+      }));
+      setCertificateFiles(certs);
 
       setDocuments((prevDocs) => {
         const docsWithoutCerts = prevDocs.filter((doc) => doc.type !== "p12");
-        return [...docsWithoutCerts, certDoc];
+        return [...docsWithoutCerts, ...certs];
       });
     } else {
-      setCertificateFile(null);
+      setCertificateFiles([]);
       setDocuments((prevDocs) => prevDocs.filter((doc) => doc.type !== "p12"));
     }
   } catch (error) {
-    console.error("Error al cargar certificado:", error);
-    setCertificateFile(null);
+    console.error("Error al cargar certificados:", error);
+    setCertificateFiles([]);
   } finally {
     setIsLoadingDocuments(false);
   }
