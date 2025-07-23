@@ -15,7 +15,7 @@ import {
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { IconArrowLeft, IconMail, IconLock } from "@tabler/icons-react";
+import { IconMail, IconLock } from "@tabler/icons-react";
 import {
   requestPasswordReset,
   resetPassword,
@@ -143,7 +143,7 @@ const RecoverPassword = () => {
                   onClick={handleBackToLogin}
                   size="xs"
                 >
-                  <IconArrowLeft size={12} /> Volver al inicio de sesión
+                  Volver al inicio de sesión
                 </Anchor>
               </Group>
             </Stack>
@@ -208,7 +208,8 @@ const RecoverPassword = () => {
                 onClick={handleBackToRequest}
                 size="xs"
               >
-                <IconArrowLeft size={12} /> Cambiar correo electrónico
+                {" "}
+                Cambiar correo electrónico
               </Anchor>
 
               <Anchor
