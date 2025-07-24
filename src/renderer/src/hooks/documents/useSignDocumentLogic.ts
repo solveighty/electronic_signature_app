@@ -14,7 +14,6 @@ import {
   canProceedToPosition,
   canSignDocument
 } from './pdf/validatorSteps/stepValidation';
-import { CertificateFileType } from './types/CertificateFileType';
 import { signPdfDocument } from '../../utils/api/endpoints/pdf/documentApi';
 import { toast } from 'react-toastify';
 
