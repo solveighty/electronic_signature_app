@@ -79,6 +79,8 @@ const CertificateForm = ({ form, handleChange }: CertificateFormProps) => (
       required
       mt="md"
       classNames={inputClassNames}
+      error={form.challengePassword && form.challengePassword.length < 8 ? "La contraseña debe tener al menos 8 caracteres" : undefined}
+      description="Mínimo 8 caracteres"
     />
     <TextInput
       label="Nombre de la empresa (opcional)"

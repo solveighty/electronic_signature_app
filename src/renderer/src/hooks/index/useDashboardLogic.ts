@@ -113,6 +113,10 @@ export function useDashboardLogic() {
       toast.error("Se requiere un certificado y una clave personal");
       return;
     }
+    if (certificateKey.length < 8) {
+      toast.error("La clave debe tener al menos 8 caracteres");
+      return;
+    }
     closeCertificateKeyModal();
     try {
       const result = await handleFileChange({
