@@ -5,7 +5,7 @@ import uploads from "./routes/uploads";
 import { connectToMongoDB } from "./utils/mongoConnect";
 
 const app = express();
-const PORT = process.env.VITE_API_PORT;
+const PORT = process.env.VITE_ENVIRONMENT === "development" ? 3000 : 80;
 
 // Conectar a MongoDB
 connectToMongoDB().catch(console.error);
