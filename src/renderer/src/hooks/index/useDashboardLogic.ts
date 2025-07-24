@@ -8,7 +8,6 @@ import { toast } from 'react-toastify';
 import { deleteCertificateById } from '../../utils/api/api';
 import { getCertificateUrl } from '../../utils/api/endpoints/certificate/certificateApi';
 
-
 export function useDashboardLogic() {
   const {
     documents,

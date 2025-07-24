@@ -2,7 +2,7 @@ import { Group, Title, Button, Center, Loader, Card, Box, Badge, Paper, Text, Ac
 import { IconCertificate, IconTrash, IconFile, IconDownload, IconRefresh } from '@tabler/icons-react';
 import { useState } from 'react';
 import DeletePdfModal from '../Modals/DeletePdfModal';
-import { handleDeletePdf, handleDownloadCertificate } from './handlers/documentsHandlers';
+import { toast } from 'react-toastify';
 
 const DocumentsPanel = ({ logic }: { logic: any }) => {
   const [deletingDocs, setDeletingDocs] = useState<{ [id: string]: boolean }>({});
@@ -11,6 +11,30 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [selectedCertId, setSelectedCertId] = useState<string | null>(null);
+
+  const handleDeletePdf = async (documentId: string) => {
+    setDeletingDocs(prev => ({ ...prev, [documentId]: true }));
+    await logic.deletePdf(documentId);
+    setDeletingDocs(prev => ({ ...prev, [documentId]: false }));
+  };
+
+  const handleDownloadCertificate = async () => {
+    if (selectedCertId && password) {
+      const url = await logic.getCertificateUrl(selectedCertId, password);
+      if (url === 'invalid-password') {
+        toast.error('Contraseña incorrecta. Por favor, verifica e intenta nuevamente.');
+        return;
+      }
+      if (url) {
+        window.open(url, '_blank');
+        setPasswordModalOpen(false);
+        setPassword('');
+        setSelectedCertId(null);
+      } else {
+        toast.error('No se pudo obtener el certificado. Por favor, verifica tus credenciales e intenta nuevamente.');
+      }
+    }
+  };
 
   return (
     <>
@@ -187,7 +211,7 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={async () => {
           if (docToDelete) {
-            await handleDeletePdf(docToDelete, setDeletingDocs, logic);
+            await handleDeletePdf(docToDelete);
             setDeleteModalOpen(false);
             setDocToDelete(null);
           }
@@ -206,16 +230,7 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Button onClick={() =>
-          handleDownloadCertificate(
-            selectedCertId,
-            password,
-            logic,
-            setPasswordModalOpen,
-            setPassword,
-            setSelectedCertId
-          )
-        } mt="md">
+        <Button onClick={handleDownloadCertificate} mt="md">
           Descargar
         </Button>
       </Modal>

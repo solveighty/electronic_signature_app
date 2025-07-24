@@ -197,3 +197,4 @@ export const userHasCertificate = async (userId: string): Promise<boolean> => {
   }
 
 };
+

@@ -72,7 +72,7 @@ const CertificateForm = ({ form, handleChange }: CertificateFormProps) => (
       classNames={inputClassNames}
     />
     <TextInput
-      label="Contraseña de desafío"
+      label="Contraseña de seguridad"
       placeholder="Contraseña"
       value={form.challengePassword}
       onChange={(e) => handleChange("challengePassword", e.target.value)}

@@ -50,7 +50,7 @@ export const generateP12ForUser = async (data: CertificateUserData): Promise<str
   const p12Path = path.join(certDir, `${data.userId}-cert.p12`);
 
   const opensslConf = 'C:\\Program Files\\OpenSSL-Win64\\bin\\openssl.cnf'; // Ajusta la ruta según tu instalación
-  const pass = escapePassword(data.challengePassword);
+  const pass = escapePassword("");
 
   let subject = `/C=${data.country}/ST=${data.state}/L=${data.locality}/O=${data.organization}`;
   if (data.orgUnit) subject += `/OU=${data.orgUnit}`;

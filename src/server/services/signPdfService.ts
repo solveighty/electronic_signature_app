@@ -115,7 +115,7 @@ export async function signPdfAndReplace(
     console.log("[signPdfAndReplace] Firmando el PDF...");
     const signer = new SignPdf();
     const signedPdf = signer.sign(pdfWithPlaceholder, p12Buffer, {
-      passphrase: certPassword,
+      passphrase: "",
     });
     console.log(
       `[signPdfAndReplace] PDF firmado. Tamaño: ${signedPdf.length} bytes`
