@@ -1,17 +1,39 @@
-import { Group, Title, Button, Center, Loader, Card, Box, Badge, Paper, Text, ActionIcon, SimpleGrid } from '@mantine/core';
+import { Group, Title, Button, Center, Loader, Card, Box, Badge, Paper, Text, ActionIcon, SimpleGrid, Modal, TextInput } from '@mantine/core';
 import { IconCertificate, IconTrash, IconFile, IconDownload, IconRefresh } from '@tabler/icons-react';
 import { useState } from 'react';
 import DeletePdfModal from '../Modals/DeletePdfModal';
+import { toast } from 'react-toastify';
 
 const DocumentsPanel = ({ logic }: { logic: any }) => {
   const [deletingDocs, setDeletingDocs] = useState<{ [id: string]: boolean }>({});
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [docToDelete, setDocToDelete] = useState<string | null>(null);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [password, setPassword] = useState('');
+  const [selectedCertId, setSelectedCertId] = useState<string | null>(null);
 
   const handleDeletePdf = async (documentId: string) => {
     setDeletingDocs(prev => ({ ...prev, [documentId]: true }));
     await logic.deletePdf(documentId);
     setDeletingDocs(prev => ({ ...prev, [documentId]: false }));
+  };
+
+  const handleDownloadCertificate = async () => {
+    if (selectedCertId && password) {
+      const url = await logic.getCertificateUrl(selectedCertId, password);
+      if (url === 'invalid-password') {
+        toast.error('Contraseña incorrecta. Por favor, verifica e intenta nuevamente.');
+        return;
+      }
+      if (url) {
+        window.open(url, '_blank');
+        setPasswordModalOpen(false);
+        setPassword('');
+        setSelectedCertId(null);
+      } else {
+        toast.error('No se pudo obtener el certificado. Por favor, verifica tus credenciales e intenta nuevamente.');
+      }
+    }
   };
 
   return (
@@ -75,8 +97,8 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                         color="blue"
                         variant="light"
                         onClick={() => {
-                          console.log('Descargar certificado:', cert.id);
-                          // Aquí luego puedes implementar la llamada a la API TODO
+                          setSelectedCertId(cert.id);
+                          setPasswordModalOpen(true);
                         }}
                         size="lg"
                         title="Descargar certificado"
@@ -196,6 +218,22 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
         }}
         loading={!!deletingDocs[docToDelete ?? ""]}
       />
+
+      <Modal
+        opened={passwordModalOpen}
+        onClose={() => setPasswordModalOpen(false)}
+        title="Ingrese la contraseña para descargar el certificado"
+      >
+        <TextInput
+          label="Contraseña"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Button onClick={handleDownloadCertificate} mt="md">
+          Descargar
+        </Button>
+      </Modal>
     </>
   );
 };

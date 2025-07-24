@@ -154,7 +154,6 @@ export const handleCertificateUpload = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Contraseña no proporcionada" });
     }
 
-
     /*
     console.log('Archivo de certificado recibido:', req.file);
     console.log('Ruta del archivo de certificado:', req.file.path);
@@ -402,23 +401,44 @@ export const downloadCertificate = async (req: Request, res: Response) => {
     const { id } = req.params;
     const userId = extractUserIdFromToken(req);
 
+    console.log(`[downloadCertificate] ID del certificado: ${id}`);
+    console.log(`[downloadCertificate] ID del usuario: ${userId}`);
+
     if (!userId) {
       return res.status(401).json({ error: 'No autorizado' });
     }
 
-    // Obtiene el buffer descifrado del certificado .p12
-    const certBuffer = await decryptandretrieveCertificate(id, userId);
+    // Get password from body (POST) or query (GET)
+    const password = req.body?.password || req.query?.password;
+    if (!password) {
+      console.error(`[downloadCertificate] Error: La contraseña no fue proporcionada en la solicitud.`);
+      return res.status(400).json({ error: 'La contraseña es requerida para descargar el certificado.' });
+    }
+
+    // Validar la contraseña antes de descargar
+    let certBuffer;
+    try {
+      certBuffer = await decryptandretrieveCertificate(id, password as string);
+    } catch (err: any) {
+      if (err.message && err.message.toLowerCase().includes('bad decrypt')) {
+        return res.status(401).json({ error: 'Contraseña incorrecta. Por favor, verifica e intenta nuevamente.' });
+      }
+      return res.status(500).json({ error: err.message || 'Error al descargar el certificado' });
+    }
 
     if (!certBuffer) {
+      console.error(`[downloadCertificate] Certificado no encontrado o no autorizado para ID: ${id}`);
       return res.status(404).json({ error: 'Certificado no encontrado o no autorizado' });
     }
+
+    console.log(`[downloadCertificate] Certificado descifrado con tamaño: ${certBuffer.length} bytes`);
 
     res.setHeader('Content-Type', 'application/x-pkcs12');
     res.setHeader('Content-Disposition', `attachment; filename=certificado_${id}.p12`);
     return res.send(certBuffer);
 
   } catch (error: any) {
-    console.error('Error al descargar certificado:', error);
+    console.error(`[downloadCertificate] Error al descargar certificado:`, error);
     return res.status(500).json({ error: error.message || 'Error al descargar el certificado' });
   }
 };

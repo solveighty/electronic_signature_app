@@ -15,6 +15,8 @@ import {
   canSignDocument
 } from './pdf/validatorSteps/stepValidation';
 import { CertificateFileType } from './types/CertificateFileType';
+import { signPdfDocument } from '../../utils/api/endpoints/pdf/documentApi';
+import { toast } from 'react-toastify';
 
 export function useSignDocumentLogic() {
   const [active, setActive] = useState(0);
@@ -49,7 +51,29 @@ export function useSignDocumentLogic() {
     }
   }, [hasCertificate, active]);
 
+  const validateCertificatePassword = async () => {
+    if (!selectedDocumentId || !selectedCertificateFile || !certificatePassword) return false;
+    const result = await signPdfDocument(
+      selectedDocumentId,
+      selectedCertificateFile.id.toString(),
+      certificatePassword,
+      token || ''
+    );
+    if (result === 'invalid-password') {
+      toast.error('La contraseña del certificado es incorrecta.');
+      return false;
+    }
+    if (result !== 'ok') {
+      toast.error(result || 'No se pudo validar el certificado. Verifica los datos e intenta nuevamente.');
+      return false;
+    }
+    return true;
+  };
+
   const handleSignDocument = async () => {
+    // Validar contraseña antes de proceder
+    const isValid = await validateCertificatePassword();
+    if (!isValid) return;
     await handleSignDocumentLogic({
       selectedDocumentId,
       certificatePassword,
@@ -107,7 +131,7 @@ export function useSignDocumentLogic() {
     open,
     close,
     pdfDocuments,
-    certificateFiles, // <-- Cambia aquí
+    certificateFiles, 
     selectedCertificateFile,
     isLoadingDocuments,
     refreshDocuments,
@@ -122,5 +146,6 @@ export function useSignDocumentLogic() {
     handleSignDocument,
     handleDownloadSignedDocument,
     handleReset,
+    validateCertificatePassword,
   };
 }

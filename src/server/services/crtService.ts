@@ -109,7 +109,11 @@ export const decryptandretrieveCertificate = async (
   password: string
 ): Promise<Buffer> => {
   try {
+    console.log('certificateId provided:', certificateId);
+    console.log('Certificate.findById query:', { certificateId });
+    
     const cert = await Certificate.findById(certificateId);
+
     if (!cert) throw new Error('Certificado no encontrado');
 
     // Verificar que todos los campos necesarios estén presentes
@@ -117,20 +121,18 @@ export const decryptandretrieveCertificate = async (
       throw new Error('El certificado no tiene el formato esperado');
     }
 
-    console.log('encryptionSalt (hex):', cert.encryptionSalt);
-    console.log('encryptionIV (hex):', cert.encryptionIV);
-    console.log('userSalt (hex):', cert.userSalt);
-    console.log('userIV (hex):', cert.userIV);
-    console.log('certificateData (base64, length):', cert.certificateData.length);
+    // Convertir certificateData de base64 a buffer
+    const encryptedDataBuffer = Buffer.from(cert.certificateData, 'base64');
 
     // --- PRIMER DESCIFRADO: con clave del servidor ---
     const encryptionSalt = Buffer.from(cert.encryptionSalt, 'hex');
     const encryptionIV = Buffer.from(cert.encryptionIV, 'hex');
     const serverKey = crypto.pbkdf2Sync(ENCRYPTION_SECRET, encryptionSalt, 100000, 32, 'sha256');
-    const serverDecipher = crypto.createDecipheriv('aes-256-cbc', serverKey, encryptionIV);
+    console.log('serverKey (hex):', serverKey.toString('hex'));
+    console.log('encryptionSalt (hex):', encryptionSalt.toString('hex'));
+    console.log('encryptionIV (hex):', encryptionIV.toString('hex'));
 
-    // Convertir certificateData de base64 a buffer
-    const encryptedDataBuffer = Buffer.from(cert.certificateData, 'base64');
+    const serverDecipher = crypto.createDecipheriv('aes-256-cbc', serverKey, encryptionIV);
 
     let userEncrypted = serverDecipher.update(encryptedDataBuffer);
     userEncrypted = Buffer.concat([
@@ -142,6 +144,10 @@ export const decryptandretrieveCertificate = async (
     const userSalt = Buffer.from(cert.userSalt, 'hex');
     const userIV = Buffer.from(cert.userIV, 'hex');
     const userKey = crypto.pbkdf2Sync(password, userSalt, 100000, 32, 'sha256');
+    console.log('userKey (hex):', userKey.toString('hex'));
+    console.log('userSalt (hex):', userSalt.toString('hex'));
+    console.log('userIV (hex):', userIV.toString('hex'));
+
     const userDecipher = crypto.createDecipheriv('aes-256-cbc', userKey, userIV);
 
     let decrypted = userDecipher.update(userEncrypted);

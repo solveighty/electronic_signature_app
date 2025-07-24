@@ -75,7 +75,15 @@ export async function signPdfAndReplace(
     let pdfBuffer = await retrievePdfDocument(documentId);
 
     // 2. Recuperar el certificado desencriptado
-    const p12Buffer = await decryptandretrieveCertificate(certId, certPassword);
+    let p12Buffer;
+    try {
+      p12Buffer = await decryptandretrieveCertificate(certId, certPassword);
+    } catch (err: any) {
+      if (err.message && err.message.toLowerCase().includes('bad decrypt')) {
+        throw new Error('Contraseña incorrecta. Por favor, verifica e intenta nuevamente.');
+      }
+      throw err;
+    }
 
     // 3. Agregar estampado visual usando la imagen recibida
     const stampText = "Firmado electrónicamente por PUCESE"; // Personaliza el texto
@@ -103,10 +111,6 @@ export async function signPdfAndReplace(
       signatureLength: 8192,
     });
 
-    // Guardar temporalmente para verificar
-    //const placeholderPath = path.join(outputDir, `debug_pdf_with_placeholder_${documentId}.pdf`);
-    //fs.writeFileSync(placeholderPath, pdfWithPlaceholder);
-    //console.log(`[signPdfAndReplace] Placeholder guardado en: ${placeholderPath}`);
 
     console.log("[signPdfAndReplace] Firmando el PDF...");
     const signer = new SignPdf();
@@ -116,10 +120,16 @@ export async function signPdfAndReplace(
     console.log(
       `[signPdfAndReplace] PDF firmado. Tamaño: ${signedPdf.length} bytes`
     );
-
-    // Guardar temporalmente para verificar firma
-    const signedPdfPath = path.join(outputDir, `${documentId}_firmado.pdf`);
-    fs.writeFileSync(signedPdfPath, signedPdf);
+   
+    try {
+      const signedPdfPath = path.join(outputDir, `${documentId}_firmado.pdf`);
+      if (fs.existsSync(signedPdfPath)) {
+        fs.unlinkSync(signedPdfPath);
+        console.log(`[signPdfAndReplace] Archivo temporal eliminado: ${signedPdfPath}`);
+      }
+    } catch (err) {
+      console.warn(`[signPdfAndReplace] No se pudo eliminar archivo temporal:`, err);
+    }
 
     console.log(
       "[signPdfAndReplace] Guardando PDF firmado en base de datos..."

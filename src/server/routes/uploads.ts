@@ -54,6 +54,10 @@ router.get('/certificates/:id/download', (req, res, next) => {
   downloadCertificate(req, res).catch(next);
 });
 
+router.post('/certificates/:id/download', (req, res, next) => {
+  downloadCertificate(req, res).catch(next);
+});
+
 router.post('/pdf/:id/sign-with-stamp', stampUpload.single('stampImage'), (req, res, next) => {
   signPdfWithStamp(req, res).catch(next);
 });

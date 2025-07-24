@@ -36,15 +36,23 @@ export async function signPdfDocument(
   certId: string, 
   certPassword: string, 
   token: string
-) {
-  return api.post(`/api/pdf/${documentId}/sign`, {
-    certId,
-    certPassword
-  }, {
-    headers: {
-      Authorization: `Bearer ${token}`
+): Promise<'ok' | 'invalid-password' | string> {
+  try {
+    const response = await api.post(`/api/pdf/${documentId}/sign`, {
+      certId,
+      certPassword
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return 'ok';
+  } catch (error: any) {
+    if (error?.response?.status === 401 && error?.response?.data?.error?.includes('Contraseña incorrecta')) {
+      return 'invalid-password';
     }
-  });
+    return error?.response?.data?.error || 'error';
+  }
 }
 
 export async function signPdfWithStamp(

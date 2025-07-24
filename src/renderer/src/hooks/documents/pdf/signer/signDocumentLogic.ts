@@ -57,12 +57,17 @@ export async function handleSignDocumentLogic({
         Number(signaturePosition.y)
       );
     } else {
-      await signPdfDocument(
+      const signResult = await signPdfDocument(
         selectedDocumentId,
         certificateFile.id.toString(),
         certificatePassword,
         token || ''
       );
+      if (signResult === 'invalid-password') {
+        toast.error('Contraseña incorrecta. Por favor, verifica e intenta nuevamente.');
+        setIsSigningInProgress(false);
+        return;
+      }
     }
 
     const url = await getPdfDocumentUrl(selectedDocumentId);
