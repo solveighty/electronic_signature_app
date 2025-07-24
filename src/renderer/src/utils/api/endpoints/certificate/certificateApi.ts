@@ -41,16 +41,14 @@ export function generateCertificate(data: GenerateCertificateData) {
   return api.post("/api/uploads/certificates/generate", data);
 }
 
-export async function getCertificateUrl(certificateId: string, password: string): Promise<string | null | 'invalid-password'> {
+export async function getCertificateUrl(certificateId: string, password: string): Promise<string | null> {
   try {
-    const response = await api.post(`/api/certificates/${certificateId}/download`, { password }, {
+    const response = await api.get(`/api/certificates/${certificateId}/download`, {
+      params: { password },
       responseType: "blob",
     });
     return URL.createObjectURL(response.data);
-  } catch (error: any) {
-    if (error?.response?.status === 401 && error?.response?.data?.error?.includes('Contraseña incorrecta')) {
-      return 'invalid-password';
-    }
+  } catch (error) {
     console.error("Error al obtener certificado:", error);
     return null;
   }

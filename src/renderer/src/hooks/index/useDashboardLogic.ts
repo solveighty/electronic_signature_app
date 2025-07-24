@@ -6,20 +6,8 @@ import { useDocumentManager } from '../documents/useDocumentManager';
 import { useDisclosure } from '@mantine/hooks';
 import { toast } from 'react-toastify';
 import { deleteCertificateById } from '../../utils/api/api';
-import api from '../../utils/api/config/axiosConfig';
+import { getCertificateUrl } from '../../utils/api/endpoints/certificate/certificateApi';
 
-export async function getCertificateUrl(certificateId: string, password: string): Promise<string | null> {
-  try {
-    const response = await api.get(`/api/certificates/${certificateId}/download`, {
-      params: { password },
-      responseType: "blob",
-    });
-    return URL.createObjectURL(response.data);
-  } catch (error) {
-    console.error("Error al obtener certificado:", error);
-    return null;
-  }
-}
 
 export function useDashboardLogic() {
   const {
