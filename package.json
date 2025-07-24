@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "concurrently \"vite\" \"tsx watch src/server/index.ts\"",
     "dev:server": "tsx watch src/server/index.ts",
+    "server": "tsx src/server/index.ts",
     "build": "tsc && vite build && electron-builder --publish never",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
