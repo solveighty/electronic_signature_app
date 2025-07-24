@@ -72,6 +72,19 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                     </Center>
                     <Center>
                       <ActionIcon
+                        color="blue"
+                        variant="light"
+                        onClick={() => {
+                          console.log('Descargar certificado:', cert.id);
+                          // Aquí luego puedes implementar la llamada a la API TODO
+                        }}
+                        size="lg"
+                        title="Descargar certificado"
+                        style={{ marginRight: 8 }}
+                      >
+                        <IconDownload size={22} />
+                      </ActionIcon>
+                      <ActionIcon
                         color="red"
                         variant="light"
                         onClick={() => {
