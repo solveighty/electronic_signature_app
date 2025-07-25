@@ -5,7 +5,7 @@ import { plainAddPlaceholder } from 'node-signpdf/dist/helpers/index.js';
 import { retrievePdfDocument, updateSignedPdf } from './pdfService';
 import { decryptandretrieveCertificate } from './crtService';
 
-const outputDir = path.join(process.cwd(), 'src/files/pdf');
+
 
 // Función para contar firmas existentes
 function countExistingSignatures(pdfBuffer: Buffer): number {
@@ -129,7 +129,8 @@ export async function signPdfAndReplace(
 
     // ⭐ PASO 3: Firmar el PDF que YA contiene la estampa
     console.log("[signPdfAndReplace] Firmando el PDF que ya contiene la estampa...");
-    const tempCertPath = path.join(outputDir, `temp_cert_${certId}.p12`);
+    // Crear certificado temporal SOLO para firmar
+    const tempCertPath = path.join(process.cwd(), `temp_cert_${certId}.p12`);
     fs.writeFileSync(tempCertPath, p12Buffer);
 
     const signer = new SignPdf();
@@ -148,19 +149,18 @@ export async function signPdfAndReplace(
         console.log("[signPdfAndReplace] Certificado temporal eliminado.");
       }
 
-      const signedPdfPath = path.join(outputDir, `${documentId}_firmado.pdf`);
-      fs.writeFileSync(signedPdfPath, signedPdf);
-
+      // Guardar el PDF firmado SOLO en la base de datos cifrado
       console.log("[signPdfAndReplace] Guardando PDF firmado final en base de datos...");
       await updateSignedPdf(documentId, signedPdf);
       console.log(`[signPdfAndReplace] Documento ${documentId} actualizado con PDF firmado en BD.`);
 
-      console.log("[signPdfAndReplace] Eliminando certificado temporal...");
-      // Certificado temporal ya eliminado arriba
-
-      console.log("[signPdfAndReplace] 🎉 Proceso finalizado correctamente con NUEVA ESTRATEGIA!");
+      console.log("[signPdfAndReplace] 🎉 Proceso finalizado correctamente, sin archivos locales!");
       
     } catch (signError) {
+      // Limpiar certificado temporal si ocurre error
+      if (fs.existsSync(tempCertPath)) {
+        fs.unlinkSync(tempCertPath);
+      }
       console.error("[signPdfAndReplace] Error durante la firma:", signError);
       throw new Error("Error al firmar el PDF.");
     }
