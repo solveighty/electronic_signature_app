@@ -81,9 +81,8 @@ const SignaturePositionStep = ({
               }}
             >
               <SignatureStamp
-                text={logic.selectedDocument?.name || "Documento"}
                 documentId={logic.selectedDocument?.id?.toString() || ""}
-                certId={logic.certificateFile?.id?.toString() || ""}
+                certId={logic.selectedCertificateFile?.id?.toString() || ""}
                 certPassword={logic.certificatePassword}
               />
             </div>

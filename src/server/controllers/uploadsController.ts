@@ -10,8 +10,7 @@ import 'dotenv/config';
 import { deleteCertificateFromDB, deletePdfDocumentFromDB, deleteCertificateById } from "../services/deleteService";
 import { generateP12ForUser } from "../services/p12GeneratorService";
 import { getDecryptedPdfBuffer } from "../services/pdfService";
-import PdfDocument from '../models/PdfDocument';
-import { signPdfAndReplace } from "../services/signPdfService";
+import { signPdfWithStamp } from "../services/signPdfService";
 import { v4 as uuidv4 } from 'uuid';
 
 // Obtener la ruta base del proyecto
@@ -471,59 +470,48 @@ export const downloadPdfDocument = async (req: Request, res: Response) => {
   }
 };
 
-export const signPdfDocument = async (req: Request, res: Response) => {
+export const handleSignPdfWithStamp = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const { certId, certPassword } = req.body;
-
-    if (!certId || !certPassword) {
-      return res.status(400).json({ error: "certId y certPassword son requeridos" });
-    }
-
+    const { documentId, certId, certPassword, stampImageBase64, userName } = req.body;
     const userId = extractUserIdFromToken(req);
 
-    // Ejecutar lógica de firma del servicio
-    await signPdfAndReplace(id, certId, certPassword);
+    console.log(`[handleSignPdfWithStamp] Recibido: documentId=${documentId}, certId=${certId}, userName=${userName}, userId=${userId}`);
 
-    // Actualiza el estado del documento a "Firmado"
-    await PdfDocument.updateOne(
-      { _id: id, userId },
-      { $set: { status: "Firmado" } }
-    );
-
-    return res.status(200).json({
-      message: "Documento firmado correctamente",
-      documentId: id
-    });
-  } catch (error: any) {
-    console.error('Error al firmar documento:', error);
-    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
-      error: error.message || "Error al firmar el documento"
-    });
-  }
-};
-
-export const signPdfWithStamp = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { certId, certPassword, page, x, y } = req.body;
-    const stampImageBuffer = req.file?.buffer;
-
-    console.log(`[signPdfWithStamp] Recibido: page=${page}, x=${x}, y=${y}`);
-
-    await signPdfAndReplace(
-      id,
+    await signPdfWithStamp({
+      id: documentId,
       certId,
       certPassword,
-      stampImageBuffer,
-      Number(page),
-      Number(x),
-      Number(y)
-    );
+      stampImageBase64,
+      userName,
+      userId,
+    });
 
     return res.status(200).json({ message: "Documento firmado con estampa" });
   } catch (error: any) {
-    console.error('Error al firmar con estampa:', error);
+    console.error("Error en handleSignPdfWithStamp:", error);
     return res.status(500).json({ error: error.message || "Error al firmar el documento" });
   }
 };
+
+export const getDocumentSignatureMetadata = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = extractUserIdFromToken(req);
+
+    console.log(`[getDocumentSignatureMetadata] Obteniendo metadatos para documento ${id}, usuario ${userId}`);
+
+    // const metadata = await getSignatureMetadata(id, userId);
+    const metadata = null; // Función temporalmente deshabilitada
+
+    return res.status(200).json({
+      documentId: id,
+      signatures: metadata,
+      count: 0 // Metadatos temporalmente deshabilitados
+    });
+  } catch (error: any) {
+    console.error("Error en getDocumentSignatureMetadata:", error);
+    return res.status(500).json({ error: error.message || "Error al obtener metadatos de firma" });
+  }
+};
+
+export { signPdfWithStamp };

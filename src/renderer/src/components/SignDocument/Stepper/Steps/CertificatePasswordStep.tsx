@@ -1,6 +1,5 @@
 import { Paper, Text, Card, Group, PasswordInput, Alert, Button, Select } from '@mantine/core';
 import { IconCertificate, IconLock, IconEyeOff, IconEye, IconAlertCircle } from '@tabler/icons-react';
-import { toast } from 'react-toastify';
 
 const CertificatePasswordStep = ({ logic }: { logic: any }) => (
   <Paper radius="md" p="xl" withBorder mt="xl">
@@ -56,16 +55,10 @@ const CertificatePasswordStep = ({ logic }: { logic: any }) => (
         Atrás
       </Button>
       <Button
-        onClick={async () => {
+        onClick={() => {
           if (!logic.canProceedToPosition) return;
-          // Validar contraseña antes de avanzar
-          if (logic.validateCertificatePassword) {
-            const isValid = await logic.validateCertificatePassword();
-            if (!isValid) {
-              toast.error('La contraseña del certificado es incorrecta.');
-              return;
-            }
-          }
+          // Solo avanzar al siguiente paso sin validar contraseña
+          // La validación se hará al momento de firmar
           logic.setActive(2);
         }}
         disabled={!logic.canProceedToPosition}

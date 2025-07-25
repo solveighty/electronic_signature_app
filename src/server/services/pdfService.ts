@@ -78,7 +78,9 @@ export const storePdfDocument = async (
  */
 export const retrievePdfDocument = async (documentId: string): Promise<Buffer> => {
   try {
+    console.log(`[retrievePdfDocument] Buscando documento con ID: ${documentId}`);
     const pdfDoc = await PdfDocument.findById(documentId);
+    console.log(`[retrievePdfDocument] Documento encontrado:`, pdfDoc ? 'SÍ' : 'NO');
 
     if (!pdfDoc) {
       throw new Error('Documento no encontrado');

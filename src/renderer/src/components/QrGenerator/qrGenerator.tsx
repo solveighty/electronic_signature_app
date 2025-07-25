@@ -3,20 +3,19 @@ import QRCode from "qrcode";
 import { useAuth } from "../../context/AuthContext";
 import { QrGeneratorProps } from "./types/qrGenerator";
 
-const SignatureStamp: React.FC<QrGeneratorProps> = () => {
+const SignatureStamp: React.FC<QrGeneratorProps> = ({ documentId, certId, certPassword }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { userName } = useAuth();
+  const { userName, token } = useAuth();
 
   useEffect(() => {
     const drawStamp = async () => {
       const timestamp = new Date().toISOString().substring(0, 10);
-      // Elimina el nombre del archivo
       const qrText = `Firma Electrónica:\n${userName}\n${timestamp}\nPUCESE`;
 
       const qrDataUrl = await QRCode.toDataURL(qrText, {
         errorCorrectionLevel: "H",
         margin: 2,
-        width: 120, // tamaño reducido
+        width: 120,
         color: {
           dark: "#000000",
           light: "#FFFFFF",
@@ -51,11 +50,20 @@ const SignatureStamp: React.FC<QrGeneratorProps> = () => {
         lines.forEach((line, i) => {
           ctx.fillText(line, qrImg.width + 8, 8 + i * 18);
         });
+
+        // Convert canvas to base64 for preview only
+        const stampImageBase64 = canvas.toDataURL("image/png");
+        // NO enviar automáticamente al backend - solo generar para previsualización
+        console.log("Estampa generada para previsualización:", {
+          documentId,
+          certId,
+          stampGenerated: !!stampImageBase64
+        });
       };
     };
 
     drawStamp();
-  }, [userName]);
+  }, [userName, documentId, certId, certPassword, token]);
 
   return (
     <div>

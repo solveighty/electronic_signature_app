@@ -10,15 +10,13 @@ import {
   deletePdfDocument,
   deleteCertificateByIdHandler,
   generateCertificate,
-  signPdfDocument,
   downloadPdfDocument,
   downloadCertificate,
-  signPdfWithStamp
+  handleSignPdfWithStamp,
+  getDocumentSignatureMetadata
 } from "../controllers/uploadsController";
-import multer from 'multer';
 
 const router = Router();
-const stampUpload = multer();
 
 router.post("/uploads/pdf", uploadPdf.single("file"), (req, res, next) => {
   handlePdfUpload(req, res).catch(next);
@@ -46,10 +44,6 @@ router.get('/pdf/:id/download', (req, res, next) => {
   downloadPdfDocument(req, res).catch(next);
 });
 
-router.post('/pdf/:id/sign', (req, res, next) => {
-  signPdfDocument(req, res).catch(next);
-});
-
 router.get('/certificates/:id/download', (req, res, next) => {
   downloadCertificate(req, res).catch(next);
 });
@@ -58,8 +52,10 @@ router.post('/certificates/:id/download', (req, res, next) => {
   downloadCertificate(req, res).catch(next);
 });
 
-router.post('/pdf/:id/sign-with-stamp', stampUpload.single('stampImage'), (req, res, next) => {
-  signPdfWithStamp(req, res).catch(next);
+router.post('/sign-pdf', handleSignPdfWithStamp);
+
+router.get('/pdf/:id/signatures', (req, res, next) => {
+  getDocumentSignatureMetadata(req, res).catch(next);
 });
 
 export default router;
