@@ -46,16 +46,24 @@ export async function handleSignDocumentLogic({
     }
 
     if (stampBlob) {
-      await signPdfWithStamp(
-        selectedDocumentId,
-        certificateFile.id.toString(),
-        certificatePassword,
-        stampBlob,
-        token || '',
-        Number(signaturePosition.page),
-        Number(signaturePosition.x),
-        Number(signaturePosition.y)
-      );
+      // Convierte el blob a base64 antes de enviarlo si tu API lo requiere
+      const stampImageBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(stampBlob);
+      });
+
+      await signPdfWithStamp({
+        documentId: selectedDocumentId,
+        certId: certificateFile.id.toString(),
+        certPassword: certificatePassword,
+        stampImageBase64,
+        userName: token || '',
+        x: Number(signaturePosition.x),
+        y: Number(signaturePosition.y),
+        page: Number(signaturePosition.page),
+      });
     } else {
       const signResult = await signPdfDocument(
         selectedDocumentId,

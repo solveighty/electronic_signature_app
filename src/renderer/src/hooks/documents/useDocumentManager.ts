@@ -9,7 +9,7 @@ import { certificateUpload } from "./certificate/crud/certificateUpload";
 import { handleFileChange as handleFileChangeExternal } from "./event/handleFileChange";
 import { loadUserDocuments as loadUserDocumentsExternal } from "./pdf/crud/loadUserDocuments";
 import { Document } from "../../types/document";
-import { deleteCertificateById } from "../../utils/api/endpoints/certificate/certificateApi";
+import { deleteCertificateById } from "../../utils/api/api";
 
 export const useDocumentManager = () => {
   const [documents, setDocuments] = useState<Document[]>([]);

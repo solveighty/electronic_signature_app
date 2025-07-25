@@ -5,7 +5,7 @@ import { Document } from '../../../../types/document';
 
 export const deleteCertificateHandler = async (
   certificateFile: Document | null,
-  setCertificateFile: (cert: Document | null) => void,
+  setCertificateFiles: (certs: Document[]) => void,
   setDocuments: (fn: (docs: Document[]) => Document[]) => void,
   setIsLoadingCertificate: (loading: boolean) => void,
   setIsLoadingDocuments: (loading: boolean) => void,
@@ -27,10 +27,10 @@ export const deleteCertificateHandler = async (
   try {
     await deleteCertificateApi();
 
-    setCertificateFile(null);
+    setCertificateFiles([]);
     setDocuments(prevDocs => prevDocs.filter(doc => doc.type !== 'p12'));
 
-    await fetchUserCertificate(setCertificateFile, setDocuments, setIsLoadingDocuments);
+    await fetchUserCertificate(setCertificateFiles, setDocuments, setIsLoadingDocuments);
 
     toast.update(toastId, {
       render: 'Certificado eliminado correctamente',

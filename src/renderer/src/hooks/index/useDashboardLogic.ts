@@ -6,7 +6,7 @@ import { useDocumentManager } from '../documents/useDocumentManager';
 import { useDisclosure } from '@mantine/hooks';
 import { toast } from 'react-toastify';
 import { deleteCertificateById } from '../../utils/api/api';
-import { getCertificateUrl } from '../../utils/api/endpoints/certificate/certificateApi';
+import { getCertificateUrl } from '../../utils/api/api';
 
 export function useDashboardLogic() {
   const {

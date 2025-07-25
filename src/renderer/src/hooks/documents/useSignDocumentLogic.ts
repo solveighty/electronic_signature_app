@@ -14,9 +14,9 @@ import {
   canSignDocument
 } from './pdf/validatorSteps/stepValidation';
 import { toast } from 'react-toastify';
-import axios from 'axios';
 import QRCode from 'qrcode';
 import { getPdfDocumentUrl } from '../../utils/api/api';
+import { signPdfWithStampBase64 } from '../../utils/api/api';
 
 export function useSignDocumentLogic() {
   const [active, setActive] = useState(0);
@@ -115,23 +115,19 @@ export function useSignDocumentLogic() {
       // Generar estampa
       const stampImageBase64 = await generateStamp(userName || 'Usuario');
 
-      // Enviar al backend para firmar con estampa con coordenadas dinámicas
-      await axios.post("http://localhost:3000/api/sign-pdf", {
-        documentId: selectedDocumentId,
-        certId: selectedCertificateFile.id.toString(),
-        certPassword: certificatePassword,
+      // Llamada a la función movida
+      await signPdfWithStampBase64(
+        selectedDocumentId,
+        selectedCertificateFile.id.toString(),
+        certificatePassword,
         stampImageBase64,
-        userName: userName || 'Usuario',
-        x: parseFloat(signaturePosition.x),
-        y: parseFloat(signaturePosition.y),
-        page: parseInt(signaturePosition.page) - 1
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
+        userName || 'Usuario',
+        parseFloat(signaturePosition.x),
+        parseFloat(signaturePosition.y),
+        parseInt(signaturePosition.page) - 1,
+        token || ''
+      );
+
       // Actualizar estado
       const pdfResponse = await getPdfDocumentUrl(selectedDocumentId);
       setSignedDocumentUrl(pdfResponse || null);

@@ -8,7 +8,8 @@ export {
   deletePdfDocument,
   getPdfDocumentUrl,
   signPdfDocument,
-  signPdfWithStamp as signPdfWithStampFromDocumentApi
+  signPdfWithStamp as signPdfWithStampFromDocumentApi,
+  signPdfWithStampBase64
 } from "./endpoints/pdf/documentApi";
 
 export default api;

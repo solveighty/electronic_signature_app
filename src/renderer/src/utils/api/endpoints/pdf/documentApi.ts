@@ -79,3 +79,31 @@ export async function signPdfWithStamp(
     }
   });
 }
+
+export async function signPdfWithStampBase64(
+  documentId: string,
+  certId: string,
+  certPassword: string,
+  stampImageBase64: string,
+  userName: string,
+  x: number,
+  y: number,
+  page: number,
+  token: string
+) {
+  return api.post("/api/sign-pdf", {
+    documentId,
+    certId,
+    certPassword,
+    stampImageBase64,
+    userName,
+    x,
+    y,
+    page
+  }, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    }
+  });
+}
