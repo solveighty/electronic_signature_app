@@ -113,29 +113,28 @@ export function useSignDocumentLogic() {
       setError(null);
 
       // Generar estampa
-      console.log("Generando estampa para firma...");
       const stampImageBase64 = await generateStamp(userName || 'Usuario');
-      console.log("Estampa generada, enviando al backend...");
 
-      // Enviar al backend para firmar con estampa
+      // Enviar al backend para firmar con estampa con coordenadas dinámicas
       await axios.post("http://localhost:3000/api/sign-pdf", {
         documentId: selectedDocumentId,
         certId: selectedCertificateFile.id.toString(),
         certPassword: certificatePassword,
         stampImageBase64,
         userName: userName || 'Usuario',
+        x: parseFloat(signaturePosition.x),
+        y: parseFloat(signaturePosition.y),
+        page: parseInt(signaturePosition.page) - 1
       }, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
-
-      console.log("Documento firmado exitosamente");
       
       // Actualizar estado
-      const url = await getPdfDocumentUrl(selectedDocumentId);
-      setSignedDocumentUrl(url);
+      const pdfResponse = await getPdfDocumentUrl(selectedDocumentId);
+      setSignedDocumentUrl(pdfResponse || null);
       setActive(3);
       
       toast.success('Documento firmado con éxito');

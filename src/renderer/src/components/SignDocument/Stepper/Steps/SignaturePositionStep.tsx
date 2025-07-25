@@ -54,7 +54,6 @@ const SignaturePositionStep = ({
             width: '100%',
             position: 'relative',
           }}
-          onClick={pdfSigner.handlePdfClick}
         >
           <PdfPageViewer
             fileUrl={securePdfUrl}
@@ -66,10 +65,10 @@ const SignaturePositionStep = ({
             <div
               style={{
                 position: 'absolute',
-                left: `${pdfSigner.signaturePosition.x}%`,
-                top: `${pdfSigner.signaturePosition.y}%`,
-                width: 160,
-                height: 80,
+                left: `${pdfSigner.signaturePosition.canvasX}px`,
+                top: `${pdfSigner.signaturePosition.canvasY}px`,
+                width: 120,  // Reducido de 160 a 120 para coincidir con el backend
+                height: 48,  // Reducido de 80 a 48 para coincidir con el backend
                 pointerEvents: 'none',
                 transform: 'translate(-50%, -50%)',
                 display: 'flex',

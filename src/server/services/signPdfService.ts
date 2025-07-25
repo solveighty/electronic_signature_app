@@ -5,24 +5,15 @@ import { plainAddPlaceholder } from 'node-signpdf/dist/helpers/index.js';
 import { retrievePdfDocument, updateSignedPdf } from './pdfService';
 import { decryptandretrieveCertificate } from './crtService';
 
-
-
-// Función para contar firmas existentes
-function countExistingSignatures(pdfBuffer: Buffer): number {
-  const pdfContent = pdfBuffer.toString('latin1');
-  const signatureRegex = /\/Type\s*\/Sig/g;
-  const matches = pdfContent.match(signatureRegex);
-  return matches ? matches.length : 0;
-}
-
 // ⭐ NUEVA ESTRATEGIA: Integrar estampa ANTES de cualquier firma
 async function addStampBeforeSignature(
   pdfBuffer: Buffer,
-  stampImageBase64: string
+  stampImageBase64: string,
+  x?: number,
+  y?: number,
+  page?: number
 ): Promise<Buffer> {
   try {
-    console.log("[addStampBeforeSignature] 🎯 Agregando estampa ANTES de cualquier modificación de firma...");
-    
     const { PDFDocument } = await import('pdf-lib');
     
     // Configuración ultra-conservadora para evitar alteraciones
@@ -34,37 +25,62 @@ async function addStampBeforeSignature(
       updateMetadata: false
     });
     
-    console.log("[addStampBeforeSignature] PDF original cargado exitosamente.");
+    const pages = pdfDoc.getPages();
     
-    const firstPage = pdfDoc.getPages()[0];
-    const { width, height } = firstPage.getSize();
+    // Seleccionar página objetivo
+    let targetPageIndex = 0; // Por defecto página 1 (índice 0)
+    if (typeof page === 'number' && page >= 0 && page < pages.length) {
+      targetPageIndex = page;
+    }
     
-    console.log(`[addStampBeforeSignature] Dimensiones página: ${width} x ${height}`);
+    const targetPage = pages[targetPageIndex];
+    const { width, height } = targetPage.getSize();
+
+    // Validar y procesar imagen
+    if (!stampImageBase64) {
+      throw new Error("No se proporcionó imagen base64 para la estampa");
+    }
     
-    // Procesar imagen
     const imageData = stampImageBase64.replace(/^data:image\/png;base64,/, "");
+    
+    if (imageData.length === 0) {
+      throw new Error("Imagen base64 vacía después de limpiar prefijo");
+    }
+    
     const stampImage = await pdfDoc.embedPng(Buffer.from(imageData, 'base64'));
+
+    // Tamaño de la estampa - Reducido para ser más pequeña
+    const stampWidth = 150;  // Reducido de 200 a 150
+    const stampHeight = 60;  // Reducido de 80 a 60
     
-    console.log("[addStampBeforeSignature] Imagen embebida exitosamente.");
+    // Calcular coordenadas finales
+    let xPos: number;
+    let yPos: number;
     
-    // Posición de estampa
-    const stampWidth = 200;
-    const stampHeight = 80;
-    const xPos = width - stampWidth - 20;
-    const yPos = height - stampHeight - 20;
+    if (typeof x === 'number' && typeof y === 'number') {
+      // Usar coordenadas proporcionadas
+      xPos = x;
+      yPos = y;
+    } else {
+      // Coordenadas por defecto en la esquina inferior derecha
+      xPos = width - stampWidth - 20;
+      yPos = height - stampHeight - 20;
+    }
     
-    console.log(`[addStampBeforeSignature] Dibujando estampa en: x=${xPos}, y=${yPos}`);
-    
+    // Validar que las coordenadas estén dentro de los límites de la página
+    if (xPos < 0) xPos = 0;
+    if (yPos < 0) yPos = 0;
+    if (xPos + stampWidth > width) xPos = width - stampWidth;
+    if (yPos + stampHeight > height) yPos = height - stampHeight;
+
     // Dibujar estampa
-    firstPage.drawImage(stampImage, {
+    targetPage.drawImage(stampImage, {
       x: xPos,
       y: yPos,
       width: stampWidth,
       height: stampHeight,
       opacity: 0.9
     });
-    
-    console.log("[addStampBeforeSignature] Estampa dibujada exitosamente.");
     
     // Guardar con configuraciones que minimicen cambios estructurales
     const modifiedPdfBytes = await pdfDoc.save({
@@ -73,14 +89,10 @@ async function addStampBeforeSignature(
       updateFieldAppearances: false,
     });
     
-    console.log("[addStampBeforeSignature] PDF con estampa guardado. Tamaño:", modifiedPdfBytes.length);
-    console.log("[addStampBeforeSignature] ✅ Estampa integrada ANTES de firma exitosamente!");
-    
     return Buffer.from(modifiedPdfBytes);
     
   } catch (error) {
-    console.error("[addStampBeforeSignature] ❌ Error:", error);
-    console.log("[addStampBeforeSignature] Devolviendo PDF original debido al error.");
+    console.error("[addStampBeforeSignature] Error:", error);
     return pdfBuffer;
   }
 }
@@ -91,70 +103,51 @@ export async function signPdfAndReplace(
   certPassword: string,
   stampImageBase64?: string,
   userName?: string,
-  userId?: string
+  userId?: string,
+  x?: number,
+  y?: number,
+  page?: number
 ): Promise<void> {
   try {
-    console.log("[signPdfAndReplace] 🚀 NUEVA ESTRATEGIA: Estampa ANTES de firmar...");
-    
-    console.log("[signPdfAndReplace] Recuperando PDF original...");
     let pdfBuffer = await retrievePdfDocument(documentId);
 
-    console.log("[signPdfAndReplace] Recuperando certificado desencriptado...");
     const p12Buffer = await decryptandretrieveCertificate(certId, certPassword);
-    console.log(`[signPdfAndReplace] Certificado recuperado. Tamaño: ${p12Buffer.length} bytes`);
 
     // ⭐ PASO 1: Agregar estampa ANTES de cualquier proceso de firma
     if (stampImageBase64) {
-      console.log("[signPdfAndReplace] 🎯 Integrando estampa ANTES de firmar...");
       try {
-        pdfBuffer = await addStampBeforeSignature(pdfBuffer, stampImageBase64);
-        console.log("[signPdfAndReplace] ✅ Estampa integrada exitosamente ANTES de firmar.");
+        pdfBuffer = await addStampBeforeSignature(pdfBuffer, stampImageBase64, x, y, page);
       } catch (error) {
-        console.error("[signPdfAndReplace] ⚠️ Error integrando estampa:", error);
-        console.log("[signPdfAndReplace] Continuando con firma sin estampa.");
+        console.error("[signPdfAndReplace] Error integrando estampa:", error);
       }
     }
 
-    const existingSignatureCount = countExistingSignatures(pdfBuffer);
-    console.log(`[signPdfAndReplace] Firmas existentes encontradas: ${existingSignatureCount}`);
-
     // ⭐ PASO 2: Agregar placeholder para firma (en PDF con estampa ya integrada)
-    console.log("[signPdfAndReplace] Agregando placeholder para firma...");
     const pdfWithPlaceholder = plainAddPlaceholder({
       pdfBuffer,
       reason: "Firmado digitalmente",
       signatureLength: 8192,
     });
-    console.log("[signPdfAndReplace] Placeholder agregado. Tamaño del PDF:", pdfWithPlaceholder.length);
 
     // ⭐ PASO 3: Firmar el PDF que YA contiene la estampa
-    console.log("[signPdfAndReplace] Firmando el PDF que ya contiene la estampa...");
     // Crear certificado temporal SOLO para firmar
     const tempCertPath = path.join(process.cwd(), `temp_cert_${certId}.p12`);
     fs.writeFileSync(tempCertPath, p12Buffer);
 
     const signer = new SignPdf();
-    console.log("[signPdfAndReplace] Certificado temporal creado en:", tempCertPath);
 
     try {
       const signedPdf = signer.sign(pdfWithPlaceholder, fs.readFileSync(tempCertPath), {
         passphrase: "", // Certificado sin contraseña
       });
 
-      console.log(`[signPdfAndReplace] ✅ PDF con estampa firmado exitosamente. Tamaño: ${signedPdf.length} bytes`);
-
       // Limpiar certificado temporal de forma segura
       if (fs.existsSync(tempCertPath)) {
         fs.unlinkSync(tempCertPath);
-        console.log("[signPdfAndReplace] Certificado temporal eliminado.");
       }
 
       // Guardar el PDF firmado SOLO en la base de datos cifrado
-      console.log("[signPdfAndReplace] Guardando PDF firmado final en base de datos...");
       await updateSignedPdf(documentId, signedPdf);
-      console.log(`[signPdfAndReplace] Documento ${documentId} actualizado con PDF firmado en BD.`);
-
-      console.log("[signPdfAndReplace] 🎉 Proceso finalizado correctamente, sin archivos locales!");
       
     } catch (signError) {
       // Limpiar certificado temporal si ocurre error
@@ -178,6 +171,9 @@ export async function signPdfWithStamp({
   stampImageBase64,
   userName,
   userId,
+  x,
+  y,
+  page,
 }: {
   id: string;
   certId: string;
@@ -185,6 +181,9 @@ export async function signPdfWithStamp({
   stampImageBase64?: string;
   userName?: string;
   userId?: string;
+  x?: number;
+  y?: number;
+  page?: number;
 }): Promise<void> {
-  await signPdfAndReplace(id, certId, certPassword, stampImageBase64, userName, userId);
+  await signPdfAndReplace(id, certId, certPassword, stampImageBase64, userName, userId, x, y, page);
 }

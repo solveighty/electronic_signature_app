@@ -29,8 +29,8 @@ const SignDocument = () => {
     if (pdfSigner.signaturePosition) {
       logic.setSignaturePosition({
         page: String(pdfSigner.signaturePosition.page),
-        x: String(pdfSigner.signaturePosition.x),
-        y: String(pdfSigner.signaturePosition.y),
+        x: String(pdfSigner.signaturePosition.x), // Usar coordenadas PDF reales
+        y: String(pdfSigner.signaturePosition.y), // Usar coordenadas PDF reales
       });
     }
   }, [pdfSigner.signaturePosition]);

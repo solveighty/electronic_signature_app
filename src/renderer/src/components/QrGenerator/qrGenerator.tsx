@@ -3,7 +3,12 @@ import QRCode from "qrcode";
 import { useAuth } from "../../context/AuthContext";
 import { QrGeneratorProps } from "./types/qrGenerator";
 
-const SignatureStamp: React.FC<QrGeneratorProps> = ({ documentId, certId, certPassword }) => {
+
+interface SignatureStampProps extends QrGeneratorProps {
+  onStampReady?: (stampImageBase64: string) => void;
+}
+
+const SignatureStamp: React.FC<SignatureStampProps> = ({ documentId, certId, certPassword, onStampReady }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { userName, token } = useAuth();
 
@@ -51,9 +56,10 @@ const SignatureStamp: React.FC<QrGeneratorProps> = ({ documentId, certId, certPa
           ctx.fillText(line, qrImg.width + 8, 8 + i * 18);
         });
 
-        // Convert canvas to base64 for preview only
+        // Convert canvas to base64 for preview and firma
         const stampImageBase64 = canvas.toDataURL("image/png");
-        // NO enviar automáticamente al backend - solo generar para previsualización
+        if (onStampReady) onStampReady(stampImageBase64);
+        // Para depuración
         console.log("Estampa generada para previsualización:", {
           documentId,
           certId,
@@ -63,7 +69,7 @@ const SignatureStamp: React.FC<QrGeneratorProps> = ({ documentId, certId, certPa
     };
 
     drawStamp();
-  }, [userName, documentId, certId, certPassword, token]);
+  }, [userName, documentId, certId, certPassword, token, onStampReady]);
 
   return (
     <div>

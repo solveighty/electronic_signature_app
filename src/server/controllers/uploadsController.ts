@@ -472,10 +472,8 @@ export const downloadPdfDocument = async (req: Request, res: Response) => {
 
 export const handleSignPdfWithStamp = async (req: Request, res: Response) => {
   try {
-    const { documentId, certId, certPassword, stampImageBase64, userName } = req.body;
+    const { documentId, certId, certPassword, stampImageBase64, userName, x, y, page } = req.body;
     const userId = extractUserIdFromToken(req);
-
-    console.log(`[handleSignPdfWithStamp] Recibido: documentId=${documentId}, certId=${certId}, userName=${userName}, userId=${userId}`);
 
     await signPdfWithStamp({
       id: documentId,
@@ -484,6 +482,9 @@ export const handleSignPdfWithStamp = async (req: Request, res: Response) => {
       stampImageBase64,
       userName,
       userId,
+      x,
+      y,
+      page,
     });
 
     return res.status(200).json({ message: "Documento firmado con estampa" });

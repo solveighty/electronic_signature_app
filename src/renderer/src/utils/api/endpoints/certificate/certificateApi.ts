@@ -1,3 +1,34 @@
+// Firma un PDF enviando coordenadas y datos de estampa al backend
+export function signPdfWithStamp({
+  documentId,
+  certId,
+  certPassword,
+  stampImageBase64,
+  userName,
+  x,
+  y,
+  page
+}: {
+  documentId: string;
+  certId: string;
+  certPassword: string;
+  stampImageBase64: string;
+  userName: string;
+  x: number;
+  y: number;
+  page?: number;
+}) {
+  return api.post("/api/sign-pdf", {
+    documentId,
+    certId,
+    certPassword,
+    stampImageBase64,
+    userName,
+    x,
+    y,
+    page
+  });
+}
 import api from "../../config/axiosConfig";
 import { GenerateCertificateData } from "../../types/generateCertificate";
 
