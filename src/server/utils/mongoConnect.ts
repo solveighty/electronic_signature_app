@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import 'dotenv/config';
 
-const MONGO_URI = process.env.VITE_MONGODB_URL;
+const MONGO_URI = process.env.VITE_MONGODB_URL || process.env.AZURE_COSMOS_CONNECTIONSTRING ;
 
 if (!MONGO_URI) {
   console.error('MONGO_URI no definido en variables de entorno');

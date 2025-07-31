@@ -1,22 +1,28 @@
 import multer from "multer";
 import { Request, Response } from "express";
 import * as path from "path";
-import { fileURLToPath } from 'url';
-import * as fs from 'fs';
+import * as fs from "fs";
 import { storePdfDocument, getUserPdfDocuments } from "../services/pdfService";
-import { storeCertificate, getUserCertificates, decryptandretrieveCertificate } from "../services/crtService";
+import {
+  storeCertificate,
+  getUserCertificates,
+  decryptandretrieveCertificate,
+} from "../services/crtService";
 import jwt from "jsonwebtoken";
-import 'dotenv/config';
-import { deleteCertificateFromDB, deletePdfDocumentFromDB, deleteCertificateById } from "../services/deleteService";
+import "dotenv/config";
+import {
+  deleteCertificateFromDB,
+  deletePdfDocumentFromDB,
+  deleteCertificateById,
+} from "../services/deleteService";
 import { generateP12ForUser } from "../services/p12GeneratorService";
 import { getDecryptedPdfBuffer } from "../services/pdfService";
 import { signPdfWithStamp } from "../services/signPdfService";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
-// Obtener la ruta base del proyecto
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, '../../..');
+// Obtener la ruta base del proyecto usando CommonJS
+const __dirname_current = __dirname;
+const rootDir = path.resolve(__dirname_current, "../../..");
 
 // Crear directorios si no existen
 const filesDir = path.join(rootDir, "files");
@@ -41,12 +47,19 @@ export const storagePdf = multer.diskStorage({
   },
 });
 
-export const fileFilterPdf = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+export const fileFilterPdf = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
   if (file.mimetype === "application/pdf") cb(null, true);
   else cb(new Error("Solo archivos PDF son permitidos"));
 };
 
-export const uploadPdf = multer({ storage: storagePdf, fileFilter: fileFilterPdf });
+export const uploadPdf = multer({
+  storage: storagePdf,
+  fileFilter: fileFilterPdf,
+});
 
 // Storage para P12
 export const storageP12 = multer.diskStorage({
@@ -59,27 +72,41 @@ export const storageP12 = multer.diskStorage({
   },
 });
 
-export const fileFilterP12 = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  if (file.mimetype === "application/x-pkcs12" || file.originalname.endsWith(".p12")) cb(null, true);
+export const fileFilterP12 = (
+  req: Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) => {
+  if (
+    file.mimetype === "application/x-pkcs12" ||
+    file.originalname.endsWith(".p12")
+  )
+    cb(null, true);
   else cb(new Error("Solo archivos P12 son permitidos"));
 };
 
-export const uploadP12 = multer({ storage: storageP12, fileFilter: fileFilterP12 });
+export const uploadP12 = multer({
+  storage: storageP12,
+  fileFilter: fileFilterP12,
+});
 
 // Extraer el ID de usuario del token JWT
 const extractUserIdFromToken = (req: Request): string => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
-      throw new Error('Token no proporcionado');
+      throw new Error("Token no proporcionado");
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret') as { id: string };
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "your_jwt_secret"
+    ) as { id: string };
     return decoded.id;
   } catch (error) {
-    console.error('Error al extraer ID de usuario del token:', error);
-    throw new Error('No autorizado');
+    console.error("Error al extraer ID de usuario del token:", error);
+    throw new Error("No autorizado");
   }
 };
 
@@ -105,17 +132,17 @@ export const handlePdfUpload = async (req: Request, res: Response) => {
       userId
     );
 
-    console.log('Enviando respuesta al cliente...');
+    console.log("Enviando respuesta al cliente...");
     return res.status(200).json({
       message: "Archivo subido y cifrado correctamente",
       documentId,
-      fileName: req.file.originalname
+      fileName: req.file.originalname,
     });
   } catch (error: any) {
-    console.error('Error en handlePdfUpload:', error);
+    console.error("Error en handlePdfUpload:", error);
     // Asegúrate de siempre enviar una respuesta incluso en caso de error
-    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
-      error: error.message || "Error al procesar el archivo"
+    return res.status(error.message === "No autorizado" ? 401 : 500).json({
+      error: error.message || "Error al procesar el archivo",
     });
   }
 };
@@ -130,12 +157,12 @@ export const getUserDocuments = async (req: Request, res: Response) => {
     const documents = await getUserPdfDocuments(userId);
 
     res.status(200).json({
-      documents
+      documents,
     });
   } catch (error: any) {
-    console.error('Error en getUserDocuments:', error);
-    res.status(error.message === 'No autorizado' ? 401 : 500).json({
-      error: error.message || "Error al obtener documentos"
+    console.error("Error en getUserDocuments:", error);
+    res.status(error.message === "No autorizado" ? 401 : 500).json({
+      error: error.message || "Error al obtener documentos",
     });
   }
 };
@@ -171,28 +198,34 @@ export const handleCertificateUpload = async (req: Request, res: Response) => {
 
     // 2. Recuperar el documento recién guardado desde la base de datos
     const certDoc = await getUserCertificates(userId);
-    const justSaved = certDoc.find(c => (c as { _id: { toString(): string } })._id.toString() === certificateId);
+    const justSaved = certDoc.find(
+      (c) =>
+        (c as { _id: { toString(): string } })._id.toString() === certificateId
+    );
 
     if (!justSaved) {
-      throw new Error('No se pudo recuperar el certificado recién guardado');
+      throw new Error("No se pudo recuperar el certificado recién guardado");
     }
 
     // 3. Desencriptar el hash del documento recuperado
     const { _id } = justSaved as { _id: { toString(): string } };
-    const decryptedHash = await decryptandretrieveCertificate(_id.toString(), password);
+    const decryptedHash = await decryptandretrieveCertificate(
+      _id.toString(),
+      password
+    );
     //console.log('Hash desencriptado tras guardar:', decryptedHash);
 
     // Responder al cliente
-    console.log('Enviando respuesta al cliente...');
+    console.log("Enviando respuesta al cliente...");
     return res.status(200).json({
       message: "Certificado subido y hash guardado correctamente",
       certificateId,
-      fileName: req.file.originalname
+      fileName: req.file.originalname,
     });
   } catch (error: any) {
-    console.error('Error en handleCertificateUpload:', error);
-    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
-      error: error.message || "Error al procesar el certificado"
+    console.error("Error en handleCertificateUpload:", error);
+    return res.status(error.message === "No autorizado" ? 401 : 500).json({
+      error: error.message || "Error al procesar el certificado",
     });
   }
 };
@@ -219,16 +252,16 @@ export const updateCertificate = async (req: Request, res: Response) => {
       req.body.password
     );
 
-    console.log('Enviando respuesta al cliente (PUT)...');
+    console.log("Enviando respuesta al cliente (PUT)...");
     return res.status(200).json({
       message: "Certificado actualizado y hash guardado correctamente",
       certificateId,
-      fileName: req.file.originalname
+      fileName: req.file.originalname,
     });
   } catch (error: any) {
-    console.error('Error en updateCertificate:', error);
-    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
-      error: error.message || "Error al actualizar el certificado"
+    console.error("Error en updateCertificate:", error);
+    return res.status(error.message === "No autorizado" ? 401 : 500).json({
+      error: error.message || "Error al actualizar el certificado",
     });
   }
 };
@@ -246,11 +279,23 @@ export const generateCertificate = async (req: Request, res: Response) => {
       commonName,
       email,
       challengePassword,
-      optionalCompany
+      optionalCompany,
     } = req.body;
 
-    if (!country || !state || !locality || !organization || !commonName || !email || !challengePassword) {
-      return res.status(400).json({ error: "Faltan campos obligatorios para generar el certificado" });
+    if (
+      !country ||
+      !state ||
+      !locality ||
+      !organization ||
+      !commonName ||
+      !email ||
+      !challengePassword
+    ) {
+      return res
+        .status(400)
+        .json({
+          error: "Faltan campos obligatorios para generar el certificado",
+        });
     }
 
     const p12Path = await generateP12ForUser({
@@ -264,7 +309,7 @@ export const generateCertificate = async (req: Request, res: Response) => {
       email,
       challengePassword,
       optionalCompany,
-      filename: uniqueFilename
+      filename: uniqueFilename,
     });
 
     const certificateId = await storeCertificate(
@@ -284,12 +329,12 @@ export const generateCertificate = async (req: Request, res: Response) => {
 
     return res.status(200).json({
       message: "Certificado P12 generado y guardado correctamente",
-      certificateId
+      certificateId,
     });
   } catch (error: any) {
     console.error("Error al generar certificado P12:", error);
     return res.status(500).json({
-      error: error.message || "Error al generar el certificado P12"
+      error: error.message || "Error al generar el certificado P12",
     });
   }
 };
@@ -302,14 +347,14 @@ export const getUserCertificate = async (req: Request, res: Response) => {
     // Obtener todos los certificados del usuario
     const certificates = await getUserCertificates(userId);
 
-    // Devolver todos los certificados 
+    // Devolver todos los certificados
     res.status(200).json({
-      certificates: certificates
+      certificates: certificates,
     });
   } catch (error: any) {
-    console.error('Error en getUserCertificate:', error);
-    res.status(error.message === 'No autorizado' ? 401 : 500).json({
-      error: error.message || "Error al obtener certificados"
+    console.error("Error en getUserCertificate:", error);
+    res.status(error.message === "No autorizado" ? 401 : 500).json({
+      error: error.message || "Error al obtener certificados",
     });
   }
 };
@@ -319,7 +364,9 @@ export const deletePdfDocument = async (req: Request, res: Response) => {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).json({ error: "ID de documento no proporcionado" });
+      return res
+        .status(400)
+        .json({ error: "ID de documento no proporcionado" });
     }
 
     // Extraer el ID del usuario del token
@@ -331,22 +378,25 @@ export const deletePdfDocument = async (req: Request, res: Response) => {
     if (result.success) {
       return res.status(200).json({
         message: "Documento eliminado correctamente",
-        documentId: id
+        documentId: id,
       });
     } else {
       return res.status(result.code || 400).json({
-        error: result.message
+        error: result.message,
       });
     }
   } catch (error: any) {
-    console.error('Error al eliminar documento PDF:', error);
-    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
-      error: error.message || "Error al eliminar el documento"
+    console.error("Error al eliminar documento PDF:", error);
+    return res.status(error.message === "No autorizado" ? 401 : 500).json({
+      error: error.message || "Error al eliminar el documento",
     });
   }
 };
 
-export const deleteCertificateFromDBHandler = async (req: Request, res: Response) => {
+export const deleteCertificateFromDBHandler = async (
+  req: Request,
+  res: Response
+) => {
   try {
     // Extraer el ID del usuario del token
     const userId = extractUserIdFromToken(req);
@@ -356,41 +406,51 @@ export const deleteCertificateFromDBHandler = async (req: Request, res: Response
 
     if (result.success) {
       return res.status(200).json({
-        message: "Certificado eliminado correctamente"
+        message: "Certificado eliminado correctamente",
       });
     } else {
       return res.status(result.code || 404).json({
-        error: result.message
+        error: result.message,
       });
     }
   } catch (error: any) {
-    console.error('Error al eliminar certificado:', error);
-    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
-      error: error.message || "Error al eliminar el certificado"
+    console.error("Error al eliminar certificado:", error);
+    return res.status(error.message === "No autorizado" ? 401 : 500).json({
+      error: error.message || "Error al eliminar el certificado",
     });
   }
 };
 
-export const deleteCertificateByIdHandler = async (req: Request, res: Response) => {
+export const deleteCertificateByIdHandler = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const { id } = req.params;
     const userId = extractUserIdFromToken(req);
 
     if (!id) {
-      return res.status(400).json({ error: "ID de certificado no proporcionado" });
+      return res
+        .status(400)
+        .json({ error: "ID de certificado no proporcionado" });
     }
 
     const result = await deleteCertificateById(id, userId);
 
     if (result.success) {
-      return res.status(200).json({ message: "Certificado eliminado correctamente", certificateId: id });
+      return res
+        .status(200)
+        .json({
+          message: "Certificado eliminado correctamente",
+          certificateId: id,
+        });
     } else {
       return res.status(result.code || 400).json({ error: result.message });
     }
   } catch (error: any) {
-    console.error('Error al eliminar certificado por ID:', error);
-    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
-      error: error.message || "Error al eliminar el certificado"
+    console.error("Error al eliminar certificado por ID:", error);
+    return res.status(error.message === "No autorizado" ? 401 : 500).json({
+      error: error.message || "Error al eliminar el certificado",
     });
   }
 };
@@ -404,14 +464,20 @@ export const downloadCertificate = async (req: Request, res: Response) => {
     console.log(`[downloadCertificate] ID del usuario: ${userId}`);
 
     if (!userId) {
-      return res.status(401).json({ error: 'No autorizado' });
+      return res.status(401).json({ error: "No autorizado" });
     }
 
     // Get password from body (POST) or query (GET)
     const password = req.body?.password || req.query?.password;
     if (!password) {
-      console.error(`[downloadCertificate] Error: La contraseña no fue proporcionada en la solicitud.`);
-      return res.status(400).json({ error: 'La contraseña es requerida para descargar el certificado.' });
+      console.error(
+        `[downloadCertificate] Error: La contraseña no fue proporcionada en la solicitud.`
+      );
+      return res
+        .status(400)
+        .json({
+          error: "La contraseña es requerida para descargar el certificado.",
+        });
     }
 
     // Validar la contraseña antes de descargar
@@ -419,26 +485,46 @@ export const downloadCertificate = async (req: Request, res: Response) => {
     try {
       certBuffer = await decryptandretrieveCertificate(id, password as string);
     } catch (err: any) {
-      if (err.message && err.message.toLowerCase().includes('bad decrypt')) {
-        return res.status(401).json({ error: 'Contraseña incorrecta. Por favor, verifica e intenta nuevamente.' });
+      if (err.message && err.message.toLowerCase().includes("bad decrypt")) {
+        return res
+          .status(401)
+          .json({
+            error:
+              "Contraseña incorrecta. Por favor, verifica e intenta nuevamente.",
+          });
       }
-      return res.status(500).json({ error: err.message || 'Error al descargar el certificado' });
+      return res
+        .status(500)
+        .json({ error: err.message || "Error al descargar el certificado" });
     }
 
     if (!certBuffer) {
-      console.error(`[downloadCertificate] Certificado no encontrado o no autorizado para ID: ${id}`);
-      return res.status(404).json({ error: 'Certificado no encontrado o no autorizado' });
+      console.error(
+        `[downloadCertificate] Certificado no encontrado o no autorizado para ID: ${id}`
+      );
+      return res
+        .status(404)
+        .json({ error: "Certificado no encontrado o no autorizado" });
     }
 
-    console.log(`[downloadCertificate] Certificado descifrado con tamaño: ${certBuffer.length} bytes`);
+    console.log(
+      `[downloadCertificate] Certificado descifrado con tamaño: ${certBuffer.length} bytes`
+    );
 
-    res.setHeader('Content-Type', 'application/x-pkcs12');
-    res.setHeader('Content-Disposition', `attachment; filename=certificado_${id}.p12`);
+    res.setHeader("Content-Type", "application/x-pkcs12");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=certificado_${id}.p12`
+    );
     return res.send(certBuffer);
-
   } catch (error: any) {
-    console.error(`[downloadCertificate] Error al descargar certificado:`, error);
-    return res.status(500).json({ error: error.message || 'Error al descargar el certificado' });
+    console.error(
+      `[downloadCertificate] Error al descargar certificado:`,
+      error
+    );
+    return res
+      .status(500)
+      .json({ error: error.message || "Error al descargar el certificado" });
   }
 };
 
@@ -448,31 +534,48 @@ export const downloadPdfDocument = async (req: Request, res: Response) => {
     const userId = extractUserIdFromToken(req);
 
     if (!userId) {
-      return res.status(401).json({ error: 'No autorizado' });
+      return res.status(401).json({ error: "No autorizado" });
     }
 
     const pdfBuffer = await getDecryptedPdfBuffer(id, userId);
 
     if (!pdfBuffer) {
-      return res.status(404).json({ error: 'Documento no encontrado o no autorizado' });
+      return res
+        .status(404)
+        .json({ error: "Documento no encontrado o no autorizado" });
     }
 
-    console.log(`[downloadPdfDocument] Enviando PDF descifrado con tamaño: ${pdfBuffer.length} bytes`);
+    console.log(
+      `[downloadPdfDocument] Enviando PDF descifrado con tamaño: ${pdfBuffer.length} bytes`
+    );
 
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="documento_${id}.pdf"`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="documento_${id}.pdf"`
+    );
 
     return res.send(pdfBuffer);
-
   } catch (error: any) {
-    console.error('Error al descargar PDF:', error);
-    return res.status(500).json({ error: error.message || 'Error al descargar el PDF' });
+    console.error("Error al descargar PDF:", error);
+    return res
+      .status(500)
+      .json({ error: error.message || "Error al descargar el PDF" });
   }
 };
 
 export const handleSignPdfWithStamp = async (req: Request, res: Response) => {
   try {
-    const { documentId, certId, certPassword, stampImageBase64, userName, x, y, page } = req.body;
+    const {
+      documentId,
+      certId,
+      certPassword,
+      stampImageBase64,
+      userName,
+      x,
+      y,
+      page,
+    } = req.body;
     const userId = extractUserIdFromToken(req);
 
     await signPdfWithStamp({
@@ -490,16 +593,23 @@ export const handleSignPdfWithStamp = async (req: Request, res: Response) => {
     return res.status(200).json({ message: "Documento firmado con estampa" });
   } catch (error: any) {
     console.error("Error en handleSignPdfWithStamp:", error);
-    return res.status(500).json({ error: error.message || "Error al firmar el documento" });
+    return res
+      .status(500)
+      .json({ error: error.message || "Error al firmar el documento" });
   }
 };
 
-export const getDocumentSignatureMetadata = async (req: Request, res: Response) => {
+export const getDocumentSignatureMetadata = async (
+  req: Request,
+  res: Response
+) => {
   try {
     const { id } = req.params;
     const userId = extractUserIdFromToken(req);
 
-    console.log(`[getDocumentSignatureMetadata] Obteniendo metadatos para documento ${id}, usuario ${userId}`);
+    console.log(
+      `[getDocumentSignatureMetadata] Obteniendo metadatos para documento ${id}, usuario ${userId}`
+    );
 
     // const metadata = await getSignatureMetadata(id, userId);
     const metadata = null; // Función temporalmente deshabilitada
@@ -507,11 +617,13 @@ export const getDocumentSignatureMetadata = async (req: Request, res: Response) 
     return res.status(200).json({
       documentId: id,
       signatures: metadata,
-      count: 0 // Metadatos temporalmente deshabilitados
+      count: 0, // Metadatos temporalmente deshabilitados
     });
   } catch (error: any) {
     console.error("Error en getDocumentSignatureMetadata:", error);
-    return res.status(500).json({ error: error.message || "Error al obtener metadatos de firma" });
+    return res
+      .status(500)
+      .json({ error: error.message || "Error al obtener metadatos de firma" });
   }
 };
 

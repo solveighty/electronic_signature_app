@@ -1,0 +1,57 @@
+{
+  "compilerOptions": {
+    /* Base Options */
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020"],
+    "outDir": "../../dist/server",
+    "rootDir": ".",
+    
+    /* Module Resolution */
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    
+    /* Type Checking */
+    "strict": false,
+    "noImplicitAny": false,
+    "noImplicitReturns": false,
+    "noImplicitThis": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "noCheck": true,
+    
+    /* Emit */
+    "noEmit": false,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": true,
+    "removeComments": true,
+    
+    /* Advanced Options */
+    "isolatedModules": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    
+    /* Node.js specific */
+    "types": ["node"],
+    "typeRoots": ["../../node_modules/@types", "./types"]
+  },
+  "include": [
+    "./**/*.ts",
+    "../../types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "dist"
+  ],
+  "ts-node": {
+    "esm": false,
+    "experimentalSpecifierResolution": "node"
+  }
+}

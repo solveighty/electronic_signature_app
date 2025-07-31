@@ -1,7 +1,6 @@
-import { exec } from 'child_process';
-import { fileURLToPath } from 'url';
+import { exec } from "child_process";
 import * as path from "path";
-import * as fs from 'fs';
+import * as fs from "fs";
 
 export interface CertificateUserData {
   userId: string;
@@ -14,14 +13,14 @@ export interface CertificateUserData {
   email: string;
   challengePassword: string;
   optionalCompany?: string;
-  filename?:string;
+  filename?: string;
 }
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Use CommonJS __dirname
+const __dirname_current = __dirname;
 
 function escapePassword(pass: string): string {
-  return pass.replace(/(["$`\\])/g, '\\$1');
+  return pass.replace(/(["$`\\])/g, "\\$1");
 }
 
 function execPromise(cmd: string, env?: NodeJS.ProcessEnv): Promise<void> {
@@ -40,8 +39,13 @@ function execPromise(cmd: string, env?: NodeJS.ProcessEnv): Promise<void> {
   });
 }
 
-export const generateP12ForUser = async (data: CertificateUserData): Promise<string> => {
-  const certDir = path.resolve(__dirname, '../../../files/certificates');
+export const generateP12ForUser = async (
+  data: CertificateUserData
+): Promise<string> => {
+  const certDir = path.resolve(
+    __dirname_current,
+    "../../../files/certificates"
+  );
   if (!fs.existsSync(certDir)) fs.mkdirSync(certDir, { recursive: true });
 
   const keyPath = path.join(certDir, `${data.userId}-key.pem`);
@@ -49,7 +53,7 @@ export const generateP12ForUser = async (data: CertificateUserData): Promise<str
   const crtPath = path.join(certDir, `${data.userId}-crt.crt`);
   const p12Path = path.join(certDir, `${data.userId}-cert.p12`);
 
-  const opensslConf = 'C:\\Program Files\\OpenSSL-Win64\\bin\\openssl.cnf'; // Ajusta la ruta según tu instalación
+  const opensslConf = "C:\\Program Files\\OpenSSL-Win64\\bin\\openssl.cnf"; // Ajusta la ruta según tu instalación
   const pass = escapePassword("");
 
   let subject = `/C=${data.country}/ST=${data.state}/L=${data.locality}/O=${data.organization}`;
@@ -59,14 +63,26 @@ export const generateP12ForUser = async (data: CertificateUserData): Promise<str
 
   const env = {
     ...process.env,
-    OPENSSL_CONF: opensslConf
+    OPENSSL_CONF: opensslConf,
   };
 
   try {
-    await execPromise(`openssl genrsa -aes256 -passout pass:"${pass}" -out "${keyPath}" 2048`, env);
-    await execPromise(`openssl req -new -key "${keyPath}" -out "${csrPath}" -subj "${subject}" -passin pass:"${pass}"`, env);
-    await execPromise(`openssl x509 -req -in "${csrPath}" -signkey "${keyPath}" -out "${crtPath}" -days 365 -passin pass:"${pass}"`, env);
-    await execPromise(`openssl pkcs12 -export -out "${p12Path}" -inkey "${keyPath}" -in "${crtPath}" -passin pass:"${pass}" -passout pass:"${pass}"`, env);
+    await execPromise(
+      `openssl genrsa -aes256 -passout pass:"${pass}" -out "${keyPath}" 2048`,
+      env
+    );
+    await execPromise(
+      `openssl req -new -key "${keyPath}" -out "${csrPath}" -subj "${subject}" -passin pass:"${pass}"`,
+      env
+    );
+    await execPromise(
+      `openssl x509 -req -in "${csrPath}" -signkey "${keyPath}" -out "${crtPath}" -days 365 -passin pass:"${pass}"`,
+      env
+    );
+    await execPromise(
+      `openssl pkcs12 -export -out "${p12Path}" -inkey "${keyPath}" -in "${crtPath}" -passin pass:"${pass}" -passout pass:"${pass}"`,
+      env
+    );
 
     if (fs.existsSync(p12Path)) {
       console.log(`Archivo P12 generado correctamente en: ${p12Path}`);
@@ -75,8 +91,8 @@ export const generateP12ForUser = async (data: CertificateUserData): Promise<str
     }
 
     // Borra solo archivos temporales (key, csr, crt)
-    
-    [keyPath, csrPath, crtPath].forEach(file => {
+
+    [keyPath, csrPath, crtPath].forEach((file) => {
       if (fs.existsSync(file)) {
         try {
           fs.unlinkSync(file);
@@ -88,7 +104,6 @@ export const generateP12ForUser = async (data: CertificateUserData): Promise<str
     });
 
     return p12Path;
-
   } catch (error) {
     console.error("Error al generar certificado P12:", error);
     throw error;
