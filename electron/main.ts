@@ -28,6 +28,8 @@ let win: BrowserWindow | null;
 
 function createWindow() {
   win = new BrowserWindow({
+    width: 900,
+    height: 800,
     maximizable: true,
     frame: false,
     resizable: true,
@@ -44,7 +46,7 @@ function createWindow() {
 
   win.setMenu(null);
   // for debbugging purposes
-  win.webContents.openDevTools();
+  //win.webContents.openDevTools();
 
   // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {

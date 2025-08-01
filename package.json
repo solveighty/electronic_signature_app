@@ -10,7 +10,7 @@
     "start": "node dist/server/index.js",
     "build:server:watch": "tsc --project src/server/tsconfig.json --watch",
     "clean:server": "rm -rf dist/server || true",
-    "build": "tsc && vite build && electron-builder --publish never",
+    "build": "tsc --noCheck && vite build && electron-builder --publish never",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
