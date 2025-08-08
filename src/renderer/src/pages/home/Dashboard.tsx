@@ -39,47 +39,45 @@ const Dashboard = () => {
 
       <Tabs value={logic.activeTab} onChange={logic.handleTabChange} mb="xl">
         <Tabs.List grow>
-          {/* Solo mostrar la pestaña de subir si el usuario tiene permisos */}
-          <Tabs.Tab value="upload" leftSection={<IconUpload size={16} />}>
-            Subir Archivos
-          </Tabs.Tab>
-          {/* Solo mostrar la pestaña de firmar si el usuario tiene documentos */}
-          <Tabs.Tab value="sign" leftSection={<IconSignature size={16} />}>
-            Firmar Documentos
-          </Tabs.Tab>
-          {/* Solo mostrar la pestaña de documentos si el usuario tiene documentos */}
-          <Tabs.Tab value="documents" leftSection={<IconFile size={16} />}>
-            Mis Documentos
-          </Tabs.Tab>
-          {/* Solo mostrar la pestaña de certificados si el usuario tiene certificados */}
-          <Tabs.Tab
-            value="create-certificate"
-            leftSection={<IconCertificate size={16} />}
-          >
-            Crear Certificado
-          </Tabs.Tab>
+          {logic.isAdmin ? (
+            <Tabs.Tab
+              value="create-certificate"
+              leftSection={<IconCertificate size={16} />}
+            >
+              Crear Certificado
+            </Tabs.Tab>
+          ) : (
+            <>
+              <Tabs.Tab value="upload" leftSection={<IconUpload size={16} />}>
+                Subir Archivos
+              </Tabs.Tab>
+              <Tabs.Tab value="sign" leftSection={<IconSignature size={16} />}>
+                Firmar Documentos
+              </Tabs.Tab>
+              <Tabs.Tab value="documents" leftSection={<IconFile size={16} />}>
+                Mis Documentos
+              </Tabs.Tab>
+            </>
+          )}
         </Tabs.List>
 
-        {/* Paneles de contenido para cada pestaña */}
-        <Tabs.Panel value="upload" pt="md">
-          <UploadPanel logic={logic} />
-        </Tabs.Panel>
-
-        {/* Panel para firmar documentos */}
-        <Tabs.Panel value="sign" pt="md">
-          <SignPanel />
-        </Tabs.Panel>
-
-        {/* Panel para mostrar documentos subidos */}
-
-        <Tabs.Panel value="documents" pt="md">
-          <DocumentsPanel logic={logic} />
-        </Tabs.Panel>
-
-        {/* Panel para crear certificados */}
-        <Tabs.Panel value="create-certificate" pt="md">
-          <CreateCertificatePanel logic={logic} />
-        </Tabs.Panel>
+        {logic.isAdmin ? (
+          <Tabs.Panel value="create-certificate" pt="md">
+            <CreateCertificatePanel logic={logic} />
+          </Tabs.Panel>
+        ) : (
+          <>
+            <Tabs.Panel value="upload" pt="md">
+              <UploadPanel logic={logic} />
+            </Tabs.Panel>
+            <Tabs.Panel value="sign" pt="md">
+              <SignPanel />
+            </Tabs.Panel>
+            <Tabs.Panel value="documents" pt="md">
+              <DocumentsPanel logic={logic} />
+            </Tabs.Panel>
+          </>
+        )}
       </Tabs>
 
       {/* Modal de confirmación para eliminar PDF */}

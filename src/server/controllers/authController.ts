@@ -103,6 +103,7 @@ export const login = async (req: Request, res: Response) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        isAdmin: user.isAdmin ?? false,
       },
     });
   } catch (error) {

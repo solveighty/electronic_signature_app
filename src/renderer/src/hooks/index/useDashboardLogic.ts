@@ -23,7 +23,7 @@ export function useDashboardLogic() {
     getPdfDocumentUrl
   } = useDocumentManager();
 
-  const { setToken, userName } = useAuth();
+  const { setToken, userName, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { darkMode, toggleDarkMode } = useDarkMode();
 
@@ -161,6 +161,7 @@ export function useDashboardLogic() {
     deletePdf,
     setToken,
     userName,
+    isAdmin,
     navigate,
     darkMode,
     toggleDarkMode,
