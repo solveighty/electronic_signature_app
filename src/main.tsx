@@ -13,12 +13,11 @@ import { useDarkMode } from "./renderer/src/context/DarkMode.tsx";
 const RootProviders = () => {
   const { darkMode } = useDarkMode();
   return (
-    <MantineProvider key={darkMode ? "dark" : "light"} forceColorScheme={darkMode ? "dark" : "light"}>
+    <MantineProvider forceColorScheme={darkMode ? "dark" : "light"}>
       <App />
     </MantineProvider>
   );
 };
-
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

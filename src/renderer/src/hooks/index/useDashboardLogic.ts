@@ -31,10 +31,22 @@ export function useDashboardLogic() {
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [deleteCertificateModalOpened, { open: openDeleteCertificateModal, close: closeDeleteCertificateModal }] = useDisclosure(false);
   const [overwriteModalOpened, setOverwriteModalOpened] = useState(false);
-  const [activeTab, setActiveTab] = useState(isAdmin ? 'create-certificate' : 'upload');
+  // Initialize active tab from localStorage (persist across theme toggles/reloads)
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    const saved = localStorage.getItem('dashboard.activeTab');
+    if (saved) return saved;
+    return isAdmin ? 'create-certificate' : 'upload';
+  });
 
+  // If role changes, ensure the current tab is valid for the new role
   useEffect(() => {
-    setActiveTab(isAdmin ? 'create-certificate' : 'upload');
+    if (isAdmin) {
+      // Admin has only create-certificate
+      if (activeTab !== 'create-certificate') setActiveTab('create-certificate');
+    } else {
+      // Non-admin cannot be on create-certificate
+      if (activeTab === 'create-certificate') setActiveTab('upload');
+    }
   }, [isAdmin]);
   const [certificateKeyModalOpened, { open: openCertificateKeyModal, close: closeCertificateKeyModal }] = useDisclosure(false);
   const [certificateKey, setCertificateKey] = useState('');
@@ -94,7 +106,10 @@ export function useDashboardLogic() {
   };
 
   const handleTabChange = (value: string | null) => {
-    if (value) setActiveTab(value);
+    if (value) {
+      setActiveTab(value);
+      localStorage.setItem('dashboard.activeTab', value);
+    }
   };
 
   const handleCertificateUploadWithKey = async (e: React.ChangeEvent<HTMLInputElement>) => {
