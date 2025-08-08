@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import * as path from "path";
+import { fileURLToPath } from 'url';
 import * as fs from "fs";
 
 export interface CertificateUserData {
@@ -16,8 +17,8 @@ export interface CertificateUserData {
   filename?: string;
 }
 
-// Use CommonJS __dirname
-const __dirname_current = __dirname;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname_current = path.dirname(__filename);
 
 function escapePassword(pass: string): string {
   return pass.replace(/(["$`\\])/g, "\\$1");

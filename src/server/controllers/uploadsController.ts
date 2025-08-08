@@ -1,6 +1,7 @@
 import multer from "multer";
 import { Request, Response } from "express";
 import * as path from "path";
+import { fileURLToPath } from 'url';
 import * as fs from "fs";
 import { storePdfDocument, getUserPdfDocuments } from "../services/pdfService";
 import {
@@ -20,8 +21,8 @@ import { getDecryptedPdfBuffer } from "../services/pdfService";
 import { signPdfWithStamp } from "../services/signPdfService";
 import { v4 as uuidv4 } from "uuid";
 
-// Obtener la ruta base del proyecto usando CommonJS
-const __dirname_current = __dirname;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname_current = path.dirname(__filename);
 const rootDir = path.resolve(__dirname_current, "../../..");
 
 // Crear directorios si no existen
