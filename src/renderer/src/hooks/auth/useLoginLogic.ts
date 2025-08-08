@@ -7,7 +7,7 @@ import { handleLogin } from "./handle/loginLogic";
 
 export function useLoginLogic() {
   const navigate = useNavigate();
-  const { setToken, setUserName } = useAuth();
+  const { setToken, setUserName, setIsAdmin } = useAuth();
 
   const form = useForm({
     initialValues: {
@@ -33,6 +33,7 @@ export function useLoginLogic() {
       loginApi: LoginApi,
       setToken,
       setUserName,
+      setIsAdmin,
       navigate,
     });
   };

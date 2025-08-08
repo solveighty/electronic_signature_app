@@ -4,6 +4,7 @@ interface User {
   email: string;
   password: string;
   isVerified?: boolean;
+  isAdmin?: boolean;
 }
 
 export type { User as default };

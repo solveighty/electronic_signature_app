@@ -6,6 +6,7 @@ export async function handleLogin({
   loginApi,
   setToken,
   setUserName,
+  setIsAdmin,
   navigate,
 }: {
   email: string;
@@ -13,6 +14,7 @@ export async function handleLogin({
   loginApi: (email: string, password: string) => Promise<any>;
   setToken: (token: string | null) => void;
   setUserName: (name: string | null) => void;
+  setIsAdmin: (isAdmin: boolean) => void;
   navigate: (path: string) => void;
 }) {
   try {
@@ -23,6 +25,12 @@ export async function handleLogin({
       setUserName(response.data.user.name);
     } else {
       setUserName(email.split('@')[0]);
+    }
+
+    if (response.data.user && typeof response.data.user.isAdmin === 'boolean') {
+      setIsAdmin(response.data.user.isAdmin);
+    } else {
+      setIsAdmin(false);
     }
 
     toast.success('¡Inicio de sesión exitoso!');

@@ -3,6 +3,7 @@ interface VerificationCode {
   code: string;
   expiresAt: Date;
   name: string;
+  isAdmin?: boolean;
 }
 
 interface PasswordResetCode {
@@ -21,11 +22,13 @@ const passwordResetCodes = new Map<string, PasswordResetCode>();
  * @param email - User's email address
  * @param code - 6-digit verification code
  * @param name - User's name
+ * @param isAdmin - Optional admin flag
  */
 export const storeVerificationCode = (
   email: string,
   code: string,
-  name: string
+  name: string,
+  isAdmin?: boolean
 ): void => {
   const expiresAt = new Date();
   expiresAt.setMinutes(expiresAt.getMinutes() + 10); // Expire in 10 minutes
@@ -35,6 +38,7 @@ export const storeVerificationCode = (
     code,
     expiresAt,
     name,
+    isAdmin,
   });
 };
 

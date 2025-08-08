@@ -1,8 +1,10 @@
 export type AuthContextType = {
   token: string | null;
   userName: string | null;
+  isAdmin: boolean;
   setToken: (token: string | null) => void;
   setUserName: (name: string | null) => void;
+  setIsAdmin: (isAdmin: boolean) => void;
 };
 
 export interface OTPVerificationData {
@@ -21,6 +23,7 @@ export interface OTPVerificationResponse {
     email: string;
     name: string;
     verified: boolean;
+    isAdmin?: boolean;
   };
 }
 

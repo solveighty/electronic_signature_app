@@ -26,7 +26,7 @@ if (!JWT_SECRET) {
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, isAdmin = false } = req.body;
 
     // Validate required fields
     if (!name || !email || !password) {
@@ -40,8 +40,7 @@ export const register = async (req: Request, res: Response) => {
       .schema("public")
       .from("users")
       .select("*")
-      .eq("email", email)
-      .single();
+      .eq("email", email);
 
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -66,7 +65,7 @@ export const register = async (req: Request, res: Response) => {
       email,
     });
   } catch (error: unknown) {
-    console.error(error);
+          storeVerificationCode(email, verificationCode, name, isAdmin);
     res
       .status(500)
       .json({ message: (error as Error).message || "Server error" });
@@ -126,20 +125,15 @@ export const verifyRegistration = async (req: Request, res: Response) => {
     // Get verification data
     const verificationData = getVerificationData(email);
     if (!verificationData) {
-      return res
-        .status(400)
-        .json({ message: "Invalid or expired verification code" });
+      return res.status(400).json({ message: "Invalid or expired verification code" });
     }
 
     // Verify the code
     const isCodeValid = verifyCode(email, verificationCode);
     if (!isCodeValid) {
-      return res
-        .status(400)
-        .json({ message: "Invalid or expired verification code" });
+      return res.status(400).json({ message: "Invalid or expired verification code" });
     }
 
-    // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(String(password), salt);
 
@@ -150,6 +144,7 @@ export const verifyRegistration = async (req: Request, res: Response) => {
       email,
       password: hashedPassword,
       isVerified: true,
+      isAdmin: verificationData.isAdmin ?? false,
     };
 
     // Save user to database
@@ -162,6 +157,7 @@ export const verifyRegistration = async (req: Request, res: Response) => {
         email: newUser.email,
         password: hashedPassword,
         is_verified: true,
+        is_admin: newUser.isAdmin,
       });
 
     if (supabaseResponse.error) {
@@ -199,7 +195,6 @@ export const resendVerificationCode = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Email is required" });
     }
 
-    // Check if there's existing verification data
     const existingData = getVerificationData(email);
     if (!existingData) {
       return res.status(400).json({
@@ -211,8 +206,8 @@ export const resendVerificationCode = async (req: Request, res: Response) => {
     // Generate new verification code
     const verificationCode = generateVerificationCode();
 
-    // Store new verification code
-    storeVerificationCode(email, verificationCode, existingData.name);
+    // Store new verification code (mantener isAdmin si existía)
+    storeVerificationCode(email, verificationCode, existingData.name, existingData.isAdmin);
 
     // Send verification email
     await sendVerificationEmail({

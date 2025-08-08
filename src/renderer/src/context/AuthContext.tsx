@@ -9,13 +9,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setTokenState] = useState<string | null>(null);
   const [userName, setUserName] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   const setToken = (newToken: string | null) => {
     handleSetToken(setTokenState, newToken);
   };
 
   return (
-    <AuthContext.Provider value={{ token, userName, setToken, setUserName }}>
+    <AuthContext.Provider value={{ token, userName, isAdmin, setToken, setUserName, setIsAdmin }}>
       {children}
     </AuthContext.Provider>
   );

@@ -7,6 +7,7 @@ export async function handleRegister({
   password,
   registerApi,
   navigate,
+  setIsAdmin,
 }: {
   name: string;
   email: string;
@@ -20,12 +21,16 @@ export async function handleRegister({
     path: string,
     options?: { state?: { email: string; password: string } }
   ) => void;
+  setIsAdmin: (isAdmin: boolean) => void;
 }) {
   try {
-    // Start registration without waiting for response
-    registerApi(name, email, password).catch(() => {
-      console.info("Timed out waiting for registration response");
-    });
+    // Start registration and wait for response
+    const response = await registerApi(name, email, password);
+    if (response.user && typeof (response.user as any).isAdmin === 'boolean') {
+      setIsAdmin((response.user as any).isAdmin);
+    } else {
+      setIsAdmin(false);
+    }
 
     toast.success("¡Código de verificación enviado a tu correo!");
     // Navigate to OTP verification with email and password in state

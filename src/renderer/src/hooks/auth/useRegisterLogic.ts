@@ -3,9 +3,11 @@ import { useForm } from "@mantine/form";
 import { useSpring } from "@react-spring/web";
 import { register as RegisterApi } from "../../utils/api/api";
 import { handleRegister } from "./handle/registerLogic";
+import { useAuth } from "../../context/AuthContext";
 
 export function useRegisterLogic() {
   const navigate = useNavigate();
+  const { setIsAdmin } = useAuth();
 
   const form = useForm({
     initialValues: {
@@ -36,6 +38,7 @@ export function useRegisterLogic() {
       password: form.values.password,
       registerApi: RegisterApi,
       navigate,
+      setIsAdmin,
     });
   };
 
