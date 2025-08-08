@@ -68,10 +68,15 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                   shadow="lg"
                   padding="xl"
                   style={{
-                    background: "linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%)",
+                    background: logic.darkMode
+                      ? "linear-gradient(135deg, #1f2430 0%, #0f172a 100%)"
+                      : "linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%)",
+                    border: logic.darkMode ? '1px solid #2b3545' : undefined,
                     transition: "transform 0.2s, box-shadow 0.2s",
                     cursor: "pointer",
-                    boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                    boxShadow: logic.darkMode
+                      ? "0 6px 18px rgba(0,0,0,0.35)"
+                      : "0 2px 12px rgba(0,0,0,0.08)",
                   }}
                   onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.03)")}
                   onMouseLeave={e => (e.currentTarget.style.transform = "scale(1)")}
@@ -79,11 +84,17 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                   <Center mb="md">
                     <IconCertificate size={48} color="#26A69A" />
                   </Center>
-                  <Text fw={700} size="lg" ta="center" mb={4} style={{ wordBreak: "break-all" }}>
+                  <Text
+                    fw={700}
+                    size="lg"
+                    ta="center"
+                    mb={4}
+                    style={{ wordBreak: "break-all", color: logic.darkMode ? '#e2e8f0' : undefined }}
+                  >
                     {cert.name}
                   </Text>
                   {cert.createdAt && (
-                    <Text size="xs" c="dimmed" ta="center" mb={8}>
+                    <Text size="xs" c={logic.darkMode ? undefined : "dimmed"} ta="center" mb={8} style={{ color: logic.darkMode ? '#cbd5e1' : undefined }}>
                       Subido el {logic.formatDate(cert.createdAt)}
                     </Text>
                   )}
@@ -95,7 +106,7 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                   <Center>
                     <ActionIcon
                       color="blue"
-                      variant="light"
+                      variant={logic.darkMode ? "subtle" : "light"}
                       onClick={() => {
                         setSelectedCertId(cert.id);
                         setPasswordModalOpen(true);
@@ -108,7 +119,7 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                     </ActionIcon>
                     <ActionIcon
                       color="red"
-                      variant="light"
+                      variant={logic.darkMode ? "subtle" : "light"}
                       onClick={() => {
                         logic.setSelectedCertId(cert.id);
                         logic.openDeleteCertificateModal();
@@ -132,12 +143,29 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
           {/* Sección de PDFs - siempre visible */}
           <Title order={5} mb="sm" ta="center">Mis Documentos PDF</Title>
           {logic.pdfDocuments.length > 0 ? (
-            <Paper withBorder p="xs" mb="xs" radius="lg" shadow="md" style={{ overflow: 'hidden' }}>
-              <Group gap={0} justify="space-between" align="center" style={{ padding: '12px 24px', background: '#f7fafc', borderBottom: '1px solid #e0e0e0' }}>
-                <Text fw={700} size="sm" style={{ flex: 2 }}>Nombre del documento</Text>
-                <Text fw={700} size="sm" style={{ flex: 1 }}>Fecha de subida</Text>
-                <Text fw={700} size="sm" style={{ flex: 1 }}>Estado</Text>
-                <Text fw={700} size="sm" style={{ flex: 1, textAlign: 'center' }}>Acción</Text>
+            <Paper
+              withBorder
+              p="xs"
+              mb="xs"
+              radius="lg"
+              shadow="md"
+              style={{ overflow: 'hidden' }}
+              className="pdf-documents-list"
+            >
+              <Group
+                gap={0}
+                justify="space-between"
+                align="center"
+                style={{
+                  padding: '12px 24px',
+                  background: logic.darkMode ? '#23293a' : '#f7fafc',
+                  borderBottom: logic.darkMode ? '1px solid #2b3545' : '1px solid #e0e0e0',
+                }}
+              >
+                <Text fw={700} size="sm" style={{ flex: 2, color: logic.darkMode ? '#e2e8f0' : undefined }}>Nombre del documento</Text>
+                <Text fw={700} size="sm" style={{ flex: 1, color: logic.darkMode ? '#e2e8f0' : undefined }}>Fecha de subida</Text>
+                <Text fw={700} size="sm" style={{ flex: 1, color: logic.darkMode ? '#e2e8f0' : undefined }}>Estado</Text>
+                <Text fw={700} size="sm" style={{ flex: 1, textAlign: 'center', color: logic.darkMode ? '#e2e8f0' : undefined }}>Acción</Text>
               </Group>
               {logic.pdfDocuments.map((doc: any) => (
                 <Group
@@ -147,16 +175,16 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                   align="center"
                   style={{
                     padding: '16px 24px',
-                    borderBottom: '1px solid #f0f0f0',
-                    background: '#fff',
+                    borderBottom: logic.darkMode ? '1px solid #2a3240' : '1px solid #f0f0f0',
+                    background: logic.darkMode ? '#1f2430' : '#fff',
                     borderRadius: 12,
                     marginBottom: 8,
                     transition: 'box-shadow 0.2s, background 0.2s',
-                    boxShadow: '0 2px 8px rgba(33,150,243,0.04)',
+                    boxShadow: logic.darkMode ? '0 2px 8px rgba(0,0,0,0.25)' : '0 2px 8px rgba(33,150,243,0.04)',
                     cursor: 'pointer',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#e3f0ff')}
-                  onMouseLeave={e => (e.currentTarget.style.background = '#fff')}
+                  onMouseEnter={e => (e.currentTarget.style.background = logic.darkMode ? 'rgba(59,130,246,0.12)' : '#e3f0ff')}
+                  onMouseLeave={e => (e.currentTarget.style.background = logic.darkMode ? '#1f2430' : '#fff')}
                 >
                   <Group gap="xs" style={{ flex: 2 }}>
                     <IconFile size={20} color="#2196F3" />

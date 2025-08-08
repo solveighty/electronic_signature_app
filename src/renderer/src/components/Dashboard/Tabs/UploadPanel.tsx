@@ -39,7 +39,14 @@ const UploadPanel = ({ logic }: { logic: any }) => {
         >
         <Center style={{ flexDirection: 'column' }} py="lg">
           <IconCertificate size={64} color="#26A69A" />
-          <Title order={3} mt="md" className="text-gray-800 dark:text-white">Certificado Digital</Title>
+          <Title
+            order={3}
+            mt="md"
+            className="text-gray-800 dark:text-white"
+            style={{ color: dark ? '#26A69A' : undefined }}
+          >
+            Certificado Digital
+          </Title>
           <Text c="dimmed" mt="xs" mb="lg" ta="center" size="md" className="dark:text-gray-300">
             Sube tu archivo <b>.p12</b> para firmar documentos digitalmente.
           </Text>
@@ -94,7 +101,14 @@ const UploadPanel = ({ logic }: { logic: any }) => {
       >
         <Center style={{ flexDirection: 'column' }} py="lg">
           <IconFileText size={64} color="#2196F3" />
-          <Title order={3} mt="md" className="text-gray-800 dark:text-white">Documento PDF</Title>
+          <Title
+            order={3}
+            mt="md"
+            className="text-gray-800 dark:text-white"
+            style={{ color: dark ? '#2196F3' : undefined }}
+          >
+            Documento PDF
+          </Title>
           <Text c="dimmed" mt="xs" mb="lg" ta="center" size="md" className="dark:text-gray-300">
             Sube el documento PDF que quieres firmar electrónicamente.
           </Text>

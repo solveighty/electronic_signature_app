@@ -1,3 +1,12 @@
+/* Fondo claro para la lista de documentos PDF en modo claro, oscuro en dark */
+.pdf-documents-list, .pdf-documents-table, .pdf-documents-container {
+  background: #fff !important;
+}
+html.dark .pdf-documents-list, html.dark .pdf-documents-table, html.dark .pdf-documents-container,
+body.dark .pdf-documents-list, body.dark .pdf-documents-table, body.dark .pdf-documents-container,
+.dark .pdf-documents-list, .dark .pdf-documents-table, .dark .pdf-documents-container {
+  background: #181c23 !important;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

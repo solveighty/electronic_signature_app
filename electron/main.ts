@@ -46,7 +46,7 @@ function createWindow() {
 
   win.setMenu(null);
   // for debbugging purposes
-  //win.webContents.openDevTools();
+  win.webContents.openDevTools();
 
   // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {
