@@ -13,7 +13,12 @@ const Register = () => {
       {/* Header de Registro */}
       <RegisterHeader />
       {/* Contenedor principal del formulario de registro */}
-      <Paper radius="md" p="xl" withBorder>
+      <Paper
+        radius="md"
+        p="xl"
+        withBorder
+        className="bg-white dark:bg-[#23293a] dark:text-gray-100 border border-gray-200 dark:border-[#475569] shadow-lg"
+      >
         <RegisterForm
           form={form}
           registerProps={registerProps}

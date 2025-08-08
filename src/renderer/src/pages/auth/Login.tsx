@@ -13,7 +13,12 @@ const Login = () => {
       {/* Header de Inicio de Sesión */}
       <LoginHeader />
 
-      <Paper radius="md" p="xl" withBorder>
+      <Paper
+        radius="md"
+        p="xl"
+        withBorder
+        className="bg-white dark:bg-[#23293a] dark:text-gray-100 border border-gray-200 dark:border-[#475569] shadow-lg"
+      >
         {/* Formulario de Inicio de Sesión */}
         <LoginForm
           form={form}
