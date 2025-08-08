@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from "react-router-dom";
 import { useDarkMode } from '../../context/DarkMode';
@@ -31,7 +31,11 @@ export function useDashboardLogic() {
   const [documentToDelete, setDocumentToDelete] = useState<string | null>(null);
   const [deleteCertificateModalOpened, { open: openDeleteCertificateModal, close: closeDeleteCertificateModal }] = useDisclosure(false);
   const [overwriteModalOpened, setOverwriteModalOpened] = useState(false);
-  const [activeTab, setActiveTab] = useState('upload');
+  const [activeTab, setActiveTab] = useState(isAdmin ? 'create-certificate' : 'upload');
+
+  useEffect(() => {
+    setActiveTab(isAdmin ? 'create-certificate' : 'upload');
+  }, [isAdmin]);
   const [certificateKeyModalOpened, { open: openCertificateKeyModal, close: closeCertificateKeyModal }] = useDisclosure(false);
   const [certificateKey, setCertificateKey] = useState('');
   const [tempCertificateFile, setTempCertificateFile] = useState<File | null>(null);
