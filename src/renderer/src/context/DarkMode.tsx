@@ -16,6 +16,7 @@ export const DarkModeProvider = ({ children }: { children: React.ReactNode }) =>
         const isDark = saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches);
         setDarkMode(isDark);
         document.documentElement.classList.toggle('dark', isDark);
+        document.body.classList.toggle('dark', isDark);
     }, []);
 
     const toggleDarkMode = () => {
@@ -23,6 +24,7 @@ export const DarkModeProvider = ({ children }: { children: React.ReactNode }) =>
         setDarkMode(newMode);
         localStorage.setItem('darkMode', newMode ? 'dark' : 'light');
         document.documentElement.classList.toggle('dark', newMode);
+        document.body.classList.toggle('dark', newMode);
     };
 
     return (

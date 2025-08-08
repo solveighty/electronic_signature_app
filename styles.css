@@ -1,3 +1,11 @@
+html.dark, body.dark, .dark {
+  background-color: #111827 !important; /* tailwind bg-gray-900 */
+  color: #f3f4f6 !important; /* tailwind text-gray-100 */
+}
+
+#root {
+  min-height: 100vh;
+}
 :root {
   --titlebar-bg: #1e1e1e;
   --titlebar-text: #e0e0e0;

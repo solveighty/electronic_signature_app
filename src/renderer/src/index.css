@@ -3,8 +3,17 @@
 @tailwind utilities;
 
 @layer base {
-  body {
+  html {
     @apply bg-gray-50 text-gray-900;
+  }
+  body {
+    @apply bg-gray-50 text-gray-900 min-h-screen;
+  }
+  #root {
+    @apply min-h-screen;
+  }
+  html.dark, body.dark, .dark {
+    @apply bg-gray-900 text-gray-100;
   }
 }
 
