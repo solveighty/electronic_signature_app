@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { getAllUsers, getFriendsAndRequests, acceptFriendRequest } from "../../utils/api/endpoints/friends/friendsApi";
+import { toast } from 'react-toastify';
 
 export interface User {
   id: string;
@@ -33,14 +34,17 @@ export function useFriendsLogic() {
   const handleAccept = async (fromId: string) => {
     if (!userId) {
       setError("Usuario no autenticado");
+      toast.error("Usuario no autenticado");
       return;
     }
     try {
       await acceptFriendRequest(fromId, userId);
       setRequests(reqs => reqs.filter(u => u.id !== fromId));
       setFriends(f => [...f, requests.find(u => u.id === fromId)!]);
+      toast.success("Solicitud de amistad aceptada");
     } catch (e: any) {
       setError(e.response?.data?.message || "Error al aceptar solicitud");
+      toast.error(e.response?.data?.message || "Error al aceptar solicitud");
     }
   };
 
