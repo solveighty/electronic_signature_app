@@ -4,6 +4,8 @@ import { Container, Title, Button, Loader, Group, Avatar, Paper, Text } from "@m
 import { IconUserPlus } from "@tabler/icons-react";
 import axios from "axios";
 
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
 interface User {
   id: string;
   name: string;
@@ -19,7 +21,7 @@ const AddFriendsDashboard = () => {
 
   useEffect(() => {
     setLoading(true);
-    axios.get("/api/users")
+    axios.get(`${API_BASE}/api/users`)
       .then(res => {
         console.log('Respuesta /api/users:', res.data);
         setUsers(Array.isArray(res.data.users) ? res.data.users : []);
@@ -35,9 +37,10 @@ const AddFriendsDashboard = () => {
     setSending(toId);
     try {
       if (!userId) throw new Error("No autenticado");
-      await axios.post("/api/friend-request", { fromId: userId, toId });
+      await axios.post(`${API_BASE}/api/friend-request`, { fromId: userId, toId });
       setUsers(users => users.filter(u => u.id !== toId));
     } catch (e: any) {
+      console.error("Error al enviar solicitud:", e);
       setError(e.response?.data?.message || "Error al enviar solicitud");
     } finally {
       setSending(null);
