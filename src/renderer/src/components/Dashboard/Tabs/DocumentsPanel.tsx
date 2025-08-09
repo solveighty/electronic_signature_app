@@ -1,11 +1,18 @@
-import { Group, Title, Button, Center, Loader, Card, Box, Badge, Paper, Text, ActionIcon, SimpleGrid, Modal, TextInput } from '@mantine/core';
+import { Group, Title, Button, Center, Loader, Card, Box, Badge, Paper, Text, ActionIcon, SimpleGrid, Modal, TextInput, Select } from '@mantine/core';
 import { IconCertificate, IconTrash, IconFile, IconDownload, IconRefresh } from '@tabler/icons-react';
 import { useState } from 'react';
+import { useFriendsLogic } from '../../../hooks/home/useFriendsLogic';
+import { useSendSignatureRequest } from '../../../hooks/home/useSendSignatureRequest';
 import DeletePdfModal from '../Modals/DeletePdfModal';
 import { toast } from 'react-toastify';
 
 const DocumentsPanel = ({ logic }: { logic: any }) => {
   const [deletingDocs, setDeletingDocs] = useState<{ [id: string]: boolean }>({});
+  const [sendModalOpen, setSendModalOpen] = useState(false);
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null);
+  const { friends } = useFriendsLogic();
+  const { sendSignatureRequest, loading: sending, error: sendError, success } = useSendSignatureRequest();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [docToDelete, setDocToDelete] = useState<string | null>(null);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -224,6 +231,52 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                     >
                       <IconTrash size={18} />
                     </ActionIcon>
+                    <Button
+                      size="xs"
+                      color="teal"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedDocId(doc.id.toString());
+                        setSendModalOpen(true);
+                      }}
+                    >
+                      Enviar a firmar
+                    </Button>
+                    <Modal
+                      opened={sendModalOpen}
+                      onClose={() => {
+                        setSendModalOpen(false);
+                        setSelectedDocId(null);
+                        setSelectedFriendId(null);
+                      }}
+                      title="Enviar documento a firmar"
+                    >
+                      <Select
+                        label="Selecciona un amigo para enviar la solicitud de firma"
+                        placeholder="Selecciona un amigo"
+                        data={friends.map(f => ({ value: f.id, label: f.name }))}
+                        value={selectedFriendId}
+                        onChange={setSelectedFriendId}
+                      />
+                      <Button
+                        mt="md"
+                        fullWidth
+                        loading={sending}
+                        disabled={!selectedFriendId || !selectedDocId}
+                        onClick={async () => {
+                          if (selectedDocId && selectedFriendId) {
+                            await sendSignatureRequest(selectedDocId, logic.userId, selectedFriendId);
+                            setSendModalOpen(false);
+                            setSelectedDocId(null);
+                            setSelectedFriendId(null);
+                          }
+                        }}
+                      >
+                        Enviar solicitud
+                      </Button>
+                      {sendError && <Text color="red" mt={8}>{sendError}</Text>}
+                      {success && <Text color="green" mt={8}>Solicitud enviada correctamente</Text>}
+                    </Modal>
                   </Group>
                 </Group>
               ))}

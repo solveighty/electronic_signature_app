@@ -1,3 +1,4 @@
+import PendingSignaturesDashboard from "./renderer/src/pages/home/PendingSignaturesDashboard";
 import "./App.css";
 import Login from "./renderer/src/pages/auth/Login";
 import Register from "./renderer/src/pages/auth/Register";
@@ -41,6 +42,14 @@ function App() {
             element={
               <PrivateRoute>
                 <FriendsDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/pending-signatures"
+            element={
+              <PrivateRoute>
+                <PendingSignaturesDashboard />
               </PrivateRoute>
             }
           />

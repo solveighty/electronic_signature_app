@@ -50,6 +50,10 @@ const Dashboard = () => {
               variant="outline" color="teal">
               Ver amigos y solicitudes
             </Button>
+            <Button onClick={() => navigate("/pending-signatures")}
+              variant="outline" color="orange">
+              Documentos para firmar
+            </Button>
           </Group>
         )}
       </Group>

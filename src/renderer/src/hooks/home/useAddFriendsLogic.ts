@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import api from "../../utils/api/config/axiosConfig";
+import { getAllUsers, getFriendsAndRequests, sendFriendRequest } from "../../utils/api/endpoints/friends/friendsApi";
 
 export interface User {
   id: string;
@@ -20,13 +20,13 @@ export function useAddFriendsLogic() {
 
   useEffect(() => {
     setLoading(true);
-    api.get("/api/users")
+    getAllUsers()
       .then(res => {
         setUsers(Array.isArray(res.data.users) ? res.data.users : []);
       })
       .catch(() => setError("Error al cargar usuarios"));
     if (userId) {
-      api.get(`/api/friends/${userId}`)
+      getFriendsAndRequests(userId)
         .then(res => {
           setFriendsIds(res.data.friends || []);
           setSentIds(res.data.friendRequestsSent || []);
@@ -48,7 +48,7 @@ export function useAddFriendsLogic() {
     setSending(toId);
     try {
       if (!userId) throw new Error("No autenticado");
-      await api.post("/api/friend-request", { fromId: userId, toId });
+  await sendFriendRequest(userId, toId);
       setUsers(users => users.filter(u => u.id !== toId));
     } catch (e: any) {
       setError(e.response?.data?.message || "Error al enviar solicitud");

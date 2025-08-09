@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import api from "../../utils/api/config/axiosConfig";
+import { getAllUsers, getFriendsAndRequests, acceptFriendRequest } from "../../utils/api/endpoints/friends/friendsApi";
 
 export interface User {
   id: string;
@@ -18,10 +18,10 @@ export function useFriendsLogic() {
   useEffect(() => {
     if (!userId) return;
     setLoading(true);
-    api.get(`/api/friends/${userId}`)
+    getFriendsAndRequests(userId)
       .then(async res => {
         const { friends, friendRequestsReceived } = res.data;
-        const usersRes = await api.get("/api/users");
+        const usersRes = await getAllUsers();
         const users: User[] = usersRes.data.users;
         setFriends(users.filter(u => friends.includes(u.id)));
         setRequests(users.filter(u => friendRequestsReceived.includes(u.id)));
@@ -31,8 +31,12 @@ export function useFriendsLogic() {
   }, [userId]);
 
   const handleAccept = async (fromId: string) => {
+    if (!userId) {
+      setError("Usuario no autenticado");
+      return;
+    }
     try {
-      await api.post("/api/friend-request/accept", { fromId, toId: userId });
+      await acceptFriendRequest(fromId, userId);
       setRequests(reqs => reqs.filter(u => u.id !== fromId));
       setFriends(f => [...f, requests.find(u => u.id === fromId)!]);
     } catch (e: any) {
