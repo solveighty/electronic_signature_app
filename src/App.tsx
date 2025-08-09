@@ -1,4 +1,6 @@
 import PendingSignaturesDashboard from "./renderer/src/pages/home/PendingSignaturesDashboard";
+import { useEffect } from "react";
+import { useAuth } from "./renderer/src/context/AuthContext";
 import "./App.css";
 import Login from "./renderer/src/pages/auth/Login";
 import Register from "./renderer/src/pages/auth/Register";
@@ -12,6 +14,12 @@ import VerifyOTP from "./renderer/src/components/VerifyOTP/VerifyOTP";
 import RecoverPassword from "./renderer/src/components/RecoverPassword/RecoverPassword";
 
 function App() {
+  const { setToken } = useAuth();
+  useEffect(() => {
+    const handler = () => setToken(null);
+    window.addEventListener('logout', handler);
+    return () => window.removeEventListener('logout', handler);
+  }, [setToken]);
   return (
     <>
       <HashRouter>
