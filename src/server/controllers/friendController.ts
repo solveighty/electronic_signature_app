@@ -1,3 +1,19 @@
+import supabase from "../utils/supabase";
+// GET /users
+export const getAllNonAdminUsers = async (req: Request, res: Response) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("id, name, email, isAdmin")
+      .eq("is_admin", false);
+    if (error) {
+      return res.status(500).json({ message: error.message });
+    }
+    res.status(200).json({ users: data });
+  } catch (error) {
+    res.status(500).json({ message: (error as Error).message || "Error de servidor" });
+  }
+};
 // GET /friends/:id
 export const getFriendsAndRequests = async (req: Request, res: Response) => {
   try {

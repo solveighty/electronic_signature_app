@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { sendFriendRequest, acceptFriendRequest, getFriendsAndRequests } from "../controllers/friendController";
+import { sendFriendRequest, acceptFriendRequest, getFriendsAndRequests, getAllNonAdminUsers } from "../controllers/friendController";
 
 const router = Router();
 
@@ -11,5 +11,8 @@ router.post("/friend-request/accept", acceptFriendRequest);
 
 // GET /friends/:id
 router.get("/friends/:id", getFriendsAndRequests);
+
+// GET /users
+router.get("/users", getAllNonAdminUsers);
 
 export default router;
