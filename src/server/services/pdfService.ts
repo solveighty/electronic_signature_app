@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as crypto from 'crypto';
 import PdfDocument from '../models/PdfDocument';
+import SignatureRequest from '../models/SignatureRequest';
 import 'dotenv/config';
 
 const ENCRYPTION_SECRET = process.env.ENCRYPTION_KEY_PDF;
@@ -131,6 +132,40 @@ export const getUserPdfDocuments = async (userId: string) => {
 export const getDecryptedPdfBuffer = async (documentId: string, userId: string): Promise<Buffer> => {
   const doc = await PdfDocument.findOne({ _id: documentId, userId });
   if (!doc) throw new Error("Documento no encontrado");
+
+  const parts = doc.encryptedContent.split(':');
+  if (parts.length !== 2) {
+    throw new Error('Formato de datos cifrados no válido');
+  }
+
+  const iv = Buffer.from(parts[0], 'hex');
+  const encryptedData = Buffer.from(parts[1], 'base64');
+  const key = crypto.createHash('sha256').update(String(ENCRYPTION_SECRET)).digest();
+
+  const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+  return Buffer.concat([
+    decipher.update(encryptedData),
+    decipher.final()
+  ]);
+};
+
+/**
+ * Devuelve el buffer PDF descifrado si el usuario está autorizado:
+ * - Es el propietario del documento, o
+ * - Tiene una solicitud de firma asociada al documento.
+ */
+export const getDecryptedPdfBufferAuthorized = async (
+  documentId: string,
+  userId: string
+): Promise<Buffer> => {
+  const doc = await PdfDocument.findById(documentId);
+  if (!doc) throw new Error('Documento no encontrado');
+
+  // Permitir si es propietario o si tiene solicitud de firma para este documento
+  if (doc.userId !== userId) {
+    const sr = await SignatureRequest.findOne({ documentId, toUserId: userId });
+    if (!sr) throw new Error('Documento no autorizado');
+  }
 
   const parts = doc.encryptedContent.split(':');
   if (parts.length !== 2) {

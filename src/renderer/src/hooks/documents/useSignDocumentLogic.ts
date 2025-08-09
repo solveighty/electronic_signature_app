@@ -35,7 +35,8 @@ export function useSignDocumentLogic() {
     isLoadingDocuments,
     refreshDocuments,
     refreshCertificate,
-    hasCertificate
+    hasCertificate,
+    fetchDocumentById
   } = useDocumentManager();
 
   const { token, userName } = useAuth();
@@ -144,6 +145,22 @@ export function useSignDocumentLogic() {
       setIsSigningInProgress(false);
     }
   };
+
+  // Cuando nos piden preseleccionar un documento que no está cargado aún
+  useEffect(() => {
+    const handlePreselect = async (e: any) => {
+      const id = e?.detail?.id as string | undefined;
+      if (!id) return;
+      // Si no existe en lista, intentar obtenerlo del backend
+      const exists = pdfDocuments.some(d => d.id === id);
+      if (!exists) {
+        await fetchDocumentById(id);
+      }
+      setSelectedDocumentId(id);
+    };
+    window.addEventListener('select-document-for-sign', handlePreselect);
+    return () => window.removeEventListener('select-document-for-sign', handlePreselect);
+  }, [pdfDocuments]);
 
   const handleDownloadSignedDocument = () => {
     handleDownloadSignedDocumentLogic(signedDocumentUrl);

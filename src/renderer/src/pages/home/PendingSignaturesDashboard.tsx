@@ -63,6 +63,7 @@ const PendingSignaturesDashboard = () => {
                         color={req.status === 'pending' ? 'blue' : 'gray'}
                         disabled={req.status !== 'pending'}
                         style={{ minWidth: 100, fontWeight: 700 }}
+                        onClick={() => navigate(`/main?tab=sign&doc=${req.documentId}`)}
                       >
                         Firmar
                       </Button>

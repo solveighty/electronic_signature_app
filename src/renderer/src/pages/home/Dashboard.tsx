@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { Container, Title, Tabs, Button, Group } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   IconUpload,
   IconFile,
@@ -19,6 +20,24 @@ import DashboardHeader from "../../components/Dashboard/Header/DashboardHeader";
 const Dashboard = () => {
   const logic = useDashboardLogic();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Al llegar con /main?tab=sign&doc=<id>, cambiar pestaña y precargar documento
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    const doc = params.get('doc');
+    if (!logic.isAdmin && tab === 'sign') {
+      logic.handleTabChange('sign');
+      if (doc) {
+        // Defer para asegurar que el Sign Panel esté montado
+        setTimeout(() => {
+          const evt = new CustomEvent('select-document-for-sign', { detail: { id: doc } });
+          window.dispatchEvent(evt);
+        }, 0);
+      }
+    }
+  }, [location.search, logic.isAdmin]);
 
   return (
     <Container

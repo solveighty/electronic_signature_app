@@ -38,7 +38,7 @@ export async function signPdfDocument(
   token: string
 ): Promise<'ok' | 'invalid-password' | string> {
   try {
-    const response = await api.post(`/api/pdf/${documentId}/sign`, {
+    await api.post(`/api/pdf/${documentId}/sign`, {
       certId,
       certPassword
     }, {
@@ -106,4 +106,8 @@ export async function signPdfWithStampBase64(
       "Content-Type": "application/json"
     }
   });
+}
+
+export async function getDocumentById(documentId: string) {
+  return api.get(`/api/documents/${documentId}`);
 }

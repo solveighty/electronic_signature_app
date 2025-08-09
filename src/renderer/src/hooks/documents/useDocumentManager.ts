@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { getPdfDocumentUrl } from "../../utils/api/api";
+import { getDocumentById } from "../../utils/api/endpoints/pdf/documentApi";
 import { useAuth } from "../../context/AuthContext";
 import { fetchUserDocuments } from "./pdf/crud/fetchUserDocuments";
 import { uploadPdf } from "./pdf/crud/uploadPdf";
@@ -40,6 +41,47 @@ export const useDocumentManager = () => {
       setDocuments,
       setIsLoadingDocuments
     );
+  };
+
+  // Obtener un documento por id (si no está en la lista)
+  const fetchDocumentById = async (id: string) => {
+    try {
+      // Intentar obtener metadatos autorizados por ID (propietario o destinatario de solicitud)
+      const response = await getDocumentById(id);
+      const raw = (response?.data?.document) || null;
+      if (!raw) return null;
+      const doc: Document = {
+        id: raw._id || raw.id,
+        name: raw.fileName || raw.name,
+        type: 'pdf',
+        status: raw.status,
+        createdAt: raw.createdAt ? new Date(raw.createdAt) : new Date()
+      };
+      // Si no está, agregarlo a los estados
+      setDocuments(prev => {
+        const exists = prev.some(d => d.id === doc.id);
+        return exists ? prev : [...prev, doc];
+      });
+      if (doc.type === 'pdf') {
+        setPdfDocuments(prev => {
+          const exists = prev.some(d => d.id === doc.id);
+          return exists ? prev : [...prev, doc];
+        });
+      }
+      return doc;
+    } catch {
+      // Fallback: intentar por lista propia
+      try {
+        const docs = await fetchUserDocuments();
+        const doc = docs.find(d => d.id === id) || null;
+        if (!doc) return null;
+        setDocuments(prev => (prev.some(d => d.id === doc.id) ? prev : [...prev, doc]));
+        setPdfDocuments(prev => (prev.some(d => d.id === doc.id) ? prev : [...prev, doc]));
+        return doc;
+      } catch {
+        return null;
+      }
+    }
   };
 
   const fetchUserCertificateHandler = async () => {
@@ -130,6 +172,7 @@ export const useDocumentManager = () => {
     handleFileChange,
     refreshDocuments: loadUserDocuments,
     refreshCertificate: fetchUserCertificateHandler,
+  fetchDocumentById,
     hasCertificate: certificateFiles.length > 0,
     deleteCertificate,
     deletePdf: deletePdfHandler,

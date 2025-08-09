@@ -17,7 +17,9 @@ import {
   deleteCertificateById,
 } from "../services/deleteService";
 import { generateP12ForUser } from "../services/p12GeneratorService";
-import { getDecryptedPdfBuffer } from "../services/pdfService";
+import { getDecryptedPdfBuffer, getDecryptedPdfBufferAuthorized } from "../services/pdfService";
+import PdfDocument from "../models/PdfDocument";
+import SignatureRequest from "../models/SignatureRequest";
 import { signPdfWithStamp } from "../services/signPdfService";
 import { v4 as uuidv4 } from "uuid";
 
@@ -538,7 +540,8 @@ export const downloadPdfDocument = async (req: Request, res: Response) => {
       return res.status(401).json({ error: "No autorizado" });
     }
 
-    const pdfBuffer = await getDecryptedPdfBuffer(id, userId);
+  // Permitir descarga si es propietario o tiene solicitud de firma
+  const pdfBuffer = await getDecryptedPdfBufferAuthorized(id, userId);
 
     if (!pdfBuffer) {
       return res
@@ -562,6 +565,38 @@ export const downloadPdfDocument = async (req: Request, res: Response) => {
     return res
       .status(500)
       .json({ error: error.message || "Error al descargar el PDF" });
+  }
+};
+
+// Obtener metadatos de documento por ID si usuario está autorizado (dueño o destinatario de solicitud)
+export const getDocumentByIdAuthorized = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = extractUserIdFromToken(req);
+
+    const doc = await PdfDocument.findById(id, { encryptedContent: 0 });
+    if (!doc) return res.status(404).json({ error: 'Documento no encontrado' });
+
+    if (doc.userId !== userId) {
+      const sr = await SignatureRequest.findOne({ documentId: id, toUserId: userId });
+      if (!sr) return res.status(403).json({ error: 'No autorizado' });
+    }
+
+    return res.status(200).json({
+      document: {
+        _id: doc._id,
+        fileName: doc.fileName,
+        status: doc.status,
+        createdAt: doc.createdAt,
+        userId: doc.userId,
+        type: 'pdf'
+      }
+    });
+  } catch (error: any) {
+    console.error('Error en getDocumentByIdAuthorized:', error);
+    return res.status(error.message === 'No autorizado' ? 401 : 500).json({
+      error: error.message || 'Error al obtener el documento'
+    });
   }
 };
 

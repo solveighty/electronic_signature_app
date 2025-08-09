@@ -25,6 +25,18 @@ const SignDocument = () => {
     }
   }, [logic.selectedDocument]);
 
+  // Permitir preselección externa del documento mediante evento global
+  useEffect(() => {
+    const handler = (e: any) => {
+      const id = e?.detail?.id as string | undefined;
+      if (id) {
+        logic.setSelectedDocumentId(id);
+      }
+    };
+    window.addEventListener('select-document-for-sign', handler);
+    return () => window.removeEventListener('select-document-for-sign', handler);
+  }, []);
+
   useEffect(() => {
     if (pdfSigner.signaturePosition) {
       logic.setSignaturePosition({

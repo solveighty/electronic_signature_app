@@ -13,7 +13,8 @@ import {
   downloadPdfDocument,
   downloadCertificate,
   handleSignPdfWithStamp,
-  getDocumentSignatureMetadata
+  getDocumentSignatureMetadata,
+  getDocumentByIdAuthorized
 } from "../controllers/uploadsController";
 
 const router = Router();
@@ -42,6 +43,10 @@ router.post("/uploads/certificates/generate", (req, res, next) => {
 });
 router.get('/pdf/:id/download', (req, res, next) => {
   downloadPdfDocument(req, res).catch(next);
+});
+
+router.get('/documents/:id', (req, res, next) => {
+  getDocumentByIdAuthorized(req, res).catch(next);
 });
 
 router.get('/certificates/:id/download', (req, res, next) => {
