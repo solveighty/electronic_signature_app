@@ -10,6 +10,14 @@ const PORT = process.env.VITE_ENVIRONMENT === "development" ? 3000 : 80;
 // Conectar a MongoDB
 connectToMongoDB().catch(console.error);
 
+// Redireccionar a HTTPS
+app.use((req, res, next) => {
+  if (req.headers["x-forwarded-proto"] !== "https") {
+    return res.redirect(`https://${req.headers.host}${req.url}`);
+  }
+  next();
+});
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
