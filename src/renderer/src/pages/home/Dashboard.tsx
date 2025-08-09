@@ -41,10 +41,16 @@ const Dashboard = () => {
           Firma Electrónica
         </Title>
         {!logic.isAdmin && (
-          <Button onClick={() => navigate("/add-friends")}
-            variant="outline" color="blue">
-            Agregar amigos
-          </Button>
+          <Group>
+            <Button onClick={() => navigate("/add-friends")}
+              variant="outline" color="blue">
+              Agregar amigos
+            </Button>
+            <Button onClick={() => navigate("/friends")}
+              variant="outline" color="teal">
+              Ver amigos y solicitudes
+            </Button>
+          </Group>
         )}
       </Group>
 

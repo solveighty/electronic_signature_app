@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Container, Title, Button, Loader, Group, Avatar, Paper, Text } from "@mantine/core";
 import { IconUserPlus } from "@tabler/icons-react";
-import axios from "axios";
-
-const API_BASE = import.meta.env.VITE_API_URL || "";
+import api from "../../utils/api/config/axiosConfig";
 
 interface User {
   id: string;
@@ -19,25 +17,44 @@ const AddFriendsDashboard = () => {
   const [sending, setSending] = useState<string | null>(null);
   const [error, setError] = useState("");
 
+  const [friendsIds, setFriendsIds] = useState<string[]>([]);
+  const [sentIds, setSentIds] = useState<string[]>([]);
+  const [receivedIds, setReceivedIds] = useState<string[]>([]);
+
   useEffect(() => {
     setLoading(true);
-    axios.get(`${API_BASE}/api/users`)
+    // Obtener todos los usuarios
+    api.get("/api/users")
       .then(res => {
-        console.log('Respuesta /api/users:', res.data);
         setUsers(Array.isArray(res.data.users) ? res.data.users : []);
       })
-      .catch(() => setError("Error al cargar usuarios"))
-      .finally(() => setLoading(false));
-  }, []);
+      .catch(() => setError("Error al cargar usuarios"));
+    // Obtener amigos y solicitudes
+    if (userId) {
+      api.get(`/api/friends/${userId}`)
+        .then(res => {
+          setFriendsIds(res.data.friends || []);
+          setSentIds(res.data.friendRequestsSent || []);
+          setReceivedIds(res.data.friendRequestsReceived || []);
+        })
+        .catch(() => {});
+    }
+    setLoading(false);
+  }, [userId]);
 
-  // Mostrar todos los usuarios excepto el logueado
-  const filteredUsers = users.filter(u => u.id !== userId);
+  // Mostrar solo usuarios que no sean el logueado, ni amigos, ni con solicitud pendiente
+  const filteredUsers = users.filter(u =>
+    u.id !== userId &&
+    !friendsIds.includes(u.id) &&
+    !sentIds.includes(u.id) &&
+    !receivedIds.includes(u.id)
+  );
 
   const handleSendRequest = async (toId: string) => {
     setSending(toId);
     try {
       if (!userId) throw new Error("No autenticado");
-      await axios.post(`${API_BASE}/api/friend-request`, { fromId: userId, toId });
+    await api.post("/api/friend-request", { fromId: userId, toId });
       setUsers(users => users.filter(u => u.id !== toId));
     } catch (e: any) {
       console.error("Error al enviar solicitud:", e);

@@ -5,6 +5,7 @@ import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import Dashboard from "./renderer/src/pages/home/Dashboard";
 import AddFriendsDashboard from "./renderer/src/pages/home/AddFriendsDashboard";
 import PrivateRoute from "./renderer/src/components/PrivateRoute/PrivateRoute";
+import FriendsDashboard from "./renderer/src/pages/home/FriendsDashboard";
 import { ToastContainer } from "react-toastify";
 import VerifyOTP from "./renderer/src/components/VerifyOTP/VerifyOTP";
 import RecoverPassword from "./renderer/src/components/RecoverPassword/RecoverPassword";
@@ -32,6 +33,14 @@ function App() {
             element={
               <PrivateRoute>
                 <AddFriendsDashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/friends"
+            element={
+              <PrivateRoute>
+                <FriendsDashboard />
               </PrivateRoute>
             }
           />
