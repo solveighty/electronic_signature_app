@@ -1,4 +1,6 @@
 import { Container, Title, Loader, Group, Avatar, Paper, Text, Button, Divider } from "@mantine/core";
+import DashboardHeader from "../../components/Dashboard/Header/DashboardHeader";
+import { useHeaderLogic } from "../../hooks/home/useHeaderLogic";
 import { useNavigate } from "react-router-dom";
 import { useFriendsLogic } from "../../hooks/home/useFriendsLogic";
 
@@ -6,8 +8,10 @@ const FriendsDashboard = () => {
   const { friends, requests, loading, error, handleAccept } = useFriendsLogic();
   const navigate = useNavigate();
 
+  const header = useHeaderLogic();
   return (
     <Container size="sm" py={40}>
+      <DashboardHeader {...header} />
       <Group justify="space-between" mb="md">
         <Title order={3} ta="center">Amigos y Solicitudes</Title>
         <Button variant="outline" color="gray" onClick={() => navigate("/main")}>Volver al Dashboard</Button>
