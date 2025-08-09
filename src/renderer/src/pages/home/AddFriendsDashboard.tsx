@@ -1,68 +1,9 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
 import { Container, Title, Button, Loader, Group, Avatar, Paper, Text } from "@mantine/core";
 import { IconUserPlus } from "@tabler/icons-react";
-import api from "../../utils/api/config/axiosConfig";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import { useAddFriendsLogic } from "../../hooks/home/useAddFriendsLogic";
 
 const AddFriendsDashboard = () => {
-  const { userId } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [sending, setSending] = useState<string | null>(null);
-  const [error, setError] = useState("");
-
-  const [friendsIds, setFriendsIds] = useState<string[]>([]);
-  const [sentIds, setSentIds] = useState<string[]>([]);
-  const [receivedIds, setReceivedIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    setLoading(true);
-    // Obtener todos los usuarios
-    api.get("/api/users")
-      .then(res => {
-        setUsers(Array.isArray(res.data.users) ? res.data.users : []);
-      })
-      .catch(() => setError("Error al cargar usuarios"));
-    // Obtener amigos y solicitudes
-    if (userId) {
-      api.get(`/api/friends/${userId}`)
-        .then(res => {
-          setFriendsIds(res.data.friends || []);
-          setSentIds(res.data.friendRequestsSent || []);
-          setReceivedIds(res.data.friendRequestsReceived || []);
-        })
-        .catch(() => {});
-    }
-    setLoading(false);
-  }, [userId]);
-
-  // Mostrar solo usuarios que no sean el logueado, ni amigos, ni con solicitud pendiente
-  const filteredUsers = users.filter(u =>
-    u.id !== userId &&
-    !friendsIds.includes(u.id) &&
-    !sentIds.includes(u.id) &&
-    !receivedIds.includes(u.id)
-  );
-
-  const handleSendRequest = async (toId: string) => {
-    setSending(toId);
-    try {
-      if (!userId) throw new Error("No autenticado");
-    await api.post("/api/friend-request", { fromId: userId, toId });
-      setUsers(users => users.filter(u => u.id !== toId));
-    } catch (e: any) {
-      console.error("Error al enviar solicitud:", e);
-      setError(e.response?.data?.message || "Error al enviar solicitud");
-    } finally {
-      setSending(null);
-    }
-  };
+  const { filteredUsers, loading, sending, error, handleSendRequest } = useAddFriendsLogic();
 
   const handleBack = () => {
     window.location.hash = '/main';
