@@ -100,4 +100,13 @@ app.on("activate", () => {
   }
 });
 
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+  if (url.startsWith('https://electronic-signature-app-ec.myaddr.io')) {
+    event.preventDefault();
+    callback(true); // Confía en el certificado
+  } else {
+    callback(false); // Rechaza
+  }
+});
+
 app.whenReady().then(createWindow);
