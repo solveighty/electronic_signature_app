@@ -5,6 +5,8 @@ export type AuthContextType = {
   setToken: (token: string | null) => void;
   setUserName: (name: string | null) => void;
   setIsAdmin: (isAdmin: boolean) => void;
+  userId?: string | null;
+  setUserId?: (id: string | null) => void;
 };
 
 export interface OTPVerificationData {

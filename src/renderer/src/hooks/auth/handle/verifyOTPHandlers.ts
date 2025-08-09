@@ -7,18 +7,25 @@ export async function handleSubmitOTP({
   values,
   navigate,
   setIsLoading,
+  setUserId,
 }: {
   email: string;
   password: string;
   values: { code: string };
   navigate: (path: string) => void;
   setIsLoading: (loading: boolean) => void;
+  setUserId: (id: string | null) => void;
 }) {
   if (!email || !password) return;
 
   setIsLoading(true);
   try {
-    await verifyOTP(email, values.code, password);
+    const response = await verifyOTP(email, values.code, password);
+    if (response?.data?.user?.id) {
+      setUserId(response.data.user.id);
+    } else {
+      setUserId(null);
+    }
     toast.success("¡Cuenta verificada con éxito!");
     navigate("/login");
   } catch (error: unknown) {

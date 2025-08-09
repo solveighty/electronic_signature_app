@@ -7,6 +7,7 @@ export async function handleLogin({
   setToken,
   setUserName,
   setIsAdmin,
+  setUserId,
   navigate,
 }: {
   email: string;
@@ -15,10 +16,12 @@ export async function handleLogin({
   setToken: (token: string | null) => void;
   setUserName: (name: string | null) => void;
   setIsAdmin: (isAdmin: boolean) => void;
+  setUserId: (id: string | null) => void;
   navigate: (path: string) => void;
 }) {
   try {
     const response = await loginApi(email, password);
+
     setToken(response.data.token);
 
     if (response.data.user && response.data.user.name) {
@@ -31,6 +34,12 @@ export async function handleLogin({
       setIsAdmin(response.data.user.isAdmin);
     } else {
       setIsAdmin(false);
+    }
+
+    if (response.data.user && response.data.user.id) {
+      setUserId(response.data.user.id);
+    } else {
+      setUserId(null);
     }
 
     toast.success('¡Inicio de sesión exitoso!');

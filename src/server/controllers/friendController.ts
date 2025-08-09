@@ -5,12 +5,14 @@ export const getAllNonAdminUsers = async (req: Request, res: Response) => {
     const { data, error } = await supabase
       .from("users")
       .select("id, name, email, isAdmin")
-      .eq("is_admin", false);
+      .eq("isAdmin", false);
     if (error) {
+      console.error('Supabase error:', error);
       return res.status(500).json({ message: error.message });
     }
     res.status(200).json({ users: data });
   } catch (error) {
+    console.error('Catch error:', error);
     res.status(500).json({ message: (error as Error).message || "Error de servidor" });
   }
 };

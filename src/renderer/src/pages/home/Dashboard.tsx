@@ -1,4 +1,5 @@
-import { Container, Title, Tabs } from "@mantine/core";
+import { Container, Title, Tabs, Button, Group } from "@mantine/core";
+import { useNavigate } from "react-router-dom";
 import {
   IconUpload,
   IconFile,
@@ -17,6 +18,7 @@ import DashboardHeader from "../../components/Dashboard/Header/DashboardHeader";
 
 const Dashboard = () => {
   const logic = useDashboardLogic();
+  const navigate = useNavigate();
 
   return (
     <Container
@@ -33,9 +35,18 @@ const Dashboard = () => {
       />
 
       {/* Título principal del Dashboard */}
-      <Title order={2} mb="lg" ta="center">
-        Firma Electrónica
-      </Title>
+
+    <Group justify="space-between" mb="md">
+        <Title order={2} ta="center">
+          Firma Electrónica
+        </Title>
+        {!logic.isAdmin && (
+          <Button onClick={() => navigate("/add-friends")}
+            variant="outline" color="blue">
+            Agregar amigos
+          </Button>
+        )}
+      </Group>
 
       <Tabs value={logic.activeTab} onChange={logic.handleTabChange} mb="xl">
         <Tabs.List grow>

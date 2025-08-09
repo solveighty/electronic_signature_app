@@ -3,6 +3,7 @@ import Login from "./renderer/src/pages/auth/Login";
 import Register from "./renderer/src/pages/auth/Register";
 import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import Dashboard from "./renderer/src/pages/home/Dashboard";
+import AddFriendsDashboard from "./renderer/src/pages/home/AddFriendsDashboard";
 import PrivateRoute from "./renderer/src/components/PrivateRoute/PrivateRoute";
 import { ToastContainer } from "react-toastify";
 import VerifyOTP from "./renderer/src/components/VerifyOTP/VerifyOTP";
@@ -23,6 +24,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/add-friends"
+            element={
+              <PrivateRoute>
+                <AddFriendsDashboard />
               </PrivateRoute>
             }
           />

@@ -3,9 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "@mantine/form";
 import { useSpring } from "@react-spring/web";
 import { handleSubmitOTP, handleResendOTP } from "./handle/verifyOTPHandlers";
+import { useAuth } from "../../context/AuthContext";
 
 export function useVerifyOTPLogic() {
   const navigate = useNavigate();
+  const { setUserId } = useAuth();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -67,6 +69,7 @@ export function useVerifyOTPLogic() {
       values,
       navigate,
       setIsLoading,
+      setUserId,
     });
 
   const handleResendCode = () =>
