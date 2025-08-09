@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import router from "./routes/auth";
 import uploads from "./routes/uploads";
+import friendRoutes from "./routes/friend";
 import { connectToMongoDB } from "./utils/mongoConnect";
 
 const app = express();
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use("/api/auth", router);
 app.use("/api", uploads);
+app.use("/api", friendRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
