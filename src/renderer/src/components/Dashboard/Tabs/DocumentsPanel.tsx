@@ -4,6 +4,10 @@ import { useState } from 'react';
 import { useFriendsLogic } from '../../../hooks/home/useFriendsLogic';
 import { useSendSignatureRequest } from '../../../hooks/home/useSendSignatureRequest';
 import DeletePdfModal from '../Modals/DeletePdfModal';
+import CertificateForm from '../../../components/CertificateCreator/CertificateForm';
+import CertificateHeader from '../../../components/CertificateCreator/CertificateHeader';
+import CertificateActions from '../../../components/CertificateCreator/CertificateActions';
+import { useCertificateCreatorLogic } from '../../../hooks/documents/useCertificateCreatorLogic';
 import { toast } from 'react-toastify';
 
 const DocumentsPanel = ({ logic }: { logic: any }) => {
@@ -18,6 +22,11 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [password, setPassword] = useState('');
   const [selectedCertId, setSelectedCertId] = useState<string | null>(null);
+  const [requestCertOpen, setRequestCertOpen] = useState(false);
+  const certLogic = useCertificateCreatorLogic(() => {
+    setRequestCertOpen(false);
+    logic.refreshCertificate();
+  });
 
   const handleDeletePdf = async (documentId: string) => {
     setDeletingDocs(prev => ({ ...prev, [documentId]: true }));
@@ -64,7 +73,14 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
       ) : (
         <>
           {/* Sección de Certificados - siempre visible */}
-          <Title order={5} mb="sm">Mis Certificados Digitales</Title>
+          <Group justify="space-between" align="center" mb="sm">
+            <Title order={5}>Mis Certificados Digitales</Title>
+            {!logic.isAdmin && (
+              <Button color="teal" variant="light" onClick={() => setRequestCertOpen(true)}>
+                Solicitar certificado
+              </Button>
+            )}
+          </Group>
           {logic.certificateFiles && logic.certificateFiles.length > 0 ? (
             <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg" mb="xl">
               {logic.certificateFiles.map((cert: any) => (
@@ -266,6 +282,9 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
                         onClick={async () => {
                           if (selectedDocId && selectedFriendId) {
                             await sendSignatureRequest(selectedDocId, logic.userId, selectedFriendId);
+                            if (!sendError) {
+                              toast.success('Solicitud de firma enviada');
+                            }
                             setSendModalOpen(false);
                             setSelectedDocId(null);
                             setSelectedFriendId(null);
@@ -316,6 +335,20 @@ const DocumentsPanel = ({ logic }: { logic: any }) => {
         <Button onClick={handleDownloadCertificate} mt="md">
           Descargar
         </Button>
+      </Modal>
+
+      {/* Modal para solicitar certificado (usuario) */}
+      <Modal
+        opened={requestCertOpen}
+        onClose={() => setRequestCertOpen(false)}
+        title="Solicitar Certificado Digital"
+        size="lg"
+      >
+        <div>
+          <CertificateHeader />
+          <CertificateForm form={certLogic.form} handleChange={certLogic.handleChange} />
+          <CertificateActions error={certLogic.error} loading={certLogic.loading} onCreate={certLogic.handleCreateCertificate} />
+        </div>
       </Modal>
     </>
   );

@@ -1,4 +1,4 @@
-import { generateCertificate } from "../../../../utils/api/api";
+import { submitCertificateRequest } from "../../../../utils/api/api";
 import { toast } from "react-toastify";
 import { CertificateForm } from "../../../../types/certificate";
 export const createCertificate = async (
@@ -23,8 +23,8 @@ export const createCertificate = async (
   setLoading(true);
   setError(null);
   try {
-    await generateCertificate(form);
-    toast.success("¡Certificado creado correctamente!");
+  await submitCertificateRequest(form as any);
+  toast.success("¡Solicitud enviada correctamente! Un administrador la revisará.");
     setForm({
       country: "",
       state: "",

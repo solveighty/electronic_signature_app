@@ -35,17 +35,17 @@ export function useDashboardLogic() {
   const [activeTab, setActiveTab] = useState<string>(() => {
     const saved = localStorage.getItem('dashboard.activeTab');
     if (saved) return saved;
-    return isAdmin ? 'create-certificate' : 'upload';
+    return isAdmin ? 'admin-certificate-requests' : 'upload';
   });
 
   // If role changes, ensure the current tab is valid for the new role
   useEffect(() => {
     if (isAdmin) {
-      // Admin has only create-certificate
-      if (activeTab !== 'create-certificate') setActiveTab('create-certificate');
+  // Admin has only admin-certificate-requests
+  if (activeTab !== 'admin-certificate-requests') setActiveTab('admin-certificate-requests');
     } else {
-      // Non-admin cannot be on create-certificate
-      if (activeTab === 'create-certificate') setActiveTab('upload');
+  // Non-admin cannot be on admin-certificate-requests
+  if (activeTab === 'admin-certificate-requests') setActiveTab('upload');
     }
   }, [isAdmin]);
   const [certificateKeyModalOpened, { open: openCertificateKeyModal, close: closeCertificateKeyModal }] = useDisclosure(false);

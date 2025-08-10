@@ -30,7 +30,6 @@ const DeleteCertificateModal = ({
       <Button
         color="red"
         onClick={() => {
-          console.log('Eliminar certificado', selectedCertId);
           logic.confirmDeleteCertificate(selectedCertId);
         }}
         loading={loading}

@@ -10,7 +10,7 @@ const CertificateActions = ({ error, loading, onCreate }: CertificateActionsProp
       mt="md"
       loading={loading}
     >
-      Crear Certificado
+      Enviar Solicitud
     </Button>
   </>
 );

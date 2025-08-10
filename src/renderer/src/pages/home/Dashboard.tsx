@@ -11,11 +11,11 @@ import { useDashboardLogic } from "../../hooks/index/useDashboardLogic";
 import UploadPanel from "../../components/Dashboard/Tabs/UploadPanel";
 import SignPanel from "../../components/Dashboard/Tabs/SignPanel";
 import DocumentsPanel from "../../components/Dashboard/Tabs/DocumentsPanel";
-import CreateCertificatePanel from "../../components/Dashboard/Tabs/CreateCertificatePanel";
 import DeletePdfModal from "../../components/Dashboard/Modals/DeletePdfModal";
 import DeleteCertificateModal from "../../components/Dashboard/Modals/DeleteCertificateModal";
 import CertificateKeyModal from "../../components/Dashboard/Modals/CertificateKeyModal";
 import DashboardHeader from "../../components/Dashboard/Header/DashboardHeader";
+import AdminCertificateRequestsPanel from "../../components/Dashboard/Tabs/AdminCertificateRequestsPanel";
 
 const Dashboard = () => {
   const logic = useDashboardLogic();
@@ -81,10 +81,10 @@ const Dashboard = () => {
         <Tabs.List grow>
           {logic.isAdmin ? (
             <Tabs.Tab
-              value="create-certificate"
+              value="admin-certificate-requests"
               leftSection={<IconCertificate size={16} />}
             >
-              Crear Certificado
+              Solicitudes de Certificado
             </Tabs.Tab>
           ) : (
             <>
@@ -102,8 +102,8 @@ const Dashboard = () => {
         </Tabs.List>
 
         {logic.isAdmin ? (
-          <Tabs.Panel value="create-certificate" pt="md">
-            <CreateCertificatePanel logic={logic} />
+          <Tabs.Panel value="admin-certificate-requests" pt="md">
+            <AdminCertificateRequestsPanel />
           </Tabs.Panel>
         ) : (
           <>
