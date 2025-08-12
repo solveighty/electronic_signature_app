@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { useDocumentManager } from './useDocumentManager';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   handleDownloadSignedDocumentLogic,
   handleRefreshLogic,
@@ -28,6 +29,8 @@ export function useSignDocumentLogic() {
   const [signedDocumentUrl, setSignedDocumentUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [opened, { open, close }] = useDisclosure(false);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const {
     pdfDocuments,
@@ -136,6 +139,17 @@ export function useSignDocumentLogic() {
       
       toast.success('Documento firmado con éxito');
       await refreshDocuments();
+
+      // Verificar si necesitamos redirigir de vuelta a solicitudes pendientes
+      const returnTo = searchParams.get('returnTo');
+      const requestId = searchParams.get('requestId');
+      
+      if (returnTo === 'pending-signatures' && requestId) {
+        // Redirigir con parámetros para actualizar el estado
+        setTimeout(() => {
+          navigate(`/pending-signatures?signed=true&requestId=${requestId}`);
+        }, 2000); // Dar tiempo para que el usuario vea el mensaje de éxito
+      }
       
     } catch (error: any) {
       console.error('Error al firmar el documento:', error);

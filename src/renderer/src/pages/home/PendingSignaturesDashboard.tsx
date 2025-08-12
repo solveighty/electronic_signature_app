@@ -2,14 +2,27 @@ import { usePendingSignaturesLogic } from "../../hooks/home/usePendingSignatures
 import { Container, Title, Loader, Group, Paper, Text, Button } from "@mantine/core";
 import DashboardHeader from "../../components/Dashboard/Header/DashboardHeader";
 import { useHeaderLogic } from "../../hooks/home/useHeaderLogic";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
 
 const PendingSignaturesDashboard = () => {
-  const { requests, users, loading, error } = usePendingSignaturesLogic();
-
+  const { requests, users, loading, error, markSignatureAsCompleted } = usePendingSignaturesLogic();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-
   const header = useHeaderLogic();
+
+  // Verificar si el usuario regresa después de firmar un documento
+  useEffect(() => {
+    const signedDoc = searchParams.get('signed');
+    const requestId = searchParams.get('requestId');
+    
+    if (signedDoc && requestId) {
+      // Marcar la solicitud como completada
+      markSignatureAsCompleted(requestId);
+      // Limpiar los parámetros de la URL
+      navigate('/pending-signatures', { replace: true });
+    }
+  }, [searchParams, markSignatureAsCompleted, navigate]);
   return (
     <Container size="sm" py={40}>
       <DashboardHeader {...header} />
@@ -63,7 +76,7 @@ const PendingSignaturesDashboard = () => {
                         color={req.status === 'pending' ? 'blue' : 'gray'}
                         disabled={req.status !== 'pending'}
                         style={{ minWidth: 100, fontWeight: 700 }}
-                        onClick={() => navigate(`/main?tab=sign&doc=${req.documentId}`)}
+                        onClick={() => navigate(`/main?tab=sign&doc=${req.documentId}&returnTo=pending-signatures&requestId=${req._id}`)}
                       >
                         Firmar
                       </Button>

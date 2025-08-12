@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { getAllUsers } from "../../utils/api/endpoints/friends/friendsApi";
-import { getSignatureRequestsForUser } from "../../utils/api/endpoints/signature/signatureApi";
+import { getSignatureRequestsForUser, completeSignatureRequest } from "../../utils/api/endpoints/signature/signatureApi";
 
 export interface SignatureRequest {
   _id: string;
@@ -41,10 +41,25 @@ export function usePendingSignaturesLogic() {
       .finally(() => setLoading(false));
   }, [userId]);
 
+  const markSignatureAsCompleted = async (requestId: string) => {
+    try {
+      await completeSignatureRequest(requestId);
+      // Actualizar el estado local
+      setRequests(prev =>
+        prev.map(req =>
+          req._id === requestId ? { ...req, status: "signed" as const, signedAt: new Date().toISOString() } : req
+        )
+      );
+    } catch (error) {
+      console.error("Error al marcar solicitud como firmada:", error);
+    }
+  };
+
   return {
     requests,
     users,
     loading,
     error,
+    markSignatureAsCompleted,
   };
 }
