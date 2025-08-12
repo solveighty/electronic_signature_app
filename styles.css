@@ -1,4 +1,6 @@
-html.dark, body.dark, .dark {
+html.dark,
+body.dark,
+.dark {
   background-color: #111827 !important; /* tailwind bg-gray-900 */
   color: #f3f4f6 !important; /* tailwind text-gray-100 */
 }
@@ -108,4 +110,16 @@ body {
 .theme-toggle,
 body {
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Hide scrollbars globally */
+html,
+body {
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* Internet Explorer 10+ */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important; /* Safari and Chrome */
 }
