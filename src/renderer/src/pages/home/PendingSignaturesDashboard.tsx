@@ -4,6 +4,8 @@ import DashboardHeader from "../../components/Dashboard/Header/DashboardHeader";
 import { useHeaderLogic } from "../../hooks/home/useHeaderLogic";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
+import { IconDownload } from "@tabler/icons-react";
+import { getPdfDocumentUrl } from "../../utils/api/api";
 
 const PendingSignaturesDashboard = () => {
   const { requests, users, loading, error, markSignatureAsCompleted } = usePendingSignaturesLogic();
@@ -23,6 +25,26 @@ const PendingSignaturesDashboard = () => {
       navigate('/pending-signatures', { replace: true });
     }
   }, [searchParams, markSignatureAsCompleted, navigate]);
+
+  const handleDownloadSignedDocument = async (documentId: string) => {
+    try {
+      const url = await getPdfDocumentUrl(documentId);
+      if (!url) {
+        console.error('No se pudo obtener el PDF');
+        return;
+      }
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `documento_firmado_${documentId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      // Revocar el object URL después de un pequeño delay para permitir la descarga
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      console.error('Error al descargar el documento:', error);
+    }
+  };
   return (
     <Container size="sm" py={40}>
       <DashboardHeader {...header} />
@@ -70,16 +92,27 @@ const PendingSignaturesDashboard = () => {
                         <span style={{ fontWeight: 500, color: req.status === 'pending' ? '#faad14' : '#52c41a' }}>Estado:</span> {req.status === 'pending' ? 'Pendiente' : 'Firmado'}
                       </Text>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <Button
-                        size="md"
-                        color={req.status === 'pending' ? 'blue' : 'gray'}
-                        disabled={req.status !== 'pending'}
-                        style={{ minWidth: 100, fontWeight: 700 }}
-                        onClick={() => navigate(`/main?tab=sign&doc=${req.documentId}&returnTo=pending-signatures&requestId=${req._id}`)}
-                      >
-                        Firmar
-                      </Button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {req.status === 'pending' ? (
+                        <Button
+                          size="md"
+                          color="blue"
+                          style={{ minWidth: 100, fontWeight: 700 }}
+                          onClick={() => navigate(`/main?tab=sign&doc=${req.documentId}&returnTo=pending-signatures&requestId=${req._id}`)}
+                        >
+                          Firmar
+                        </Button>
+                      ) : (
+                        <Button
+                          size="md"
+                          color="green"
+                          leftSection={<IconDownload size={16} />}
+                          style={{ minWidth: 120, fontWeight: 700 }}
+                          onClick={() => handleDownloadSignedDocument(req.documentId)}
+                        >
+                          Descargar
+                        </Button>
+                      )}
                     </div>
                   </Group>
                 </Paper>
