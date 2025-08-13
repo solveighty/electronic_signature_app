@@ -17,6 +17,7 @@ import {
   verifyPasswordResetCode,
 } from "../utils/verificationStore";
 import "dotenv/config";
+import ensureUserMongoExists from "../services/userMongoService";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -36,21 +37,55 @@ export const register = async (req: Request, res: Response) => {
     }
 
     // Check if user already exists
-    const { data: existingUser } = await supabase
+    const { data: existingUsers, error: existingError } = await supabase
       .schema("public")
       .from("users")
-      .select("*")
-      .eq("email", email);
+      .select("id, is_verified, name")
+      .eq("email", email)
+      .limit(1);
 
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+    if (existingError) {
+      console.error("Error checking existing user:", existingError);
+      return res.status(500).json({ message: "Server error" });
+    }
+
+    if (Array.isArray(existingUsers) && existingUsers.length > 0) {
+      const existing = existingUsers[0] as {
+        id: string;
+        is_verified: boolean | null;
+        name?: string | null;
+      };
+      // If already verified, block registration
+      if (existing.is_verified) {
+        return res.status(400).json({ message: "User already exists" });
+      }
+
+      // If user exists but is not verified yet, resend verification code
+      const verificationCode = generateVerificationCode();
+      storeVerificationCode(
+        email,
+        verificationCode,
+        existing.name || name,
+        isAdmin
+      );
+      await sendVerificationEmail({
+        email,
+        name: existing.name || name,
+        verificationCode,
+      });
+
+      return res.status(200).json({
+        message:
+          "Verification code sent to your email. Please check your inbox and verify your account.",
+        email,
+      });
     }
 
     // Generate verification code
     const verificationCode = generateVerificationCode();
 
     // Store verification code and user data temporarily
-    storeVerificationCode(email, verificationCode, name);
+    storeVerificationCode(email, verificationCode, name, isAdmin);
 
     // Send verification email
     await sendVerificationEmail({
@@ -65,7 +100,6 @@ export const register = async (req: Request, res: Response) => {
       email,
     });
   } catch (error: unknown) {
-          storeVerificationCode(email, verificationCode, name, isAdmin);
     res
       .status(500)
       .json({ message: (error as Error).message || "Server error" });
@@ -93,6 +127,9 @@ export const login = async (req: Request, res: Response) => {
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
+
+  // Ensure Mongo mirror exists for this user
+  await ensureUserMongoExists(user.id);
 
     // Create and return JWT token
     const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "1h" });
@@ -126,13 +163,17 @@ export const verifyRegistration = async (req: Request, res: Response) => {
     // Get verification data
     const verificationData = getVerificationData(email);
     if (!verificationData) {
-      return res.status(400).json({ message: "Invalid or expired verification code" });
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired verification code" });
     }
 
     // Verify the code
     const isCodeValid = verifyCode(email, verificationCode);
     if (!isCodeValid) {
-      return res.status(400).json({ message: "Invalid or expired verification code" });
+      return res
+        .status(400)
+        .json({ message: "Invalid or expired verification code" });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -148,32 +189,67 @@ export const verifyRegistration = async (req: Request, res: Response) => {
       isAdmin: verificationData.isAdmin ?? false,
     };
 
-    // Save user to database
-    const supabaseResponse = await supabase
+    // Save user to database (upsert-like: update if unverified row exists, else insert)
+    const { data: existing, error: fetchExistingErr } = await supabase
       .schema("public")
       .from("users")
-      .insert({
+      .select("id, is_verified")
+      .eq("email", email)
+      .limit(1);
+
+    let supabaseResponse;
+    if (fetchExistingErr) {
+      console.error(
+        "Error checking existing user before verify:",
+        fetchExistingErr
+      );
+      return res.status(500).json({ message: "Server error" });
+    }
+
+    if (existing && existing.length > 0) {
+      // Update the existing row (assume it was a pre-created or pending row)
+      const targetId = existing[0].id as string;
+      supabaseResponse = await supabase
+        .schema("public")
+        .from("users")
+        .update({
+          name: newUser.name,
+          password: hashedPassword,
+          is_verified: true,
+          isAdmin: newUser.isAdmin,
+        })
+        .eq("id", targetId);
+    } else {
+      // Insert a brand new row
+      supabaseResponse = await supabase.schema("public").from("users").insert({
         id: newUser.id.toString(),
         name: newUser.name,
         email: newUser.email,
         password: hashedPassword,
         is_verified: true,
-        is_admin: newUser.isAdmin,
+        isAdmin: newUser.isAdmin,
       });
+    }
 
-    if (supabaseResponse.error) {
+  if (supabaseResponse.error) {
       console.error("Error inserting user:", supabaseResponse.error);
       return res.status(500).json({ message: "Error creating user account" });
     }
 
+  // Determine the id persisted in Supabase (existing row id or newly generated)
+  const persistedUserId = existing && existing.length > 0 ? String(existing[0].id) : String(newUser.id);
+
+  // Ensure Mongo mirror exists for the new/verified user
+  await ensureUserMongoExists(persistedUserId);
+
     // Create and return JWT token
-    const token = jwt.sign({ id: newUser.id }, JWT_SECRET, { expiresIn: "1h" });
+  const token = jwt.sign({ id: persistedUserId }, JWT_SECRET, { expiresIn: "1h" });
 
     res.status(201).json({
       message: "Account verified and created successfully",
       token,
       user: {
-        id: newUser.id,
+        id: persistedUserId,
         name: newUser.name,
         email: newUser.email,
         isVerified: true,
@@ -208,7 +284,12 @@ export const resendVerificationCode = async (req: Request, res: Response) => {
     const verificationCode = generateVerificationCode();
 
     // Store new verification code (mantener isAdmin si existía)
-    storeVerificationCode(email, verificationCode, existingData.name, existingData.isAdmin);
+    storeVerificationCode(
+      email,
+      verificationCode,
+      existingData.name,
+      existingData.isAdmin
+    );
 
     // Send verification email
     await sendVerificationEmail({

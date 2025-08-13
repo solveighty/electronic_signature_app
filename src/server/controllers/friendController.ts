@@ -1,4 +1,5 @@
 import supabase from "../utils/supabase";
+import ensureUserMongoExists from "../services/userMongoService";
 // GET /users
 export const getAllNonAdminUsers = async (req: Request, res: Response) => {
   try {
@@ -23,6 +24,8 @@ export const getFriendsAndRequests = async (req: Request, res: Response) => {
     if (!id) {
       return res.status(400).json({ message: "id es requerido" });
     }
+  // Ensure the Mongo mirror exists for the user
+  await ensureUserMongoExists(id);
     const user = await UserMongo.findOne({ id });
     if (!user) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -43,6 +46,9 @@ export const acceptFriendRequest = async (req: Request, res: Response) => {
     if (!fromId || !toId) {
       return res.status(400).json({ message: "fromId y toId son requeridos" });
     }
+  // Ensure both Mongo mirrors exist
+  await ensureUserMongoExists(fromId);
+  await ensureUserMongoExists(toId);
     // Buscar ambos usuarios
     const fromUser = await UserMongo.findOne({ id: fromId });
     const toUser = await UserMongo.findOne({ id: toId });
@@ -83,6 +89,9 @@ export const sendFriendRequest = async (req: Request, res: Response) => {
     if (fromId === toId) {
       return res.status(400).json({ message: "No puedes enviarte solicitud a ti mismo" });
     }
+  // Ensure both Mongo mirrors exist
+  await ensureUserMongoExists(fromId);
+  await ensureUserMongoExists(toId);
     // Buscar ambos usuarios en Mongo
     const fromUser = await UserMongo.findOne({ id: fromId });
     const toUser = await UserMongo.findOne({ id: toId });
