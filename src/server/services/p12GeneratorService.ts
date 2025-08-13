@@ -1,6 +1,6 @@
 import { exec } from "child_process";
 import * as path from "path";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 import * as fs from "fs";
 
 export interface CertificateUserData {
@@ -54,7 +54,11 @@ export const generateP12ForUser = async (
   const crtPath = path.join(certDir, `${data.userId}-crt.crt`);
   const p12Path = path.join(certDir, `${data.userId}-cert.p12`);
 
-  const opensslConf = "C:\\Program Files\\OpenSSL-Win64\\bin\\openssl.cnf"; // Ajusta la ruta según tu instalación
+  // Determine OpenSSL config path based on platform
+  const opensslConf =
+    process.platform === "win32"
+      ? "C:\\Program Files\\OpenSSL-Win64\\bin\\openssl.cnf"
+      : "/etc/ssl/openssl.cnf";
   const pass = escapePassword("");
 
   let subject = `/C=${data.country}/ST=${data.state}/L=${data.locality}/O=${data.organization}`;
