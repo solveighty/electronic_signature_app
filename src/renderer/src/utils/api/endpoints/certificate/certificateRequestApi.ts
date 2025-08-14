@@ -24,6 +24,6 @@ export function approveCertificateRequest(id: string) {
   return api.post(`/api/certificate-requests/${id}/approve`);
 }
 
-export function rejectCertificateRequest(id: string) {
-  return api.post(`/api/certificate-requests/${id}/reject`);
+export function rejectCertificateRequest(id: string, rejectionReason: string) {
+  return api.post(`/api/certificate-requests/${id}/reject`, { rejectionReason });
 }

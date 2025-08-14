@@ -15,6 +15,7 @@ export interface ICertificateRequest extends Document {
   createdAt: Date;
   processedAt?: Date;
   certificateId?: string;
+  rejectionReason?: string;
 }
 
 const CertificateRequestSchema: Schema = new Schema({
@@ -31,7 +32,8 @@ const CertificateRequestSchema: Schema = new Schema({
   status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending', index: true },
   createdAt: { type: Date, default: Date.now },
   processedAt: { type: Date },
-  certificateId: { type: String }
+  certificateId: { type: String },
+  rejectionReason: { type: String }
 });
 
 export default mongoose.model<ICertificateRequest>('CertificateRequest', CertificateRequestSchema, 'certificate_requests');
