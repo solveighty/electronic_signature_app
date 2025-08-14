@@ -8,7 +8,6 @@ import { deletePdf } from "./pdf/crud/deletePdf";
 import { fetchUserCertificate } from "./certificate/crud/fetchUserCertificate";
 import { certificateUpload } from "./certificate/crud/certificateUpload";
 import { handleFileChange as handleFileChangeExternal } from "./event/handleFileChange";
-import { loadUserDocuments as loadUserDocumentsExternal } from "./pdf/crud/loadUserDocuments";
 import { Document } from "../../types/document";
 import { deleteCertificateById } from "../../utils/api/api";
 
@@ -26,9 +25,20 @@ export const useDocumentManager = () => {
   // Cargar documentos existentes cuando se monta el componente
   useEffect(() => {
     if (token) {
+      // Carga inicial de documentos propios del usuario SIN eliminar los ya pre-cargados (ej: compartidos por solicitud de firma)
       fetchUserDocuments().then((docs) => {
-        setDocuments(docs);
-        setPdfDocuments(docs.filter(doc => doc.type === 'pdf'));
+        setDocuments(prev => {
+          const incomingIds = new Set(docs.map(d => d.id));
+            // Preserva documentos existentes que no vienen en la respuesta (ej: agregados por fetchDocumentById al abrir desde solicitud)
+          const preserved = prev.filter(p => !incomingIds.has(p.id));
+          return [...preserved, ...docs];
+        });
+        setPdfDocuments(prev => {
+          const ownedPdf = docs.filter(doc => doc.type === 'pdf');
+          const incomingIds = new Set(ownedPdf.map(d => d.id));
+          const preserved = prev.filter(p => !incomingIds.has(p.id));
+          return [...preserved, ...ownedPdf];
+        });
       });
       fetchUserCertificateHandler();
     }
@@ -36,11 +46,25 @@ export const useDocumentManager = () => {
 
   // Función para cargar documentos del usuario
   const loadUserDocuments = async () => {
-    await loadUserDocumentsExternal(
-      setPdfDocuments,
-      setDocuments,
-      setIsLoadingDocuments
-    );
+    setIsLoadingDocuments(true);
+    try {
+      const fetched = await fetchUserDocuments();
+      setDocuments(prev => {
+        const incomingIds = new Set(fetched.map(d => d.id));
+        const preserved = prev.filter(p => !incomingIds.has(p.id));
+        return [...preserved, ...fetched];
+      });
+      setPdfDocuments(prev => {
+        const ownedPdf = fetched.filter(d => d.type === 'pdf');
+        const incomingIds = new Set(ownedPdf.map(d => d.id));
+        const preserved = prev.filter(p => !incomingIds.has(p.id));
+        return [...preserved, ...ownedPdf];
+      });
+    } catch (error) {
+      console.error('Error recargando documentos:', error);
+    } finally {
+      setIsLoadingDocuments(false);
+    }
   };
 
   // Obtener un documento por id (si no está en la lista)

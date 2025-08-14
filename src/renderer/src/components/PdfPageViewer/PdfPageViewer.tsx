@@ -14,8 +14,7 @@ const PdfPageViewer = ({ fileUrl, pageNumber, width = 600, onClick }: PdfPageVie
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    let renderTask: any = null;
-    let cancelled = false
+  let renderTask: any = null;
 
     const renderPage = async () => {
       const loadingTask = pdfjsLib.getDocument(fileUrl);
@@ -43,7 +42,6 @@ const PdfPageViewer = ({ fileUrl, pageNumber, width = 600, onClick }: PdfPageVie
     renderPage();
 
     return () => {
-      cancelled = true;
       if (renderTask) {
         renderTask.cancel();
       }
