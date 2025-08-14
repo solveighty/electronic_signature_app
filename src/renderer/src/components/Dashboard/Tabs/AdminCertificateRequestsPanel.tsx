@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Table, Button, Group, Badge, Loader, Center, Text, Modal, Textarea, Stack } from '@mantine/core';
 import { listCertificateRequests, approveCertificateRequest, rejectCertificateRequest } from '../../../utils/api/api';
+import { getUserInfoById } from '../../../utils/api/endpoints/user/userApi';
 import { toast } from 'react-toastify';
 
 type CertReq = {
   _id: string;
   userId: string;
+  userName?: string;
   country: string;
   state: string;
   locality: string;
@@ -31,7 +33,15 @@ const AdminCertificateRequestsPanel = () => {
     setLoading(true);
     try {
       const res = await listCertificateRequests();
-      setItems(res.data || []);
+      const requests: CertReq[] = res.data || [];
+      // Fetch user names for each request
+      const withNames = await Promise.all(
+        requests.map(async (req) => {
+          const user = await getUserInfoById(req.userId);
+          return { ...req, userName: user?.name || req.userId };
+        })
+      );
+      setItems(withNames);
     } catch (e: any) {
       toast.error(e?.response?.data?.error || 'Error cargando solicitudes');
     } finally {
@@ -95,7 +105,7 @@ const AdminCertificateRequestsPanel = () => {
         <Table.Tbody>
           {items.map((r) => (
             <Table.Tr key={r._id}>
-              <Table.Td>{r.userId}</Table.Td>
+              <Table.Td>{r.userName || r.userId}</Table.Td>
               <Table.Td>{r.commonName}</Table.Td>
               <Table.Td>{r.organization}</Table.Td>
               <Table.Td>{r.email}</Table.Td>

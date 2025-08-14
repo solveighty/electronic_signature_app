@@ -5,6 +5,7 @@ import uploads from "./routes/uploads";
 import friendRoutes from "./routes/friend";
 import signatureRequestRoutes from "./routes/signatureRequest";
 import certificateRequestRoutes from "./routes/certificateRequest";
+import userRoutes from "./routes/user";
 import { connectToMongoDB } from "./utils/mongoConnect";
 
 const app = express();
@@ -27,11 +28,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
+
 app.use("/api/auth", router);
 app.use("/api", uploads);
 app.use("/api", friendRoutes);
 app.use("/api", signatureRequestRoutes);
 app.use("/api", certificateRequestRoutes);
+app.use("/api/users", userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
