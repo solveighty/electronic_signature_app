@@ -17,7 +17,7 @@ import {
 import { toast } from 'react-toastify';
 import QRCode from 'qrcode';
 import { getPdfDocumentUrl } from '../../utils/api/api';
-import { signPdfWithStampBase64 } from '../../utils/api/api';
+import { signPdfWithStampBase64, getCertificateUrl } from '../../utils/api/api';
 
 export function useSignDocumentLogic() {
   const [active, setActive] = useState(0);
@@ -195,6 +195,24 @@ export function useSignDocumentLogic() {
     );
   };
 
+  const validateCertificatePassword = async (
+    certId: string | null,
+    password: string
+  ): Promise<boolean> => {
+    if (!certId || !password.trim()) return false;
+    try {
+      const url = await getCertificateUrl(certId, password);
+      if (url) {
+        // Solo usamos esta llamada para validar; revocar el objeto URL inmediatamente
+        URL.revokeObjectURL(url);
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
   const canProceedToPasswordValue = canProceedToPassword(hasCertificate, selectedDocumentId);
   const canProceedToPositionValue = canProceedToPosition(canProceedToPasswordValue, certificatePassword);
   const canSignDocumentValue = canSignDocument(canProceedToPositionValue, signaturePosition);
@@ -232,5 +250,6 @@ export function useSignDocumentLogic() {
     handleSignDocument,
     handleDownloadSignedDocument,
     handleReset,
+    validateCertificatePassword,
   };
 }
