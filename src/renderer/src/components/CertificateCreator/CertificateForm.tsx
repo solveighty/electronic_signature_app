@@ -1,4 +1,4 @@
-import { TextInput } from "@mantine/core";
+import { PasswordInput, TextInput } from "@mantine/core";
 import { CertificateFormProps } from "./types/certificateForm";
 
 const inputClassNames = {
@@ -64,14 +64,14 @@ const CertificateForm = ({ form, handleChange }: CertificateFormProps) => (
     />
     <TextInput
       label="Email"
-      placeholder="Ej: abbaski@gmail.com"
+      placeholder="Ej: ejemplo@gmail.com"
       value={form.email}
       onChange={(e) => handleChange("email", e.target.value)}
       required
       mt="md"
       classNames={inputClassNames}
     />
-    <TextInput
+    <PasswordInput
       label="Contraseña de seguridad"
       placeholder="Contraseña"
       value={form.challengePassword}
@@ -79,12 +79,17 @@ const CertificateForm = ({ form, handleChange }: CertificateFormProps) => (
       required
       mt="md"
       classNames={inputClassNames}
-      error={form.challengePassword && form.challengePassword.length < 8 ? "La contraseña debe tener al menos 8 caracteres" : undefined}
-      description="Mínimo 8 caracteres"
+      error={
+        form.challengePassword &&
+        (!/^.*(?=.{8,})(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).*$/.test(form.challengePassword)
+          ? "La contraseña debe tener al menos 8 caracteres, una mayúscula y un carácter especial"
+          : undefined)
+      }
+      description="Mínimo 8 caracteres, una mayúscula y un carácter especial"
     />
     <TextInput
       label="Nombre de la empresa (opcional)"
-      placeholder="Ej: Kingdom PC"
+      placeholder="Ej: Tu Empresa INC"
       value={form.optionalCompany}
       onChange={(e) => handleChange("optionalCompany", e.target.value)}
       mt="md"
