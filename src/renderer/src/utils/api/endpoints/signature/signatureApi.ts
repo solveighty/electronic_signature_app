@@ -11,3 +11,7 @@ export function getSignatureRequestsForUser(userId: string) {
 export function completeSignatureRequest(id: string) {
   return api.post(`/api/signature-request/${id}/complete`);
 }
+
+export function rejectSignatureRequest(id: string, rejectionReason: string) {
+  return api.post(`/api/signature-request/${id}/reject`, { rejectionReason });
+}

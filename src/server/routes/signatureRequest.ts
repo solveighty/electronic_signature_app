@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createSignatureRequest, getSignatureRequestsForUser, completeSignatureRequest } from "../controllers/signatureRequestController";
+import { createSignatureRequest, getSignatureRequestsForUser, completeSignatureRequest, rejectSignatureRequest } from "../controllers/signatureRequestController";
 
 const router = Router();
 
@@ -11,5 +11,8 @@ router.get("/signature-requests/:userId", getSignatureRequestsForUser);
 
 // POST /signature-request/:id/complete
 router.post("/signature-request/:id/complete", completeSignatureRequest);
+
+// POST /signature-request/:id/reject
+router.post("/signature-request/:id/reject", rejectSignatureRequest);
 
 export default router;

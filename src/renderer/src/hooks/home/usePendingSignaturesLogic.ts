@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { getAllUsers } from "../../utils/api/endpoints/friends/friendsApi";
-import { getSignatureRequestsForUser, completeSignatureRequest } from "../../utils/api/endpoints/signature/signatureApi";
+import { getSignatureRequestsForUser, completeSignatureRequest, rejectSignatureRequest } from "../../utils/api/endpoints/signature/signatureApi";
 
 export interface SignatureRequest {
   _id: string;
   documentId: string;
   fromUserId: string;
   toUserId: string;
-  status: 'pending' | 'signed';
+  status: 'pending' | 'signed' | 'rejected';
   createdAt: string;
   signedAt?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
 }
 
 export interface User {
@@ -55,11 +57,32 @@ export function usePendingSignaturesLogic() {
     }
   };
 
+  const rejectSignatureRequestLocal = async (requestId: string, rejectionReason: string) => {
+    try {
+      await rejectSignatureRequest(requestId, rejectionReason);
+      // Actualizar el estado local
+      setRequests(prev =>
+        prev.map(req =>
+          req._id === requestId ? { 
+            ...req, 
+            status: "rejected" as const, 
+            rejectedAt: new Date().toISOString(),
+            rejectionReason: rejectionReason
+          } : req
+        )
+      );
+    } catch (error) {
+      console.error("Error al rechazar solicitud:", error);
+      throw error;
+    }
+  };
+
   return {
     requests,
     users,
     loading,
     error,
     markSignatureAsCompleted,
+    rejectSignatureRequestLocal,
   };
 }

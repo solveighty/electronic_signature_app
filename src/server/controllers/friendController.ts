@@ -1,5 +1,7 @@
 import supabase from "../utils/supabase";
 import ensureUserMongoExists from "../services/userMongoService";
+import { getUserById } from "../utils/userService";
+import { sendFriendRequestNotification } from "../utils/emailService";
 // GET /users
 export const getAllNonAdminUsers = async (req: Request, res: Response) => {
   try {
@@ -111,6 +113,27 @@ export const sendFriendRequest = async (req: Request, res: Response) => {
     toUser.friendRequestsReceived.push(fromId);
     await fromUser.save();
     await toUser.save();
+    
+    // Get user information for email notification
+    const [fromUserInfo, toUserInfo] = await Promise.all([
+      getUserById(fromId),
+      getUserById(toId)
+    ]);
+    
+    // Send notification email to recipient
+    if (fromUserInfo && toUserInfo) {
+      try {
+        await sendFriendRequestNotification({
+          email: toUserInfo.email,
+          name: toUserInfo.name,
+          senderName: fromUserInfo.name,
+        });
+      } catch (emailError) {
+        console.error('Error sending friend request notification email:', emailError);
+        // Continue execution even if email fails
+      }
+    }
+    
     res.status(200).json({ message: "Solicitud de amistad enviada" });
   } catch (error) {
     res.status(500).json({ message: (error as Error).message || "Error de servidor" });
