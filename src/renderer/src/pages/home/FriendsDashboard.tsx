@@ -22,16 +22,38 @@ const FriendsDashboard = () => {
             <Text fw={700} mb={8}>Solicitudes pendientes</Text>
             {requests.length === 0 ? <Text c="dimmed">No tienes solicitudes pendientes.</Text> : (
               requests.map(user => (
-                <Group key={user.id} justify="space-between" mb={8}>
-                  <Group align="center">
-                    <Avatar radius="xl" size={36}>{user.name[0]?.toUpperCase()}</Avatar>
-                    <div>
-                      <Text fw={600}>{user.name}</Text>
-                      <Text size="sm" c="dimmed">{user.email}</Text>
+                <Paper
+                  key={user.id}
+                  shadow="xs"
+                  radius="lg"
+                  p="md"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                    justifyContent: 'space-between',
+                    marginBottom: 14,
+                    background: '#f9fbff',
+                    border: '1px solid #e6eaf0',
+                    transition: 'box-shadow 0.2s',
+                  }}
+                  withBorder
+                >
+                  <Group align="flex-start" gap={18} style={{ flex: 1, minWidth: 0 }}>
+                    <Avatar radius="xl" size={48} color="gray" style={{ fontWeight: 700, fontSize: 22, boxShadow: '0 2px 8px #e6eaf0' }}>
+                      {user.name[0]?.toUpperCase()}
+                    </Avatar>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <Text fw={700} size="md" style={{ color: '#1a1a1a', lineHeight: 1.1, wordBreak: 'break-word', whiteSpace: 'normal', textAlign: 'left' }}>
+                        {user.name}
+                      </Text>
+                      <Text size="sm" c="dimmed" style={{ marginTop: 2, wordBreak: 'break-all', whiteSpace: 'normal', textAlign: 'left' }}>{user.email}</Text>
                     </div>
                   </Group>
-                  <Button size="xs" color="green" onClick={() => handleAccept(user.id)}>Aceptar</Button>
-                </Group>
+                  <Button size="sm" color="green" radius="xl" style={{ minWidth: 90, fontWeight: 700, alignSelf: 'flex-start', marginLeft: 12 }} onClick={() => handleAccept(user.id)}>
+                    Aceptar
+                  </Button>
+                </Paper>
               ))
             )}
           </Paper>
@@ -40,13 +62,34 @@ const FriendsDashboard = () => {
             <Text fw={700} mb={8}>Tus amigos</Text>
             {friends.length === 0 ? <Text c="dimmed">No tienes amigos agregados.</Text> : (
               friends.map(user => (
-                <Group key={user.id} align="center" mb={8}>
-                  <Avatar radius="xl" size={36}>{user.name[0]?.toUpperCase()}</Avatar>
-                  <div>
-                    <Text fw={600}>{user.name}</Text>
-                    <Text size="sm" c="dimmed">{user.email}</Text>
-                  </div>
-                </Group>
+                <Paper
+                  key={user.id}
+                  shadow="xs"
+                  radius="lg"
+                  p="md"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                    marginBottom: 14,
+                    background: '#f9fbff',
+                    border: '1px solid #e6eaf0',
+                    transition: 'box-shadow 0.2s',
+                  }}
+                  withBorder
+                >
+                  <Group align="flex-start" gap={18} style={{ flex: 1, minWidth: 0 }}>
+                    <Avatar radius="xl" size={48} color="gray" style={{ fontWeight: 700, fontSize: 22, boxShadow: '0 2px 8px #e6eaf0' }}>
+                      {user.name[0]?.toUpperCase()}
+                    </Avatar>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <Text fw={700} size="md" style={{ color: '#1a1a1a', lineHeight: 1.1, wordBreak: 'break-word', whiteSpace: 'normal', textAlign: 'left' }}>
+                        {user.name}
+                      </Text>
+                      <Text size="sm" c="dimmed" style={{ marginTop: 2, wordBreak: 'break-all', whiteSpace: 'normal', textAlign: 'left' }}>{user.email}</Text>
+                    </div>
+                  </Group>
+                </Paper>
               ))
             )}
           </Paper>

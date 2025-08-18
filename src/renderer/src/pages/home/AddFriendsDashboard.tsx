@@ -1,4 +1,4 @@
-import { Container, Title, Button, Loader, Group, Avatar, Paper, Text } from "@mantine/core";
+import { Container, Title, Button, Loader, Group, Avatar, Paper, Text, Tooltip } from "@mantine/core";
 import DashboardHeader from "../../components/Dashboard/Header/DashboardHeader";
 import { useHeaderLogic } from "../../hooks/home/useHeaderLogic";
 import { IconUserPlus } from "@tabler/icons-react";
@@ -25,46 +25,62 @@ const AddFriendsDashboard = () => {
         filteredUsers.length > 0 ? (
           <Paper shadow="xs" radius="md" p="md" style={{ maxWidth: 500, margin: '0 auto' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-              {filteredUsers.map((user, idx) => (
-                <div
+              {filteredUsers.map((user) => (
+                <Paper
                   key={user.id}
+                  shadow="xs"
+                  radius="lg"
+                  p="md"
                   style={{
                     display: 'flex',
-                    alignItems: 'center',
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
                     justifyContent: 'space-between',
-                    padding: '18px 0',
-                    borderBottom: idx !== filteredUsers.length - 1 ? '1px solid #f0f0f0' : 'none',
+                    marginBottom: 18,
+                    background: '#f9fbff',
+                    border: '1px solid #e6eaf0',
+                    transition: 'box-shadow 0.2s',
+                    minHeight: 90,
                   }}
+                  withBorder
+                  className="friend-card"
                 >
-                  <Group align="center" gap={16}>
-                    <Avatar radius="xl" size={48} color="blue" style={{ fontWeight: 700, fontSize: 22 }}>
+                  <Group align="flex-start" gap={20} style={{ flex: 1, minWidth: 0 }}>
+                    <Avatar radius="xl" size={56} color="blue" style={{ fontWeight: 700, fontSize: 26, boxShadow: '0 2px 8px #e6eaf0' }}>
                       {user.name[0]?.toUpperCase()}
                     </Avatar>
-                    <div style={{ minWidth: 0 }}>
-                      <Text fw={800} size="xl" style={{ color: '#1a1a1a', lineHeight: 1.1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left' }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <Text fw={800} size="lg" style={{ color: '#1a1a1a', lineHeight: 1.1, wordBreak: 'break-word', whiteSpace: 'normal', textAlign: 'left' }}>
                         {user.name}
                       </Text>
-                      <Text size="sm" c="dimmed" style={{ marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'left' }}>{user.email}</Text>
+                      <Text size="sm" c="dimmed" style={{ marginTop: 2, wordBreak: 'break-all', whiteSpace: 'normal', textAlign: 'left' }}>{user.email}</Text>
                     </div>
                   </Group>
-                  <Button
-                    leftSection={<IconUserPlus size={16} />}
-                    loading={sending === user.id}
-                    onClick={() => handleSendRequest(user.id)}
-                    variant="filled"
-                    color="blue"
-                    radius="xl"
-                    size="sm"
-                    style={{ minWidth: 110 }}
-                  >
-                    Agregar
-                  </Button>
-                </div>
+                  <Tooltip label="Enviar solicitud de amistad" withArrow position="left">
+                    <Button
+                      leftSection={<IconUserPlus size={16} />}
+                      loading={sending === user.id}
+                      onClick={() => handleSendRequest(user.id)}
+                      variant="gradient"
+                      gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
+                      radius="xl"
+                      size="md"
+                      style={{ minWidth: 120, fontWeight: 700, letterSpacing: 0.5, transition: 'background 0.2s', alignSelf: 'flex-start', marginLeft: 16 }}
+                      className="add-friend-btn"
+                    >
+                      Agregar
+                    </Button>
+                  </Tooltip>
+                </Paper>
               ))}
             </div>
           </Paper>
         ) : (
-          <div style={{ color: '#888', marginTop: 16, textAlign: 'center' }}>No se encontraron usuarios.</div>
+          <Paper shadow="xs" radius="md" p="xl" style={{ background: '#f8fafc', textAlign: 'center', marginTop: 32 }}>
+            <Text size="lg" c="dimmed" fw={500}>
+              <span role="img" aria-label="search">🔍</span> No se encontraron usuarios para agregar.
+            </Text>
+          </Paper>
         )
       )}
       {error && <div style={{ color: 'red', marginTop: 16 }}>{error}</div>}

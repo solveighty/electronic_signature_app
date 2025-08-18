@@ -1,151 +1,190 @@
+<img align="right" width="110" src="public/vite.svg" alt="Logo" />
+
 # Aplicación de Firma Electrónica
 
-Una aplicación de escritorio para gestión y firma electrónica de documentos, desarrollada con Electron, React, TypeScript y Express.
+Plataforma de escritorio (Electron + React + Express + MongoDB + Supabase) para gestionar certificados, documentos y flujos de firma colaborativa con notificaciones por correo.
 
-## Características
+---
 
-- Autenticación de usuarios: Registro e inicio de sesión con almacenamiento seguro en Supabase
-- Gestión de documentos PDF, Cifrado AES-256-CBC para máxima seguridad
-- Gestión de certificados digitales: Soporte para certificados P12, con almacenamiento seguro de hash del Certificado (no el certificado completo)
-- Interfaz moderna con Mantine UI y Tailwind CSS, notificaciones con React Toastify y animaciones con React Spring
-- Autenticación basada en JWT, cifrado de extremo a extremo para documentos y certificados
+## Índice
+1. Características
+2. Arquitectura
+3. Requisitos
+4. Instalación y Variables de entorno
+5. Scripts
+6. Estructura
+7. Modelos de datos
+8. Flujos
+9. Endpoints REST
+10. Seguridad
+11. Emails
+12. Firma PDF (coordenadas)
+13. Roadmap
 
-## Requisitos previos
+---
 
-- Node.js (versión 16 o superior)
-- npm o yarn
-- Cuenta de Supabase para la base de datos
-- MongoDB (local o Atlas)
+## 1. Características
+- Autenticación / registro con verificación y recuperación (Supabase + JWT)
+- Solicitudes de certificado (aprobación / rechazo con motivo + email)
+- Generación y/o subida de certificados P12 cifrados
+- Gestión de PDFs (subir, listar, descargar, eliminar)
+- Firma digital incremental con sello visual (QR + texto)
+- Solicitudes de firma a otros usuarios (aceptar / rechazar con motivo)
+- Sistema de amigos (enviar, aceptar solicitudes, listar)
+- Interfaz moderna (Mantine + Tailwind), dark mode, toasts, modales
+- Cifrado AES-256-CBC para PDFs y certificados
+- Empaquetado con Electron Builder
 
-## Instalación
+## 2. Arquitectura
+| Capa | Tecnología | Detalle |
+|------|-----------|---------|
+| UI | React 18 + TypeScript | Mantine + Tailwind |
+| Backend | Express | Rutas modulares TS |
+| DB | MongoDB (Mongoose) | Documentos y estados |
+| Usuarios | Supabase | Perfil / email / isAdmin |
+| Auth | JWT | Bearer token |
+| Firma | pdf-lib / incremental signer | Inserta sello + firma PKCS#7 |
+| Email | Nodemailer (SMTP) | Plantillas en `emailService` |
 
-1. Clona este repositorio:
+## 3. Requisitos
+- Node >=16
+- MongoDB
+- Supabase
+- SMTP para emails
+
+## 4. Instalación & .env
 ```bash
-git clone <url-del-repositorio>
+git clone <url>
 cd electronic_signature_app
-```
-
-2. Instala las dependencias:
-```bash
 npm install
 ```
-
-3. Configura las variables de entorno:
-   Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
+`.env` ejemplo:
 ```
-VITE_SUPABASE_URL=tu_url_de_supabase
-VITE_SUPABASE_ANON_KEY=tu_clave_anonima_de_supabase
-JWT_SECRET=tu_clave_secreta_para_jwt
-VITE_API_HOST=tu_host
-VITE_API_PORT=tu_puerto_host
-VITE_API_URL=http://${VITE_API_HOST}:${VITE_API_PORT}
-VITE_MONGODB_URL=tu_url_de_mongo
-ENCRYPTION_KEY_PDF=tu_clave_para_encriptar_pdf
-ENCRYPTION_KEY_CERTIFICATE=tu_clave_para_encriptar_certificado
-```
-
-## Desarrollo
-
-Para ejecutar la aplicación en modo desarrollo:
-
-```bash
-npm run dev
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
+JWT_SECRET=super_secreto
+VITE_API_HOST=localhost
+VITE_API_PORT=5174
+VITE_API_URL=http://localhost:5174
+VITE_MONGODB_URL=mongodb://localhost:27017/firma
+ENCRYPTION_KEY_PDF=<32_bytes>
+ENCRYPTION_KEY_CERTIFICATE=<32_bytes>
+SMTP_HOST=smtp.proveedor.com
+SMTP_PORT=587
+SMTP_USER=usuario
+SMTP_PASS=clave
 ```
 
-Esto iniciará tanto el servidor de desarrollo de Vite (frontend) como el servidor Express (backend).
+## 5. Scripts
+| Script | Descripción |
+|--------|-------------|
+| `dev` | Front + API en desarrollo |
+| `dev:server` | Solo backend |
+| `build` | Build producción |
 
-Para ejecutar solo el servidor backend:
-
-```bash
-npm run dev:server
+## 6. Estructura (resumen)
+```
+electron/
+src/
+   renderer/src/...
+   server/{controllers,routes,services,models,utils}
+files/{certificates,pdf}
 ```
 
-## Estructura del proyecto
+## 7. Modelos
+Mongo:
+- CertificateRequest(status, rejectionReason, certificateId)
+- SignatureRequest(status, rejectionReason)
+- PdfDocument(encryptedContent, status)
+- Certificate(encryptedContent, hash, userId)
+- UserMongo(friends, friendRequestsSent/Received)
+Supabase:
+- users(id,name,email,isAdmin,...)
 
-```
-electronic_signature_app/
-├── electron/            # Código principal de Electron
-├── src/                 # Código fuente principal
-│   ├── assets/          # Recursos estáticos
-│   ├── files/           # Directorio temporal para archivos
-│   │   ├── certificates/    # Certificados P12
-│   │   └── pdf/             # Archivos PDF
-│   ├── renderer/        # Código del frontend
-│   │   └── src/
-│   │       ├── components/  # Componentes de React
-│   │       │   ├── AuthLayout.tsx
-│   │       │   ├── Dashboard.tsx
-│   │       │   ├── Login.tsx
-│   │       │   ├── PrivateRoute.tsx
-│   │       │   └── Register.tsx
-│   │       ├── context/     # Contextos de React (autenticación)
-│   │       ├── hooks/       # Custom hooks
-│   │       │   └── useDocumentManager.ts  # Gestión de documentos
-│   │       └── utils/       # Utilidades frontend
-│   │           └── api.ts   # Cliente API con Axios
-│   └── server/          # Servidor Express
-│       ├── controllers/     # Controladores
-│       │   ├── authController.ts
-│       │   └── uploadsController.ts
-│       ├── models/          # Modelos de datos MongoDB
-│       │   ├── Certificate.ts
-│       │   ├── PdfDocument.ts
-│       │   └── User.ts
-│       ├── routes/          # Rutas de la API
-│       │   ├── auth.ts
-│       │   └── uploads.ts
-│       ├── services/        # Servicios y lógica de negocio
-│       │   ├── crtService.ts    # Manejo de certificados
-│       │   └── pdfService.ts    # Manejo de PDFs
-│       └── utils/           # Utilidades backend
-│           ├── mongoConnect.ts  # Conexión a MongoDB
-│           └── supabase.ts      # Cliente Supabase
-```
+## 8. Flujos
+1. Registro / login -> token
+2. Solicitud de certificado (admin aprueba/rechaza)
+3. Subir PDF
+4. Enviar solicitud de firma
+5. Receptor firma (x,y,page) o rechaza con motivo
+6. Emails automáticos en cada evento clave
 
-## Construcción para producción
+## 9. Endpoints REST
+Prefijo típico: `/api`. Requieren `Authorization: Bearer <token>` salvo auth.
 
-Para construir la aplicación para producción:
+### Auth
+| Método | Ruta | Body | Descripción |
+|--------|------|------|-------------|
+| POST | /login | { email,password } | Inicia sesión |
+| POST | /register | { name,email,password } | Registra usuario |
+| POST | /register/verify | { email,code } | Verifica código |
+| POST | /register/resend | { email } | Reenvía código |
+| POST | /password/request-reset | { email } | Solicita reset |
+| POST | /password/reset | { email,code,newPassword } | Resetea password |
 
-```bash
-npm run build
-```
+### Usuarios
+| GET | /users/:id | Perfil público |
 
-Esto generará los archivos de distribución en las carpetas `dist` y `release`.
+### Amistad
+| Método | Ruta | Body | Descripción |
+|--------|------|------|-------------|
+| GET | /users | - | Lista usuarios no admin |
+| GET | /friends/:id | - | Amigos y solicitudes |
+| POST | /friend-request | { fromId,toId } | Enviar solicitud |
+| POST | /friend-request/accept | { fromId,toId } | Aceptar |
 
-## Tecnologías utilizadas
+### Solicitudes de Certificado
+| Método | Ruta | Body | Descripción |
+|--------|------|------|-------------|
+| POST | /certificate-requests | datos CSR | Crear solicitud |
+| GET | /certificate-requests | - | Admin: pendientes / User: propias |
+| POST | /certificate-requests/:id/approve | - | Aprobar y generar p12 |
+| POST | /certificate-requests/:id/reject | { rejectionReason } | Rechazar |
 
-### Frontend:
+### Solicitudes de Firma
+| Método | Ruta | Body | Descripción |
+|--------|------|------|-------------|
+| POST | /signature-request | { documentId,fromUserId,toUserId } | Crear |
+| GET | /signature-requests/:userId | - | Recibidas |
+| POST | /signature-request/:id/complete | - | Marcar firmada |
+| POST | /signature-request/:id/reject | { rejectionReason } | Rechazar |
 
-- React 18 con TypeScript
-- Mantine UI 8.0 para componentes
-- React Router v7 para navegación
-- React Spring para animaciones
-- React Toastify para notificaciones
-- Axios para peticiones HTTP
-- Tailwind CSS para estilos
+### Documentos / Certificados
+| Método | Ruta | Body/FormData | Descripción |
+|--------|------|-------------|-------------|
+| POST | /uploads/pdf | file=pdf | Subir PDF |
+| GET | /documents | - | Listar propios |
+| GET | /documents/:id | - | Metadatos autorizados |
+| DELETE | /documents/:id | - | Borrar PDF |
+| GET | /pdf/:id/download | - | Descargar PDF |
+| POST | /sign-pdf | { documentId,certId,certPassword,stampImageBase64,userName,x,y,page } | Firmar |
+| GET | /pdf/:id/signatures | - | Metadatos firma (placeholder) |
+| POST | /uploads/certificates | certificate(p12) | Subir |
+| PUT | /uploads/certificates | certificate(p12) | Reemplazar |
+| GET | /certificates | - | Listar certificados |
+| DELETE | /certificates/:id | - | Eliminar |
+| POST | /uploads/certificates/generate | { datos } | Generar |
+| GET | /certificates/:id/download | - | Descargar (GET) |
+| POST | /certificates/:id/download | { password? } | Descargar (POST) |
 
-### Backend:
+## 10. Seguridad
+- AES-256-CBC para PDFs / P12
+- JWT tokens
+- Verificación de estados (no doble aprobación / firma)
+- Datos sensibles nunca en claro en BD
 
-- Express para API RESTful
-- MongoDB con Mongoose para almacenamiento de documentos
-- Supabase para gestión de usuarios
-- JWT para autenticación
-- Multer para carga de archivos
-- Crypto para cifrado de documentos
-- Bcrypt para hashing de contraseñas
+## 11. Emails
+Eventos: solicitud/ aprobación / rechazo de certificado; solicitud / firma / rechazo de firma; solicitud de amistad. Plantillas en `utils/emailService.ts`.
 
-### Empaquetado y despliegue:
+## 12. Firma PDF
+Frontend captura coordenadas reales -> backend inserta estampa (QR + texto) y firma incremental con certificado P12 (pkcs12 + password). Se actualiza documento cifrado.
 
-- Electron para aplicación de escritorio
-- Vite para desarrollo y construcción
-- Electron Builder para empaquetado
+## 13. Roadmap
+- Auditoría y logs
+- Verificación pública de firmas
+- Historial de versiones
+- Paginación y búsqueda
+- i18n
 
-## Flujo de trabajo
-### Autenticación
-- El usuario se registra o inicia sesión
-### Subida de certificado
-- El usuario sube su certificado P12
-### Subida de documentos 
-- El usuario sube documentos PDF para firmar
-### Gestión de documentos
-- El usuario puede ver y gestionar sus documentos
+---
+© 2025 Proyecto de Firma Electrónica
